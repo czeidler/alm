@@ -30,9 +30,9 @@ public class SwingTests extends TestCase {
         XTab x1 = almLayout.addXTab();
         XTab x2 = almLayout.addXTab();
 
-        almLayout.addArea(left, top, x1, bottom, new JButton("Button 1"));
-        almLayout.addArea(x1, top, x2, bottom, new JButton("Button 2"));
-        almLayout.addArea(x2, top, right, bottom, new JButton("Button 3"));
+        almLayout.addComponent(new JButton("Button 1"), left, top, x1, bottom);
+        almLayout.addComponent(new JButton("Button 2"), x1, top, x2, bottom);
+        almLayout.addComponent(new JButton("Button 3"), x2, top, right, bottom);
 
         window.setLayout(almLayout);
         window.pack();
@@ -58,11 +58,11 @@ public class SwingTests extends TestCase {
         YTab y1 = almLayout.addYTab();
         YTab y2 = almLayout.addYTab();
 
-        almLayout.addArea(left, top, x2, y1, new JButton("Button 1"));
-        almLayout.addArea(x2, top, right, y2, new JButton("Button 2"));
-        almLayout.addArea(x1, y2, right, bottom, new JButton("Button 3"));
-        almLayout.addArea(left, y1, x1, bottom, new JButton("Button 4"));
-        almLayout.addArea(x1, y1, x2, y2, new JButton("Middle"));
+        almLayout.addComponent(new JButton("Button 1"), left, top, x2, y1);
+        almLayout.addComponent(new JButton("Button 2"), x2, top, right, y2);
+        almLayout.addComponent(new JButton("Button 3"), x1, y2, right, bottom);
+        almLayout.addComponent(new JButton("Button 4"), left, y1, x1, bottom);
+        almLayout.addComponent(new JButton("Middle"), x1, y1, x2, y2);
 
         window.setLayout(almLayout);
         window.pack();

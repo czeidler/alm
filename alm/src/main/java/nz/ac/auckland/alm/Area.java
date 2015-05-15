@@ -13,21 +13,39 @@ import nz.ac.auckland.linsolve.OperatorType;
  * Rectangular area in the GUI, defined by a tab on each side.
  */
 public class Area {
+	public static class Size {
+		double width;
+		double height;
+
+		public Size(double width, double height) {
+			this.width = width;
+			this.height = height;
+		}
+
+		public double getWidth() {
+			return width;
+		}
+
+		public double getHeight() {
+			return height;
+		}
+	}
+
 	/**
 	 * Minimum possible size. Use this if there is no lower bound.
 	 */
-	public static Dimension MIN_SIZE = new Dimension(0, 0);
+	public static Size MIN_SIZE = new Size(0, 0);
 
 	/**
 	 * Maximum possible size. Use this if there is no upper bound.
 	 */
-	public static Dimension MAX_SIZE = new Dimension(Integer.MAX_VALUE,
+	public static Size MAX_SIZE = new Size(Integer.MAX_VALUE,
 			Integer.MAX_VALUE);
 
 	/**
 	 * Undefined size. Used if a certain size constraint is not set.
 	 */
-	public static Dimension UNDEFINED_SIZE = new Dimension(-1, -1);
+	public static Size UNDEFINED_SIZE = new Size(-1, -1);
 
 	/**
 	 * The layout specification this area belongs to.
@@ -49,8 +67,8 @@ public class Area {
 	 */
 	List<Constraint> constraints = new ArrayList<Constraint>();
 
-	Dimension minContentSize = new Dimension(0, 0);
-	Dimension maxContentSize = MAX_SIZE;
+	Size minContentSize = new Size(0, 0);
+	Size maxContentSize = MAX_SIZE;
 
 	/**
 	 * Size constraint for the content. Valid even if the content is actually in
@@ -59,14 +77,14 @@ public class Area {
 	Constraint minContentWidth, maxContentWidth, minContentHeight,
 			maxContentHeight;
 
-	public Dimension preferredContentSize = UNDEFINED_SIZE;
+	public Size preferredContentSize = UNDEFINED_SIZE;
 
     // TODO remove
-	//Dimension shrinkPenalties = new Dimension(2, 2);
+	//Size shrinkPenalties = new Size(2, 2);
 	public double widthPenalty;
     public double heightPenalty;
 
-    Dimension growPenalties = new Dimension(1, 1);
+    Size growPenalties = new Size(1, 1);
 
 
 	double contentAspectRatio = Double.NaN;
@@ -321,14 +339,14 @@ public class Area {
 	 * Minimum size of the area's content. May be different from the minimum
 	 * size of the area.
 	 */
-	public Dimension getMinContentSize() {
+	public Size getMinContentSize() {
 		return (childArea == null) ? minContentSize : childArea.minContentSize;
 	}
 	/**
 	* Set the minimum size of the area's content.
-	* @param value Dimension that defines the desired minimum size.
+	* @param value Size that defines the desired minimum size.
 	*/
-	public void setMinContentSize(Dimension value) {
+	public void setMinContentSize(Size value) {
         if (childArea == null) {
             minContentSize = value;
             minContentWidth.setRightSide(value.getWidth());
@@ -339,21 +357,21 @@ public class Area {
 	}
 
     public void setMinContentSize(double width, double height) {
-        setMinContentSize(new Dimension(width, height));
+        setMinContentSize(new Size(width, height));
     }
 
 	/**
 	 * Maximum size of the area's content. May be different from the maximum
 	 * size of the area.
 	 */
-	public Dimension getMaxContentSize() {
+	public Size getMaxContentSize() {
 		return (childArea == null) ? maxContentSize : childArea.maxContentSize;
 	}
 	/**
 	* Set the maximal size of the area's content.
-	* @param value Dimension that defines the desired maximal size.
+	* @param value Size that defines the desired maximal size.
 	*/
-	public void setMaxContentSize(Dimension value) {
+	public void setMaxContentSize(Size value) {
         if (childArea == null) {
             maxContentSize = value;
             if (maxContentWidth == null) { // no max constraints set yet
@@ -376,7 +394,7 @@ public class Area {
 	}
 
     public void setMaxContentSize(double width, double height) {
-        setMaxContentSize(new Dimension(width, height));
+        setMaxContentSize(new Size(width, height));
     }
 
 	/**
@@ -384,7 +402,7 @@ public class Area {
 	 * size of the area. Manual changes of PreferredContentSize are ignored
 	 * unless autoPreferredContentSize is set to false.
 	 */
-	public Dimension getPreferredContentSize() {
+	public Size getPreferredContentSize() {
 		return (childArea == null) ? preferredContentSize
 				: childArea.preferredContentSize;
 	}
@@ -392,9 +410,9 @@ public class Area {
 	* Set the prefered size of the area's content. Manual changes
 	* of PreferredContentSize are ignored unless
 	* autoPreferredContentSize is set to false.
-	* @param value Dimension that defines the prefered size.
+	* @param value Size that defines the prefered size.
 	*/
-	public void setPreferredContentSize(Dimension value) {
+	public void setPreferredContentSize(Size value) {
         if (childArea == null) {
             preferredContentSize = value;
             if (preferredContentWidth == null) { // no pref constraints set yet
@@ -422,7 +440,7 @@ public class Area {
 	}
 
     public void setPreferredContentSize(double width, double height) {
-        setPreferredContentSize(new Dimension(width, height));
+        setPreferredContentSize(new Size(width, height));
     }
 
 	/**
@@ -464,15 +482,15 @@ public class Area {
 	 * The reluctance with which the area's content grows over its preferred
 	 * size. The bigger the less likely is such expansion.
 	 */
-	public Dimension getGrowPenalties() {
+	public Size getGrowPenalties() {
 		return (childArea == null) ? growPenalties : childArea.growPenalties;
 	}
 	/**
 	* Set the reluctance with which the area's content grows over its preferred
 	* size. The bigger the less likely is such expansion.
-	* @param value Dimension that defines the grow penalties.
+	* @param value Size that defines the grow penalties.
 	*/
-	public void setGrowPenalties(Dimension value) {
+	public void setGrowPenalties(Size value) {
 		if (childArea == null) {
 			growPenalties = value;
 			if (preferredContentWidth != null) { // penalties are only relevant
@@ -660,7 +678,7 @@ public class Area {
 		// and add constraints that set its tabs to be equal to the
 		// coresponding tabs of this area (for a start)
 		childArea = new Area(ls, new XTab(ls), new YTab(ls),
-				new XTab(ls), new YTab(ls),	new Dimension(0, 0));
+				new XTab(ls), new YTab(ls),	new Size(0, 0));
 		leftConstraint = getLeft().isEqual(childArea.getLeft());
 		leftConstraint.Owner = this;
 		constraints.add(leftConstraint);
@@ -833,10 +851,10 @@ public class Area {
 	 * and the penalties according to heuristics.
 	 */
 	public void setDefaultBehavior() {
-        setGrowPenalties(new Dimension(0, 0));
+        setGrowPenalties(new Size(0, 0));
         /*
 		if (getContent() == null) {
-			setGrowPenalties(new Dimension(0, 0));
+			setGrowPenalties(new Size(0, 0));
 			return;
 		}
 
@@ -854,11 +872,11 @@ public class Area {
 //				|| getContent() instanceof JCheckBox
 //				|| getContent() instanceof JLabel
 //				|| getContent() instanceof JProgressBar) {
-//			setShrinkPenalties(new Dimension(4, 4));
-//			setGrowPenalties(new Dimension(3, 3));
+//			setShrinkPenalties(new Size(4, 4));
+//			setGrowPenalties(new Size(3, 3));
 //		} else {
-//			setShrinkPenalties(new Dimension(2, 2));
-//			setGrowPenalties(new Dimension(1, 1));
+//			setShrinkPenalties(new Size(2, 2));
+//			setGrowPenalties(new Size(1, 1));
 //		}
 	}
 
@@ -918,7 +936,7 @@ public class Area {
 	* @param bottom the bottom horziontal grid line
 	* @param minContentSize the minimal size of this area
 	*/
-	Area(LayoutSpec ls, XTab left, YTab top, XTab right, YTab bottom, Dimension minContentSize) {
+	Area(LayoutSpec ls, XTab left, YTab top, XTab right, YTab bottom, Size minContentSize) {
 		//TODO why is minContentSize passed in? component already has getMinSize()
 		this.ls = ls;
 		this.left = left;
@@ -951,7 +969,7 @@ public class Area {
 	* @param column the column this Area will reside
 	* @param minContentSize the minimal size of this area
 	*/
-	Area(LayoutSpec ls, Row row, Column column, Dimension minContentSize) {
+	Area(LayoutSpec ls, Row row, Column column, Size minContentSize) {
 		this(ls, column.getLeft(), row.getTop(), column.getRight(), row.getBottom(), minContentSize);
 		this.row = row;
 		this.column = column;

@@ -22,7 +22,7 @@ public class ALMLayout implements LayoutManager {
     private boolean activated = true;
 
     /** The specification used for calculating the layout. */
-    private LayoutSpec layoutSpec;
+    final private LayoutSpec layoutSpec;
 
     final List<JComponent> componentsToAdd = new ArrayList<JComponent>();
     final Map<JComponent, Area> areaMap = new HashMap<JComponent, Area>();
@@ -35,14 +35,12 @@ public class ALMLayout implements LayoutManager {
 
     /** Creates a new layout engine with an empty specification. */
     public ALMLayout() {
-        super();
-        initLayout();
+        layoutSpec = new LayoutSpec();
     }
 
     /** Creates a new layout engine with a specific solver. */
     public ALMLayout(AbstractLinearSolver solver) {
-        super();
-        initLayout(solver);
+        layoutSpec = new LayoutSpec(solver);
     }
 
     /**
@@ -51,23 +49,9 @@ public class ALMLayout implements LayoutManager {
      * @param ls the layout specification
      */
     public ALMLayout(LayoutSpec ls) {
-        this();
         layoutSpec = ls;
     }
 
-    /**
-     * Initializes the layout.
-     */
-    private void initLayout() {
-        layoutSpec = new LayoutSpec();
-    }
-
-    /**
-     * Initializes the layout with a specific solver
-     */
-    private void initLayout(AbstractLinearSolver solver) {
-        layoutSpec = new LayoutSpec(solver);
-    }
 
     /**
      * Calculate and set the layout. If no layout specification is given, a
@@ -165,27 +149,27 @@ public class ALMLayout implements LayoutManager {
     }
 
     /**
-     * Return the minimum layout - Dimension
+     * Return the minimum layout - Size
      *
      * @param parent the parent container of this layout spec.
      * @return The minimum size dimension.
      */
     @Override
     public Dimension minimumLayoutSize(Container parent) {
-        nz.ac.auckland.alm.Dimension dimension = layoutSpec.getMinSize();
-        return new Dimension((int)dimension.getWidth(), (int)dimension.getHeight());
+        Area.Size size = layoutSpec.getMinSize();
+        return new Dimension((int) size.getWidth(), (int) size.getHeight());
 	}
 
     /**
-     * Return the prefer layout - Dimension
+     * Return the prefer layout - Size
      *
      * @param parent the parent container of this layout spec.
      * @return The preferred size dimension.
      */
     @Override
 	public Dimension preferredLayoutSize(Container parent) {
-        nz.ac.auckland.alm.Dimension dimension = layoutSpec.getPreferredSize();
-		return new Dimension((int)dimension.getWidth(), (int)dimension.getHeight());
+        Area.Size size = layoutSpec.getPreferredSize();
+		return new Dimension((int) size.getWidth(), (int) size.getHeight());
 	}
 
     @Override
@@ -206,40 +190,29 @@ public class ALMLayout implements LayoutManager {
     }
 
     /**
-     * Sets the current layout spec
-     *
-     * @param ls The layoutspec to be used.
-     */
-    public void setLayoutSpec(LayoutSpec ls) {
-        layoutSpec = ls;
-    }
-
-
-    /**
      * Adds a new area to the specification, automatically setting preferred
      * size constraints.
      *
+     * @param component the control which is the area content
      * @param left    left border
      * @param top     top border
      * @param right   right border
      * @param bottom  bottom border
-     * @param content the control which is the area content
      * @return the new area
      */
-    public Area addArea(XTab left, YTab top, XTab right, YTab bottom,
-                        JComponent content) {
-        componentsToAdd.add(content);
+    public Area addComponent(JComponent component, XTab left, YTab top, XTab right, YTab bottom) {
+        componentsToAdd.add(component);
         Area area = layoutSpec.addArea(left, top, right, bottom);
 
-        Dimension minSize = content.getMinimumSize();
-        Dimension prefSize = content.getPreferredSize();
-        Dimension maxSize = content.getMaximumSize();
+        Dimension minSize = component.getMinimumSize();
+        Dimension prefSize = component.getPreferredSize();
+        Dimension maxSize = component.getMaximumSize();
 
         area.setMinContentSize(minSize.getWidth(), minSize.getHeight());
         area.setPreferredContentSize(prefSize.getWidth(), prefSize.getHeight());
         area.setMaxContentSize(maxSize.getWidth(), maxSize.getHeight());
 
-        areaMap.put(content, area);
+        areaMap.put(component, area);
         return area;
     }
 

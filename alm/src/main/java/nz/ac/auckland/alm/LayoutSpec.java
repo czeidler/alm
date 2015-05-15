@@ -252,9 +252,9 @@ public class LayoutSpec extends LinearSpec {
 
     // cached layout values
     // need to be invalidated whenever the layout specification is changed
-    Dimension minSize = Area.UNDEFINED_SIZE;
-    Dimension maxSize = Area.UNDEFINED_SIZE;
-    Dimension preferredSize = Area.UNDEFINED_SIZE;
+    Area.Size minSize = Area.UNDEFINED_SIZE;
+    Area.Size maxSize = Area.UNDEFINED_SIZE;
+    Area.Size preferredSize = Area.UNDEFINED_SIZE;
 
     /**
      * If the layout is solved previously the cached mininum size,
@@ -271,9 +271,9 @@ public class LayoutSpec extends LinearSpec {
      * Get the cached minimal size of the GUI, if there was none it will be calculated.
      * To invalidate the cache use invalidateLayout().
      *
-     * @return Dimension defining the minimal size of the GUI
+     * @return Size defining the minimal size of the GUI
      */
-    public Dimension getMinSize() {
+    public Area.Size getMinSize() {
         if (minSize == Area.UNDEFINED_SIZE)
             minSize = calculateMinSize();
         return minSize;
@@ -283,9 +283,9 @@ public class LayoutSpec extends LinearSpec {
      * Get the cached maximal size of the GUI, if there was none it will be calculated.
      * To invalidate the cache use invalidateLayout().
      *
-     * @return Dimension defining the maximal size of the GUI
+     * @return Size defining the maximal size of the GUI
      */
-    public Dimension getMaxSize() {
+    public Area.Size getMaxSize() {
         if (maxSize == Area.UNDEFINED_SIZE)
             maxSize = calculateMaxSize();
         return maxSize;
@@ -295,9 +295,9 @@ public class LayoutSpec extends LinearSpec {
      * Get the cached preferred size of the GUI, if there was none it will be calculated.
      * To invalidate the cache use invalidateLayout().
      *
-     * @return Dimension defining the preferred size of the GUI
+     * @return Size defining the preferred size of the GUI
      */
-    public Dimension getPreferredSize() {
+    public Area.Size getPreferredSize() {
         if (preferredSize == Area.UNDEFINED_SIZE)
             preferredSize = calculatePreferredSize();
         return preferredSize;
@@ -308,12 +308,12 @@ public class LayoutSpec extends LinearSpec {
      * If the specifications have not changed use getMinSize to get an
      * cached value for the minimal size and save some CPU cycles.
      *
-     * @return Dimension defining the minimal size of the GUI
+     * @return Size defining the minimal size of the GUI
      */
-    private Dimension calculateMinSize() {
+    private Area.Size calculateMinSize() {
 
         //Store the preferred sizes and temporarily set the preferred size to the min size.
-        Dimension[] store = new Dimension[areas.size()];
+        Area.Size[] store = new Area.Size[areas.size()];
 
         for (int i = 0; i < areas.size(); i++) {
             Area a = areas.get(i);
@@ -321,7 +321,7 @@ public class LayoutSpec extends LinearSpec {
             a.setPreferredContentSize(a.getMinContentSize());
         }
         //Calculate the preferred container size with the min sizes set as preferred sizes.
-        Dimension min = calculatePreferredSize();
+        Area.Size min = calculatePreferredSize();
 
         //Restore the original preferredSizeValues.
         for (int i = 0; i < areas.size(); i++) {
@@ -340,9 +340,9 @@ public class LayoutSpec extends LinearSpec {
      * If the specifications have not changed use getMaxSize to get an cached
      * value for the maximal size and save some CPU cycles.
      *
-     * @return Dimension defining the maximal size of the GUI
+     * @return Size defining the maximal size of the GUI
      */
-    private Dimension calculateMaxSize() {
+    private Area.Size calculateMaxSize() {
         /*
 		 * List<Summand> buf = getObjFunctionSummands();
 		 * setObjFunctionSummands(new ArrayList<Summand>());
@@ -350,7 +350,7 @@ public class LayoutSpec extends LinearSpec {
 		 * solveLayout(); setObjFunctionSummands(buf); updateObjFunction();
 		 */
 
-        return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        return new Area.Size(Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     /**
@@ -359,9 +359,9 @@ public class LayoutSpec extends LinearSpec {
      * for the preferred size and save some CPU cycles.
      * TODO - It returns the current size.
      *
-     * @return Dimension defining the preferred size of the GUI
+     * @return Size defining the preferred size of the GUI
      */
-    private Dimension calculatePreferredSize() {
+    private Area.Size calculatePreferredSize() {
         //Store the current constraint values and reset GUI edge tabs and constraints to default.
         double leftValue = leftConstraint.getRightSide();
         double topValue = topConstraint.getRightSide();
@@ -391,7 +391,7 @@ public class LayoutSpec extends LinearSpec {
         solve();
 
         //Resulting value for left/right is the preferred size of the GUI
-        Dimension prefSize = new Dimension(0, 0);
+        Area.Size prefSize = new Area.Size(0, 0);
         prefSize.width = (int) Math.round(right.getValue() - left.getValue());
         prefSize.height = (int) Math.round(bottom.getValue() - top.getValue());
 
@@ -571,7 +571,7 @@ public class LayoutSpec extends LinearSpec {
      * @param minContentSize minimum content size
      * @return the new area
      */
-    public Area addArea(XTab left, YTab top, XTab right, YTab bottom, Dimension minContentSize) {
+    public Area addArea(XTab left, YTab top, XTab right, YTab bottom, Area.Size minContentSize) {
 
         invalidateLayout();
         Area a = new Area(this, left, top, right, bottom, minContentSize);
@@ -588,7 +588,7 @@ public class LayoutSpec extends LinearSpec {
      * @param minContentSize minimum content size
      * @return the new area
      */
-    public Area addArea(Row row, Column column, Dimension minContentSize) {
+    public Area addArea(Row row, Column column, Area.Size minContentSize) {
 
         invalidateLayout();
         Area a = new Area(this, row, column, minContentSize);
@@ -608,7 +608,7 @@ public class LayoutSpec extends LinearSpec {
      */
     public Area addArea(XTab left, YTab top, XTab right, YTab bottom) {
         invalidateLayout();
-        Area a = new Area(this, left, top, right, bottom, new Dimension(0, 0));
+        Area a = new Area(this, left, top, right, bottom, new Area.Size(0, 0));
 
         a.setDefaultBehavior();
         areas.add(a);
@@ -625,7 +625,7 @@ public class LayoutSpec extends LinearSpec {
      */
     public Area addArea(Row row, Column column) {
         invalidateLayout();
-        Area a = new Area(this, row, column, new Dimension(0, 0));
+        Area a = new Area(this, row, column, new Area.Size(0, 0));
         a.setDefaultBehavior();
         areas.add(a);
         return a;
@@ -641,7 +641,7 @@ public class LayoutSpec extends LinearSpec {
      */
     public Area addArea(Row row, Column column, boolean defaultBehaviour) {
         invalidateLayout();
-        Area a = new Area(this, row, column, new Dimension(0, 0));
+        Area a = new Area(this, row, column, new Area.Size(0, 0));
         if (defaultBehaviour) {
             a.setDefaultBehavior();
         }
@@ -787,7 +787,7 @@ public class LayoutSpec extends LinearSpec {
      *
      * @param minSize defining the minimal size of the GUI
      */
-    public void setMinSize(Dimension minSize) {
+    public void setMinSize(Area.Size minSize) {
         this.minSize = minSize;
     }
 
@@ -797,7 +797,7 @@ public class LayoutSpec extends LinearSpec {
      *
      * @param maxSize defining the maximal size of the GUI
      */
-    public void setMaxSize(Dimension maxSize) {
+    public void setMaxSize(Area.Size maxSize) {
         this.maxSize = maxSize;
     }
 
@@ -806,7 +806,7 @@ public class LayoutSpec extends LinearSpec {
      *
      * @param preferredSize defining the preferred size of the GUI
      */
-    public void setPreferredSize(Dimension preferredSize) {
+    public void setPreferredSize(Area.Size preferredSize) {
         this.preferredSize = preferredSize;
     }
 }
