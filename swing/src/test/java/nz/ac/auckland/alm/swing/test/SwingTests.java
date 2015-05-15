@@ -18,9 +18,9 @@ import javax.swing.*;
 public class SwingTests extends TestCase {
 
     public void testThreeButtons() throws Exception {
-        JDialog window = new JDialog();
-
+        JDialog dialog = new JDialog();
         ALMLayout almLayout = new ALMLayout();
+        dialog.setLayout(almLayout);
 
         XTab left = almLayout.getLeft();
         YTab top = almLayout.getTop();
@@ -30,22 +30,22 @@ public class SwingTests extends TestCase {
         XTab x1 = almLayout.addXTab();
         XTab x2 = almLayout.addXTab();
 
-        almLayout.addComponent(new JButton("Button 1"), left, top, x1, bottom);
-        almLayout.addComponent(new JButton("Button 2"), x1, top, x2, bottom);
-        almLayout.addComponent(new JButton("Button 3"), x2, top, right, bottom);
+        dialog.add(new JButton("Button 1"), new ALMLayout.LayoutParams(left, top, x1, bottom));
+        dialog.add(new JButton("Button 2"), new ALMLayout.LayoutParams(x1, top, x2, bottom));
+        dialog.add(new JButton("Button 3"), new ALMLayout.LayoutParams(x2, top, right, bottom));
 
-        window.setLayout(almLayout);
-        window.pack();
-        window.setLocationRelativeTo(null);
-        window.setVisible(true);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
 
         Thread.sleep(3000);
     }
 
     public void testPinWheelButtons() throws Exception {
-        JDialog window = new JDialog();
-
+        JDialog dialog = new JDialog();
         ALMLayout almLayout = new ALMLayout();
+        dialog.setLayout(almLayout);
+
 
         XTab left = almLayout.getLeft();
         YTab top = almLayout.getTop();
@@ -58,16 +58,15 @@ public class SwingTests extends TestCase {
         YTab y1 = almLayout.addYTab();
         YTab y2 = almLayout.addYTab();
 
-        almLayout.addComponent(new JButton("Button 1"), left, top, x2, y1);
-        almLayout.addComponent(new JButton("Button 2"), x2, top, right, y2);
-        almLayout.addComponent(new JButton("Button 3"), x1, y2, right, bottom);
-        almLayout.addComponent(new JButton("Button 4"), left, y1, x1, bottom);
-        almLayout.addComponent(new JButton("Middle"), x1, y1, x2, y2);
+        dialog.add(new JButton("Button 1"), new ALMLayout.LayoutParams(left, top, x2, y1));
+        dialog.add(new JButton("Button 2"), new ALMLayout.LayoutParams(x2, top, right, y2));
+        dialog.add(new JButton("Button 3"), new ALMLayout.LayoutParams(x1, y2, right, bottom));
+        dialog.add(new JButton("Button 4"), new ALMLayout.LayoutParams(left, y1, x1, bottom));
+        dialog.add(new JButton("Middle"), new ALMLayout.LayoutParams(x1, y1, x2, y2));
 
-        window.setLayout(almLayout);
-        window.pack();
-        window.setLocationRelativeTo(null);
-        window.setVisible(true);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
 
         Thread.sleep(3000);
     }
