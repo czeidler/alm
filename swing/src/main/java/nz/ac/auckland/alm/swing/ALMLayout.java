@@ -220,7 +220,7 @@ public class ALMLayout implements LayoutManager2 {
 
         area.setMinContentSize(minSize.getWidth(), minSize.getHeight());
         area.setPreferredContentSize(prefSize.getWidth(), prefSize.getHeight());
-        area.setMaxContentSize(maxSize.getWidth(), maxSize.getHeight());
+        area.setMaxSize(maxSize.getWidth(), maxSize.getHeight());
 
         areaMap.put(component, area);
         return area;

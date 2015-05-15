@@ -235,18 +235,11 @@ public class LayoutSpec extends LinearSpec {
         bottomInsetConstraint.setRightSide(bottom);
     }
 	
-    @Override
     /**
      * Solve the linear equation with LinearSpec.
      */
+    @Override
     public void solve() {
-        // if autoPreferredContentSize is set on an area, read just its
-        // prefContentSize and penalties settings
-        // TODO: is autoPreferredContentSize a good idea?
-        for (Area a : areas) {
-            if (a.isAutoPreferredContentSize())
-                a.setDefaultBehavior();
-        }
         super.solve();
     }
 
@@ -317,8 +310,8 @@ public class LayoutSpec extends LinearSpec {
 
         for (int i = 0; i < areas.size(); i++) {
             Area a = areas.get(i);
-            store[i] = a.getPreferredContentSize();
-            a.setPreferredContentSize(a.getMinContentSize());
+            store[i] = a.getPreferredSize();
+            a.setPreferredSize(a.getMinContentSize());
         }
         //Calculate the preferred container size with the min sizes set as preferred sizes.
         Area.Size min = calculatePreferredSize();
@@ -326,7 +319,7 @@ public class LayoutSpec extends LinearSpec {
         //Restore the original preferredSizeValues.
         for (int i = 0; i < areas.size(); i++) {
             Area a = areas.get(i);
-            a.setPreferredContentSize(store[i]);
+            a.setPreferredSize(store[i]);
         }
 
         //Recalculate to avoid any potential errors.
@@ -561,42 +554,6 @@ public class LayoutSpec extends LinearSpec {
     }
 
     /**
-     * Adds a new area to the specification, setting only the necessary minimum
-     * size constraints.
-     *
-     * @param left           left border
-     * @param top            top border
-     * @param right          right border
-     * @param bottom         bottom border
-     * @param minContentSize minimum content size
-     * @return the new area
-     */
-    public Area addArea(XTab left, YTab top, XTab right, YTab bottom, Area.Size minContentSize) {
-
-        invalidateLayout();
-        Area a = new Area(this, left, top, right, bottom, minContentSize);
-        areas.add(a);
-        return a;
-    }
-
-    /**
-     * Adds a new area to the specification, setting only the necessary minimum
-     * size constraints.
-     *
-     * @param row            the row that defines the top and bottom border
-     * @param column         the column that defines the left and right border
-     * @param minContentSize minimum content size
-     * @return the new area
-     */
-    public Area addArea(Row row, Column column, Area.Size minContentSize) {
-
-        invalidateLayout();
-        Area a = new Area(this, row, column, minContentSize);
-        areas.add(a);
-        return a;
-    }
-
-    /**
      * Adds a new area to the specification, automatically setting preferred
      * size constraints.
      *
@@ -608,79 +565,9 @@ public class LayoutSpec extends LinearSpec {
      */
     public Area addArea(XTab left, YTab top, XTab right, YTab bottom) {
         invalidateLayout();
-        Area a = new Area(this, left, top, right, bottom, new Area.Size(0, 0));
-
-        a.setDefaultBehavior();
-        areas.add(a);
-        return a;
-    }
-
-    /**
-     * Adds a new area to the specification, automatically setting preferred
-     * size constraints.
-     *
-     * @param row     the row that defines the top and bottom border
-     * @param column  the column that defines the left and right border
-     * @return the new area
-     */
-    public Area addArea(Row row, Column column) {
-        invalidateLayout();
-        Area a = new Area(this, row, column, new Area.Size(0, 0));
-        a.setDefaultBehavior();
-        areas.add(a);
-        return a;
-    }
-
-    /**
-     * Adds a new area to the specification, automatically setting preferred
-     * size constraints.
-     *
-     * @param row     the row that defines the top and bottom border
-     * @param column  the column that defines the left and right border
-     * @return the new area
-     */
-    public Area addArea(Row row, Column column, boolean defaultBehaviour) {
-        invalidateLayout();
-        Area a = new Area(this, row, column, new Area.Size(0, 0));
-        if (defaultBehaviour) {
-            a.setDefaultBehavior();
-        }
-        areas.add(a);
-        return a;
-    }
-
-    /**
-     * Write the spec into XML
-     *
-     * @param out the output stream writer to use
-     */
-    void writeXML(OutputStreamWriter out) {
-        for (Area a : areas) {
-            a.writeXML(out);
-        }
-        for (Constraint c : getConstraints()) {
-            if (c.Owner == null)
-                c.writeXML(out);
-        }
-    }
-
-    /**
-     * Write the given summands into XML
-     *
-     * @param out      the output stream writer to use
-     * @param summands the summands to be written out
-     */
-    void writeXMLSummand(OutputStreamWriter out, Summand[] summands) {
-        try {
-            for (Summand s : summands) {
-                out.write("\t\t\t<summand>\n");
-                out.write("\t\t\t\t<coeff>" + s.getCoeff() + "</coeff>\n");
-                out.write("\t\t\t\t<var>" + s.getVar() + "</var>\n");
-                out.write("\t\t\t</summand>\n");
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        Area area = new Area(this, left, top, right, bottom);
+        areas.add(area);
+        return area;
     }
 
     /**
