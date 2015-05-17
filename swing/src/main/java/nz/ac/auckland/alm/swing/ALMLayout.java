@@ -187,7 +187,11 @@ public class ALMLayout implements LayoutManager2 {
 
     @Override
     public void invalidateLayout(Container container) {
-
+        for (Map.Entry<Component, Area> entry : areaMap.entrySet()) {
+            Component component = entry.getKey();
+            Area area = entry.getValue();
+            updateArea(area, component);
+        }
     }
 
     /**
@@ -213,6 +217,13 @@ public class ALMLayout implements LayoutManager2 {
     private Area addComponent(Component component, XTab left, YTab top, XTab right, YTab bottom) {
         Area area = layoutSpec.addArea(left, top, right, bottom);
 
+        updateArea(area, component);
+
+        areaMap.put(component, area);
+        return area;
+    }
+
+    private void updateArea(Area area, Component component) {
         Dimension minSize = component.getMinimumSize();
         Dimension prefSize = component.getPreferredSize();
         Dimension maxSize = component.getMaximumSize();
@@ -220,9 +231,6 @@ public class ALMLayout implements LayoutManager2 {
         area.setMinContentSize(minSize.getWidth(), minSize.getHeight());
         area.setPreferredContentSize(prefSize.getWidth(), prefSize.getHeight());
         area.setMaxSize(maxSize.getWidth(), maxSize.getHeight());
-
-        areaMap.put(component, area);
-        return area;
     }
 
     /**
