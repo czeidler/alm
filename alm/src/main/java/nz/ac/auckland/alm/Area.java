@@ -75,7 +75,7 @@ public class Area {
 	Constraint preferredWidthConstraint;
 	Constraint preferredHeightConstraint;
 
-	HorizontalAlignment horizontalAlignment = HorizontalAlignment.FILL;
+	HorizontalAlignment hAlignment = HorizontalAlignment.FILL;
 	VerticalAlignment vAlignment = VerticalAlignment.FILL;
 	int leftInset = 0;
 	int topInset = 0;
@@ -225,7 +225,8 @@ public class Area {
 
 		if (maxContentSize.getWidth() > 0) {
 			if (maxWidthConstraint == null) {
-				maxWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.LE, 0);
+				maxWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.LE, 0,
+						growPenalties.getWidth());
 				maxWidthConstraint.Owner = this;
 				constraints.add(maxWidthConstraint);
 			}
@@ -237,7 +238,8 @@ public class Area {
 
 		if (maxContentSize.getHeight() > 0) {
 			if (maxHeightConstraint == null) {
-				maxHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.LE, 0);
+				maxHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.LE, 0,
+						growPenalties.getHeight());
 				maxHeightConstraint.Owner = this;
 				constraints.add(maxHeightConstraint);
 			}
@@ -263,10 +265,10 @@ public class Area {
 		return preferredSize;
 	}
 	/**
-	* Set the prefered size of the area's content. Manual changes
+	* Set the preferred size of the area's content. Manual changes
 	* of PreferredContentSize are ignored unless
 	* autoPreferredContentSize is set to false.
-	* @param value Size that defines the prefered size.
+	* @param value Size that defines the preferred size.
 	*/
 	public void setPreferredSize(Size value) {
         preferredSize = value;
@@ -391,7 +393,7 @@ public class Area {
 	 * Horizontal alignment of the content in its area.
 	 */
 	public HorizontalAlignment getHorizontalAlignment() {
-		return horizontalAlignment;
+		return hAlignment;
 	}
 
 	/**
@@ -399,7 +401,7 @@ public class Area {
 	 * @param value HorizontalAlignment to set
 	 */
 	public void setHorizontalAlignment(HorizontalAlignment value) {
-		horizontalAlignment = value;
+		hAlignment = value;
 	}
 
 	/**
@@ -414,6 +416,11 @@ public class Area {
 	 */
 	public void setVerticalAlignment(VerticalAlignment value) {
 		vAlignment = value;
+	}
+
+	public void setAlignment(HorizontalAlignment hAlignment, VerticalAlignment vAlignment) {
+		setHorizontalAlignment(hAlignment);
+		setVerticalAlignment(vAlignment);
 	}
 
 	/**
