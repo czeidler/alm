@@ -3,8 +3,6 @@ package nz.ac.auckland.alm;
 import nz.ac.auckland.linsolve.*;
 import nz.ac.auckland.linsolve.softconstraints.GroupingSoftSolver;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -311,7 +309,7 @@ public class LayoutSpec extends LinearSpec {
         for (int i = 0; i < areas.size(); i++) {
             Area a = areas.get(i);
             store[i] = a.getPreferredSize();
-            a.setPreferredSize(a.getMinContentSize());
+            a.setPreferredSize(a.getMinSize());
         }
         //Calculate the preferred container size with the min sizes set as preferred sizes.
         Area.Size min = calculatePreferredSize();

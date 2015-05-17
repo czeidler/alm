@@ -69,12 +69,11 @@ public class ALMLayout implements LayoutManager2 {
      * You should never need to call it by your self.
      */
 	void layoutComponent(Component component, Area area) {
+        Area.Rect frame = area.getContentRect();
+
 		// set content location and size
-		component.setLocation(new Point((int) Math.round(area.getLeft().getValue()),
-                (int) Math.round(area.getTop().getValue())));
-		int width = (int) Math.round(area.getRight().getValue() - area.getLeft().getValue());
-		int height = (int) Math.round(area.getBottom().getValue() - area.getTop().getValue());
-		component.setSize(width, height);
+		component.setLocation(new Point(Math.round(frame.left), Math.round(frame.top)));
+		component.setSize(Math.round(frame.getWidth()), Math.round(frame.getHeight()));
 	}
 
     /**
@@ -270,8 +269,8 @@ public class ALMLayout implements LayoutManager2 {
      * @param component the control to look for
      * @return the area that contains the control
      */
-    public Area areaOf(JComponent component) {
-        return areaMap.remove(component);
+    public Area areaOf(Component component) {
+        return areaMap.get(component);
     }
 
     /**

@@ -28,21 +28,43 @@ public class Area {
 		}
 	}
 
+	public static class Rect {
+		public float left;
+		public float top;
+		public float right;
+		public float bottom;
+
+		public Rect(float left, float top, float right, float bottom) {
+			this.left = left;
+			this.top = top;
+			this.right = right;
+			this.bottom = bottom;
+		}
+
+		public float getWidth() {
+			return right - left;
+		}
+
+		public float getHeight() {
+			return bottom - top;
+		}
+	}
+
 	/**
 	 * Minimum possible size. Use this if there is no lower bound.
 	 */
-	public static Size MIN_SIZE = new Size(0, 0);
+	static Size MIN_SIZE = new Size(0, 0);
 
 	/**
 	 * Maximum possible size. Use this if there is no upper bound.
 	 */
-	public static Size MAX_SIZE = new Size(Integer.MAX_VALUE,
+	static Size MAX_SIZE = new Size(Integer.MAX_VALUE,
 			Integer.MAX_VALUE);
 
 	/**
 	 * Undefined size. Used if a certain size constraint is not set.
 	 */
-	public static Size UNDEFINED_SIZE = new Size(-1, -1);
+	static Size UNDEFINED_SIZE = new Size(-1, -1);
 
 	/**
 	 * The layout specification this area belongs to.
@@ -61,8 +83,9 @@ public class Area {
 	 */
 	List<Constraint> constraints = new ArrayList<Constraint>();
 
-	Size minContentSize = MIN_SIZE;
-	Size maxContentSize = MAX_SIZE;
+	Size minSize = MIN_SIZE;
+	Size preferredSize = UNDEFINED_SIZE;
+	Size maxSize = MAX_SIZE;
 
 	/**
 	 * Size constraint for the content. Valid even if the content is actually in
@@ -75,14 +98,12 @@ public class Area {
 	Constraint preferredWidthConstraint;
 	Constraint preferredHeightConstraint;
 
-	HorizontalAlignment hAlignment = HorizontalAlignment.FILL;
-	VerticalAlignment vAlignment = VerticalAlignment.FILL;
+	HorizontalAlignment hAlignment = HorizontalAlignment.CENTER;
+	VerticalAlignment vAlignment = VerticalAlignment.CENTER;
 	int leftInset = 0;
 	int topInset = 0;
 	int rightInset = 0;
 	int bottomInset = 0;
-
-	Size preferredSize = UNDEFINED_SIZE;
 
     // TODO remove
 	//Size shrinkPenalties = new Size(2, 2);
@@ -189,16 +210,16 @@ public class Area {
 	 * Minimum size of the area's content. May be different from the minimum
 	 * size of the area.
 	 */
-	public Size getMinContentSize() {
-		return minContentSize;
+	public Size getMinSize() {
+		return minSize;
 	}
 
 	/**
 	* Set the minimum size of the area's content.
 	* @param value Size that defines the desired minimum size.
 	*/
-	public void setMinContentSize(Size value) {
-        minContentSize = value;
+	public void setMinSize(Size value) {
+        minSize = value;
 		minWidthConstraint.setRightSide(value.getWidth());
 		minHeightConstraint.setRightSide(value.getHeight());
 
@@ -206,44 +227,44 @@ public class Area {
 	}
 
     public void setMinContentSize(double width, double height) {
-        setMinContentSize(new Size(width, height));
+        setMinSize(new Size(width, height));
     }
 
 	/**
 	 * Maximum size of the area's content. May be different from the maximum
 	 * size of the area.
 	 */
-	public Size getMaxContentSize() {
-		return maxContentSize;
+	public Size getMaxSize() {
+		return maxSize;
 	}
 	/**
 	* Set the maximal size of the area's content.
 	* @param value Size that defines the desired maximal size.
 	*/
 	public void setMaxSize(Size value) {
-        maxContentSize = value;
+        maxSize = value;
 
-		if (maxContentSize.getWidth() > 0) {
+		if (maxSize.getWidth() > 0) {
 			if (maxWidthConstraint == null) {
 				maxWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.LE, 0,
 						growPenalties.getWidth());
 				maxWidthConstraint.Owner = this;
 				constraints.add(maxWidthConstraint);
 			}
-			updateRightSideHorizontal(maxWidthConstraint, maxContentSize.getWidth());
+			updateRightSideHorizontal(maxWidthConstraint, maxSize.getWidth());
 		} else if (maxWidthConstraint != null) {
 			maxWidthConstraint.remove();
 			maxWidthConstraint = null;
 		}
 
-		if (maxContentSize.getHeight() > 0) {
+		if (maxSize.getHeight() > 0) {
 			if (maxHeightConstraint == null) {
 				maxHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.LE, 0,
 						growPenalties.getHeight());
 				maxHeightConstraint.Owner = this;
 				constraints.add(maxHeightConstraint);
 			}
-			updateRightSideVertical(maxHeightConstraint, maxContentSize.getHeight());
+			updateRightSideVertical(maxHeightConstraint, maxSize.getHeight());
 		} else if (maxHeightConstraint != null) {
 			maxHeightConstraint.remove();
 			maxHeightConstraint = null;
@@ -423,6 +444,49 @@ public class Area {
 		setVerticalAlignment(vAlignment);
 	}
 
+	private float relativeHorizontal(HorizontalAlignment alignment) {
+		switch (alignment) {
+			case LEFT:
+				return 0;
+			case RIGHT:
+				return 1;
+			case CENTER:
+				return 0.5f;
+		}
+		return 0;
+	}
+
+	private float relativeVertical(VerticalAlignment alignment) {
+		switch (alignment) {
+			case TOP:
+				return 0;
+			case BOTTOM:
+				return 1;
+			case CENTER:
+				return 0.5f;
+		}
+		return 0;
+	}
+
+	public Rect getContentRect() {
+		Rect frame = new Rect((float)(getLeft().getValue() + getLeftInset()),
+				(float)(getTop().getValue() + getTopInset()), (float)(getRight().getValue() - getRightInset()),
+				(float)(getBottom().getValue() - getBottomInset()));
+
+		// Taken from the Haiku source code:
+		// align according to the given alignment
+		if (maxSize.width < frame.getWidth() && hAlignment != HorizontalAlignment.FILL) {
+			frame.left += (frame.getWidth() - maxSize.width) * relativeHorizontal(hAlignment);
+			frame.right = (float)(frame.left + maxSize.width);
+		}
+		if (maxSize.height < frame.getHeight() && vAlignment != VerticalAlignment.FILL) {
+			frame.top += (frame.getHeight() - maxSize.height) * relativeVertical(vAlignment);
+			frame.bottom = (float)(frame.top + maxSize.height);
+		}
+
+		return frame;
+	}
+
 	/**
 	 * Left inset between area and its content.
 	 */
@@ -495,11 +559,11 @@ public class Area {
 	 * Update the constraints for horizontal insets and alignment.
 	 */
 	void updateHorizontal() {
-		updateRightSideHorizontal(minWidthConstraint, minContentSize.getWidth());
+		updateRightSideHorizontal(minWidthConstraint, minSize.getWidth());
 		if (preferredWidthConstraint != null)
 			updateRightSideHorizontal(preferredWidthConstraint, preferredSize.getWidth());
 		if (maxWidthConstraint != null)
-			updateRightSideHorizontal(maxWidthConstraint, maxContentSize.getWidth());
+			updateRightSideHorizontal(maxWidthConstraint, maxSize.getWidth());
 	}
 
 	void updateRightSideVertical(Constraint constraint, double rightSide) {
@@ -510,11 +574,11 @@ public class Area {
 	 * Update the constraints for vertical insets and alignment.
 	 */
 	void updateVertical() {
-		updateRightSideVertical(minHeightConstraint, minContentSize.getHeight());
+		updateRightSideVertical(minHeightConstraint, minSize.getHeight());
 		if (preferredWidthConstraint != null)
 			updateRightSideVertical(preferredWidthConstraint, preferredSize.getHeight());
 		if (maxWidthConstraint != null)
-			updateRightSideVertical(maxWidthConstraint, maxContentSize.getHeight());
+			updateRightSideVertical(maxWidthConstraint, maxSize.getHeight());
 	}
 
 	/**
@@ -547,11 +611,11 @@ public class Area {
 		// bottom y-tab
 		// TODO: the preferred size constraints need to have a smaller penalty
 		// (not INFINITY as per default)
-		minWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.GE, minContentSize.getWidth());
+		minWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.GE, minSize.getWidth());
 		minWidthConstraint.Owner = this;
 		minWidthConstraint.setName("minWidthConstraint");
 		constraints.add(minWidthConstraint);
-		minHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.GE, minContentSize.getHeight());
+		minHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.GE, minSize.getHeight());
 		minHeightConstraint.Owner = this;
 		minHeightConstraint.setName("minHeightConstraint");
 		constraints.add(minHeightConstraint);
