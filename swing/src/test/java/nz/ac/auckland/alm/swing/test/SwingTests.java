@@ -7,7 +7,6 @@
  */
 package nz.ac.auckland.alm.swing.test;
 
-import junit.framework.TestCase;
 import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
 import nz.ac.auckland.alm.swing.ALMLayout;
@@ -15,9 +14,8 @@ import nz.ac.auckland.alm.swing.ALMLayout;
 import javax.swing.*;
 
 
-public class SwingTests extends TestCase {
-
-    public void testThreeButtons() throws Exception {
+public class SwingTests {
+    static public void testThreeButtons() throws Exception {
         JDialog dialog = new JDialog();
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
@@ -37,11 +35,9 @@ public class SwingTests extends TestCase {
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
-
-        Thread.sleep(3000);
     }
 
-    public void testPinWheelButtons() throws Exception {
+    static public void testPinWheel() throws Exception {
         JDialog dialog = new JDialog();
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
@@ -67,7 +63,14 @@ public class SwingTests extends TestCase {
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
+    }
 
-        Thread.sleep(3000);
+    public static void main(String[] args) {
+        try {
+            testThreeButtons();
+            testPinWheel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
