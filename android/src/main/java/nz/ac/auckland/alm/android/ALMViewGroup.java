@@ -133,7 +133,7 @@ public class ALMViewGroup extends ViewGroup {
     }
 
     private Area.Size getMaximumSize(View view) {
-        return new Area.Size(-1, -1);
+        return getPreferredSize(view);
     }
 
     /**
