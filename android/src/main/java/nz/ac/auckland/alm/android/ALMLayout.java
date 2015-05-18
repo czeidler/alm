@@ -8,6 +8,7 @@
 package nz.ac.auckland.alm.android;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +18,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class ALMViewGroup extends ViewGroup {
+public class ALMLayout extends ViewGroup {
     static public class LayoutParams extends ViewGroup.LayoutParams {
-        final public XTab left;
-        final public YTab top;
-        final public XTab right;
-        final public YTab bottom;
+        public XTab left;
+        public YTab top;
+        public XTab right;
+        public YTab bottom;
+
+        public LayoutParams(Context context, AttributeSet attrs) {
+            super(context, attrs);
+
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ALMLayout_Layout);
+            for (int i = 0; i < a.getIndexCount(); i++) {
+                int attr = a.getIndex(i);
+                switch (attr) {
+                    case R.styleable.ALMLayout_Layout_layout_toLeftOf:
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_below:
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_toRightOf:
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_above:
+                        break;
+                }
+            }
+            a.recycle();
+        }
 
         public LayoutParams(XTab left, YTab top, XTab right, YTab bottom) {
             super(WRAP_CONTENT, WRAP_CONTENT);
@@ -44,15 +65,15 @@ public class ALMViewGroup extends ViewGroup {
     final LayoutSpec layoutSpec = new LayoutSpec();
     final Map<View, Area> areaMap = new HashMap<View, Area>();
 
-    public ALMViewGroup(Context context) {
+    public ALMLayout(Context context) {
         super(context);
     }
 
-    public ALMViewGroup(Context context, AttributeSet attrs) {
+    public ALMLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ALMViewGroup(Context context, AttributeSet attrs, int defStyle) {
+    public ALMLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
@@ -76,6 +97,39 @@ public class ALMViewGroup extends ViewGroup {
         }
     }
 
+    @Override
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        super.addView(child, index, params);
+
+        if (!(params instanceof LayoutParams))
+            throw new RuntimeException();
+
+        LayoutParams constraintParams = (LayoutParams)params;
+        Area area = layoutSpec.addArea(constraintParams.left, constraintParams.top, constraintParams.right,
+                constraintParams.bottom);
+
+        area.setMinSize(getMinimumSize(child));
+        area.setPreferredSize(getPreferredSize(child));
+        area.setMaxSize(getMaximumSize(child));
+
+        areaMap.put(child, area);
+    }
+
+    @Override
+    public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams params) {
+        return params instanceof LayoutParams;
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams(getLeftTab(), getTopTab(), getRightTab(), getBottomTab());
+    }
+
     /**
      * Adds a new x-tab to the specification.
      *
@@ -94,23 +148,6 @@ public class ALMViewGroup extends ViewGroup {
         return layoutSpec.addYTab();
     }
 
-    @Override
-    public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        super.addView(child, index, params);
-
-        if (!(params instanceof LayoutParams))
-            throw new RuntimeException();
-
-        LayoutParams constraintParams = (LayoutParams)params;
-        Area area = layoutSpec.addArea(constraintParams.left, constraintParams.top, constraintParams.right,
-                constraintParams.bottom);
-
-        area.setMinSize(getMinimumSize(child));
-        area.setPreferredSize(getPreferredSize(child));
-        area.setMaxSize(getMaximumSize(child));
-
-        areaMap.put(child, area);
-    }
 
     /**
      * Finds the area that contains the given control.

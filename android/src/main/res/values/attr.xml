@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name = "ALMLayout_Layout">
+        <attr name="layout_toLeftOf" format="reference" />
+        <attr name="layout_below" format="reference" />
+        <attr name="layout_toRightOf" format="reference" />
+        <attr name="layout_above" format="reference" />
+    </declare-styleable>
+</resources>

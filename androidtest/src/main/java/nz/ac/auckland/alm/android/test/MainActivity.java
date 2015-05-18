@@ -1,3 +1,10 @@
+/*
+ * Copyright 2015.
+ * Distributed under the terms of the GPLv3 License.
+ *
+ * Authors:
+ *      Clemens Zeidler <czei002@aucklanduni.ac.nz>
+ */
 package nz.ac.auckland.alm.android.test;
 
 import android.content.Context;
@@ -17,7 +24,7 @@ import nz.ac.auckland.alm.HorizontalAlignment;
 import nz.ac.auckland.alm.VerticalAlignment;
 import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
-import nz.ac.auckland.alm.android.ALMViewGroup;
+import nz.ac.auckland.alm.android.ALMLayout;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -78,7 +85,7 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             Context context = container.getContext();
 
-            ALMViewGroup almLayout = new ALMViewGroup(context);
+            ALMLayout almLayout = new ALMLayout(context);
             XTab left = almLayout.getLeftTab();
             YTab top = almLayout.getTopTab();
             XTab right = almLayout.getRightTab();
@@ -94,9 +101,9 @@ public class MainActivity extends ActionBarActivity {
             Button button3 = new Button(context);
             button3.setText("Button 3");
 
-            almLayout.addView(button1, new ALMViewGroup.LayoutParams(left, top, x1, bottom));
-            almLayout.addView(button2, new ALMViewGroup.LayoutParams(x1, top, x2, bottom));
-            almLayout.addView(button3, new ALMViewGroup.LayoutParams(x2, top, right, bottom));
+            almLayout.addView(button1, new ALMLayout.LayoutParams(left, top, x1, bottom));
+            almLayout.addView(button2, new ALMLayout.LayoutParams(x1, top, x2, bottom));
+            almLayout.addView(button3, new ALMLayout.LayoutParams(x2, top, right, bottom));
 
             almLayout.areaOf(button1).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
             almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
@@ -116,7 +123,7 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             Context context = container.getContext();
 
-            ALMViewGroup almLayout = new ALMViewGroup(context);
+            ALMLayout almLayout = new ALMLayout(context);
             XTab left = almLayout.getLeftTab();
             YTab top = almLayout.getTopTab();
             XTab right = almLayout.getRightTab();
@@ -139,11 +146,11 @@ public class MainActivity extends ActionBarActivity {
             Button buttonMiddle = new Button(context);
             buttonMiddle.setText("Middle");
 
-            almLayout.addView(button1, new ALMViewGroup.LayoutParams(left, top, x2, y1));
-            almLayout.addView(button2, new ALMViewGroup.LayoutParams(x2, top, right, y2));
-            almLayout.addView(button3, new ALMViewGroup.LayoutParams(x1, y2, right, bottom));
-            almLayout.addView(button4, new ALMViewGroup.LayoutParams(left, y1, x1, bottom));
-            almLayout.addView(buttonMiddle, new ALMViewGroup.LayoutParams(x1, y1, x2, y2));
+            almLayout.addView(button1, new ALMLayout.LayoutParams(left, top, x2, y1));
+            almLayout.addView(button2, new ALMLayout.LayoutParams(x2, top, right, y2));
+            almLayout.addView(button3, new ALMLayout.LayoutParams(x1, y2, right, bottom));
+            almLayout.addView(button4, new ALMLayout.LayoutParams(left, y1, x1, bottom));
+            almLayout.addView(buttonMiddle, new ALMLayout.LayoutParams(x1, y1, x2, y2));
 
             almLayout.areaOf(button1).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
             almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
