@@ -1,6 +1,8 @@
 package nz.ac.auckland.alm.android.test;
 
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -26,11 +28,10 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new ThreeButtonsFragment())
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -46,27 +47,35 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_three_buttons) {
+            setFragment(new ThreeButtonsFragment());
+            return true;
+        }
+
+        if (id == R.id.action_pin_wheel) {
+            setFragment(new PinWheelFragment());
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
+    private void setFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
 
-        public PlaceholderFragment() {
+    public static class ThreeButtonsFragment extends Fragment {
+
+        public ThreeButtonsFragment() {
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            //View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
             Context context = container.getContext();
 
             ALMViewGroup almLayout = new ALMViewGroup(context);
@@ -92,6 +101,55 @@ public class MainActivity extends ActionBarActivity {
             almLayout.areaOf(button1).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
             almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
             almLayout.areaOf(button3).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+
+            return almLayout;
+        }
+    }
+
+    public static class PinWheelFragment extends Fragment {
+
+        public PinWheelFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            Context context = container.getContext();
+
+            ALMViewGroup almLayout = new ALMViewGroup(context);
+            XTab left = almLayout.getLeftTab();
+            YTab top = almLayout.getTopTab();
+            XTab right = almLayout.getRightTab();
+            YTab bottom = almLayout.getBottomTab();
+
+            XTab x1 = almLayout.addXTab();
+            XTab x2 = almLayout.addXTab();
+
+            YTab y1 = almLayout.addYTab();
+            YTab y2 = almLayout.addYTab();
+
+            Button button1 = new Button(context);
+            button1.setText("Button 1");
+            Button button2 = new Button(context);
+            button2.setText("Button 2");
+            Button button3 = new Button(context);
+            button3.setText("Button 3");
+            Button button4 = new Button(context);
+            button4.setText("Button 4");
+            Button buttonMiddle = new Button(context);
+            buttonMiddle.setText("Middle");
+
+            almLayout.addView(button1, new ALMViewGroup.LayoutParams(left, top, x2, y1));
+            almLayout.addView(button2, new ALMViewGroup.LayoutParams(x2, top, right, y2));
+            almLayout.addView(button3, new ALMViewGroup.LayoutParams(x1, y2, right, bottom));
+            almLayout.addView(button4, new ALMViewGroup.LayoutParams(left, y1, x1, bottom));
+            almLayout.addView(buttonMiddle, new ALMViewGroup.LayoutParams(x1, y1, x2, y2));
+
+            almLayout.areaOf(button1).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+            almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+            almLayout.areaOf(button3).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+            almLayout.areaOf(button4).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+            almLayout.areaOf(buttonMiddle).setAlignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER);
 
             return almLayout;
         }
