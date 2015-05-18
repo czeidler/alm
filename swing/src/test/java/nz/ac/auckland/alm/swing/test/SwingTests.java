@@ -39,6 +39,7 @@ public class SwingTests {
         almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
         almLayout.areaOf(button3).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
 
+        dialog.setMinimumSize(almLayout.minimumLayoutSize(dialog));
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
@@ -48,7 +49,6 @@ public class SwingTests {
         JDialog dialog = new JDialog();
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
-
 
         XTab left = almLayout.getLeft();
         YTab top = almLayout.getTop();
@@ -79,6 +79,7 @@ public class SwingTests {
         almLayout.areaOf(button4).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
         almLayout.areaOf(buttonMiddle).setAlignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER);
 
+        dialog.setMinimumSize(almLayout.minimumLayoutSize(dialog));
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);

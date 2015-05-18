@@ -3,7 +3,6 @@ package nz.ac.auckland.alm.swing;
 import nz.ac.auckland.alm.*;
 import nz.ac.auckland.linsolve.AbstractLinearSolver;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.Dimension;
 import java.util.*;
