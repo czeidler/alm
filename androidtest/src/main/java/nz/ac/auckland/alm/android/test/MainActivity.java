@@ -1,0 +1,99 @@
+package nz.ac.auckland.alm.android.test;
+
+import android.content.Context;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.Fragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+
+import android.widget.Button;
+import nz.ac.auckland.alm.HorizontalAlignment;
+import nz.ac.auckland.alm.VerticalAlignment;
+import nz.ac.auckland.alm.XTab;
+import nz.ac.auckland.alm.YTab;
+import nz.ac.auckland.alm.android.ALMViewGroup;
+
+
+public class MainActivity extends ActionBarActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, new PlaceholderFragment())
+                    .commit();
+        }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    public static class PlaceholderFragment extends Fragment {
+
+        public PlaceholderFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            //View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+            Context context = container.getContext();
+
+            ALMViewGroup almLayout = new ALMViewGroup(context);
+            XTab left = almLayout.getLeftTab();
+            YTab top = almLayout.getTopTab();
+            XTab right = almLayout.getRightTab();
+            YTab bottom = almLayout.getBottomTab();
+
+            XTab x1 = almLayout.addXTab();
+            XTab x2 = almLayout.addXTab();
+
+            Button button1 = new Button(context);
+            button1.setText("Button 1");
+            Button button2 = new Button(context);
+            button2.setText("Button 2");
+            Button button3 = new Button(context);
+            button3.setText("Button 3");
+
+            almLayout.addView(button1, new ALMViewGroup.LayoutParams(left, top, x1, bottom));
+            almLayout.addView(button2, new ALMViewGroup.LayoutParams(x1, top, x2, bottom));
+            almLayout.addView(button3, new ALMViewGroup.LayoutParams(x2, top, right, bottom));
+
+            almLayout.areaOf(button1).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+            almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+            almLayout.areaOf(button3).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+
+            return almLayout;
+        }
+    }
+}

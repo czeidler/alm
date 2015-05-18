@@ -1,5 +1,8 @@
+include ':androidtest', ':androidtest'
 rootProject.name = 'ALM'
 
 include 'alm'
-include 'app'
+include 'android'
+include 'androidtest'
 include 'swing'
+
