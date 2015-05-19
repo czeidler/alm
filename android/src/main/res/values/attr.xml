@@ -5,5 +5,21 @@
         <attr name="layout_below" format="reference" />
         <attr name="layout_toRightOf" format="reference" />
         <attr name="layout_above" format="reference" />
+        <attr name="layout_leftTab" format="string" />
+        <attr name="layout_topTab" format="string" />
+        <attr name="layout_rightTab" format="string" />
+        <attr name="layout_bottomTab" format="string" />
+        <attr name="layout_horizontal_alignment" format="enum">
+            <enum name="left" value="1"/>
+            <enum name="right" value="2"/>
+            <enum name="center" value="3"/>
+            <enum name="fill" value="4"/>
+        </attr>
+        <attr name="layout_vertical_alignment" format="enum">
+            <enum name="top" value="1"/>
+            <enum name="bottom" value="2"/>
+            <enum name="center" value="3"/>
+            <enum name="fill" value="4"/>
+        </attr>
     </declare-styleable>
 </resources>

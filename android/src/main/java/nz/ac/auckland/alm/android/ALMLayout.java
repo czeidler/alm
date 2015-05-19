@@ -11,34 +11,118 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import nz.ac.auckland.alm.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class ALMLayout extends ViewGroup {
+    public final static int LEFT = 1;
+    public final static int RIGHT = 2;
+    public final static int TOP = 1;
+    public final static int BOTTOM = 2;
+    public final static int CENTER = 3;
+    public final static int FILL = 4;
+
+    /**
+     * Per-child layout information associated with ALMLayout.
+     *
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_toLeftOf
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_below
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_toRightOf
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_above
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_leftTab
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_topTab
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_rightTab
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_bottomTab
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_horizontal_alignment
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_vertical_alignment
+     */
     static public class LayoutParams extends ViewGroup.LayoutParams {
-        public XTab left;
-        public YTab top;
-        public XTab right;
-        public YTab bottom;
+        public AreaRef areaRef = new AreaRef();
 
         public LayoutParams(Context context, AttributeSet attrs) {
             super(context, attrs);
 
             TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ALMLayout_Layout);
-            for (int i = 0; i < a.getIndexCount(); i++) {
+            final int n = a.getIndexCount();
+            for (int i = 0; i < n; i++) {
                 int attr = a.getIndex(i);
                 switch (attr) {
                     case R.styleable.ALMLayout_Layout_layout_toLeftOf:
+                        areaRef.right.setTo(a.getResourceId(attr, 0));
                         break;
                     case R.styleable.ALMLayout_Layout_layout_below:
+                        areaRef.top.setTo(a.getResourceId(attr, 0));
                         break;
                     case R.styleable.ALMLayout_Layout_layout_toRightOf:
+                        areaRef.left.setTo(a.getResourceId(attr, 0));
                         break;
                     case R.styleable.ALMLayout_Layout_layout_above:
+                        areaRef.bottom.setTo(a.getResourceId(attr, 0));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_leftTab:
+                        areaRef.left.setTo(a.getString(attr));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_topTab:
+                        areaRef.top.setTo(a.getString(attr));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_rightTab:
+                        areaRef.right.setTo(a.getString(attr));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_bottomTab:
+                        areaRef.bottom.setTo(a.getString(attr));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_horizontal_alignment:
+                        switch (a.getInteger(attr, 0)) {
+                            case LEFT:
+                                areaRef.horizontalAlignment = HorizontalAlignment.LEFT;
+                                break;
+                            case RIGHT:
+                                areaRef.horizontalAlignment = HorizontalAlignment.RIGHT;
+                                break;
+                            case CENTER:
+                                areaRef.horizontalAlignment = HorizontalAlignment.CENTER;
+                                break;
+                            case FILL:
+                                areaRef.horizontalAlignment = HorizontalAlignment.FILL;
+                                break;
+                        }
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_vertical_alignment:
+                        switch (a.getInteger(attr, 0)) {
+                            case TOP:
+                                areaRef.verticalAlignment = VerticalAlignment.TOP;
+                                break;
+                            case BOTTOM:
+                                areaRef.verticalAlignment = VerticalAlignment.BOTTOM;
+                                break;
+                            case CENTER:
+                                areaRef.verticalAlignment = VerticalAlignment.CENTER;
+                                break;
+                            case FILL:
+                                areaRef.verticalAlignment = VerticalAlignment.FILL;
+                                break;
+                        }
+                        break;
+                }
+            }
+            a.recycle();
+
+            int[] attrsArray = new int[] {
+                    android.R.attr.id, // 0
+            };
+            a = context.obtainStyledAttributes(attrs, attrsArray);
+            for (int i = 0; i < a.getIndexCount(); i++) {
+                int attr = a.getIndex(i);
+                switch (attr) {
+                    case 0:
+                        areaRef.id = a.getResourceId(attr, -1);
                         break;
                 }
             }
@@ -47,21 +131,25 @@ public class ALMLayout extends ViewGroup {
 
         public LayoutParams(XTab left, YTab top, XTab right, YTab bottom) {
             super(WRAP_CONTENT, WRAP_CONTENT);
-            this.left = left;
-            this.top = top;
-            this.right = right;
-            this.bottom = bottom;
+
+            init(left, top, right, bottom);
         }
 
         public LayoutParams(int width, int height, XTab left, YTab top, XTab right, YTab bottom) {
             super(width, height);
-            this.left = left;
-            this.top = top;
-            this.right = right;
-            this.bottom = bottom;
+
+            init(left, top, right, bottom);
+        }
+
+        private void init(XTab left, YTab top, XTab right, YTab bottom) {
+            areaRef.left.setTo(left);
+            areaRef.top.setTo(top);
+            areaRef.right.setTo(right);
+            areaRef.bottom.setTo(bottom);
         }
     }
 
+    boolean layoutSpecsNeedRebuild = true;
     final LayoutSpec layoutSpec = new LayoutSpec();
     final Map<View, Area> areaMap = new HashMap<View, Area>();
 
@@ -84,6 +172,9 @@ public class ALMLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (layoutSpecsNeedRebuild)
+            rebuildLayoutSpecs();
+
         layoutSpec.setRight(getWidth());
         layoutSpec.setBottom(getHeight());
 
@@ -101,18 +192,7 @@ public class ALMLayout extends ViewGroup {
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         super.addView(child, index, params);
 
-        if (!(params instanceof LayoutParams))
-            throw new RuntimeException();
-
-        LayoutParams constraintParams = (LayoutParams)params;
-        Area area = layoutSpec.addArea(constraintParams.left, constraintParams.top, constraintParams.right,
-                constraintParams.bottom);
-
-        area.setMinSize(getMinimumSize(child));
-        area.setPreferredSize(getPreferredSize(child));
-        area.setMaxSize(getMaximumSize(child));
-
-        areaMap.put(child, area);
+        layoutSpecsNeedRebuild = true;
     }
 
     @Override
@@ -128,6 +208,41 @@ public class ALMLayout extends ViewGroup {
     @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(getLeftTab(), getTopTab(), getRightTab(), getBottomTab());
+    }
+
+    private void rebuildLayoutSpecs() {
+        layoutSpecsNeedRebuild = false;
+        layoutSpec.clear();
+        areaMap.clear();
+
+        List<AreaRef> areaRefList = new ArrayList<>();
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            LayoutParams params = (LayoutParams)child.getLayoutParams();
+            areaRefList.add(params.areaRef);
+        }
+        LayoutBuilder.resolveToTabs(areaRefList, layoutSpec);
+
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            LayoutParams params = (LayoutParams)child.getLayoutParams();
+            AreaRef areaRef = params.areaRef;
+
+            Area area = layoutSpec.addArea((XTab)areaRef.left.relation, (YTab)areaRef.top.relation,
+                    (XTab)areaRef.right.relation, (YTab)areaRef.bottom.relation);
+
+            area.setMinSize(getMinimumSize(child));
+            area.setPreferredSize(getPreferredSize(child));
+            area.setMaxSize(getMaximumSize(child));
+
+            if (child.getLayoutParams().width == LayoutParams.MATCH_PARENT)
+                areaRef.horizontalAlignment = HorizontalAlignment.FILL;
+            if (child.getLayoutParams().height == LayoutParams.MATCH_PARENT)
+                areaRef.verticalAlignment = VerticalAlignment.FILL;
+            area.setAlignment(areaRef.horizontalAlignment, areaRef.verticalAlignment);
+
+            areaMap.put(child, area);
+        }
     }
 
     /**
@@ -156,6 +271,8 @@ public class ALMLayout extends ViewGroup {
      * @return the area that contains the control
      */
     public Area areaOf(View view) {
+        if (layoutSpecsNeedRebuild)
+            rebuildLayoutSpecs();
         return areaMap.get(view);
     }
 
@@ -170,6 +287,7 @@ public class ALMLayout extends ViewGroup {
     }
 
     private Area.Size getMaximumSize(View view) {
+        //if (getWidth() == LayoutParams.MATCH_PARENT || getHeight())
         return getPreferredSize(view);
     }
 
