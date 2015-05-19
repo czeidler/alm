@@ -36,39 +36,10 @@ public class LayoutSpec extends LinearSpec {
      */
     private YTab bottom;
 
-    /**
-     * X-tab for the left border.
-     * The difference between the left tab and this tab is the thickness of the border
-     */
-    private XTab leftInset;
-    /**
-     * X-tab for the right border.
-     * The difference between the right tab and this tab is the thickness of the border
-     */
-    private XTab rightInset;
-    /**
-     * Y-tab for the top border.
-     * The difference between the top tab and this tab is the thickness of the border
-     */
-    private YTab topInset;
-    /**
-     * Y-tab for the bottom border.
-     * The difference between the bottom tab and this tab is the thickness of the border
-     */
-    private YTab bottomInset;
-
     private Constraint rightConstraint;
     private Constraint bottomConstraint;
     private Constraint leftConstraint;
     private Constraint topConstraint;
-
-    /**
-     * Constraints for the insets (borders), if no border is set, the inset tabs will match the left/top/right/bottom tabs.
-     */
-    private Constraint rightInsetConstraint;
-    private Constraint bottomInsetConstraint;
-    private Constraint leftInsetConstraint;
-    private Constraint topInsetConstraint;
 
     /** Creates a new, empty layout specification containing only four tabstops left, right, top, bottom for the layout
      * boundaries. */
@@ -98,23 +69,9 @@ public class LayoutSpec extends LinearSpec {
         bottom = new YTab(this);
         bottom.setName("bottom");
 
-        //Create the Tabs defining where the borders end.
-        leftInset = new XTab(this);
-        leftInset.setName("left inset");
-        topInset = new YTab(this);
-        topInset.setName("top inset");
-        rightInset = new XTab(this);
-        rightInset.setName("right inset");
-        bottomInset = new YTab(this);
-        bottomInset.setName("bottom inset");
-
         //Set Default Constraints
         leftConstraint = addConstraint(1, left, OperatorType.EQ, 0, Penalties.LEFT);
         topConstraint = addConstraint(1, top, OperatorType.EQ, 0, Penalties.TOP);
-        leftInsetConstraint = addConstraint(1, leftInset, -1, left, OperatorType.EQ, 0, Penalties.LEFT_INSET);
-        topInsetConstraint = addConstraint(1, topInset, -1, top, OperatorType.EQ, 0, Penalties.TOP_INSET);
-        rightInsetConstraint = addConstraint(1, right, -1, rightInset, OperatorType.EQ, 0, Penalties.RIGHT_INSET);
-        bottomInsetConstraint = addConstraint(1, bottom, -1, bottomInset, OperatorType.EQ, 0, Penalties.BOTTOM_INSET);
     }
 
     /**
@@ -170,69 +127,6 @@ public class LayoutSpec extends LinearSpec {
         right = rig;
     }
 
-    /**
-     * Sets the constraints which govern the border end tabs.
-     *
-     * @param left The left borders present on the container managed by ALM.
-     * @param top The top borders present on the container managed by ALM.
-     * @param right The right borders present on the container managed by ALM.
-     * @param bottom The bottom borders present on the container managed by ALM.
-     */
-    public void setInsetConstraints(int left, int top, int right, int bottom) {
-        if (left != leftInsetConstraint.getRightSide()
-                || top != topInsetConstraint.getRightSide()
-                || right != rightInsetConstraint.getRightSide()
-                || bottom != bottomInsetConstraint.getRightSide()) {
-
-            leftInsetConstraint.setRightSide(left);
-            topInsetConstraint.setRightSide(top);
-            rightInsetConstraint.setRightSide(right);
-            bottomInsetConstraint.setRightSide(bottom);
-
-            invalidateLayout();
-        }
-    }
-
-    /**
-     * Sets the constraint which governs the left border end tab.
-     *
-     * @param left double which defines the X-Tab
-     */
-    public void setLeftInset(double left) {
-        invalidateLayout();
-        leftInsetConstraint.setRightSide(left);
-    }
-
-    /**
-     * Sets the constraint which governs the right border end tab.
-     *
-     * @param right double which defines the X-Tab
-     */
-    public void setRightInset(double right) {
-        invalidateLayout();
-        rightInsetConstraint.setRightSide(right);
-    }
-
-    /**
-     * Sets the constraint which governs the top border end tab.
-     *
-     * @param top double which defines the Y-Tab
-     */
-    public void setTopInset(double top) {
-        invalidateLayout();
-        topInsetConstraint.setRightSide(top);
-    }
-
-    /**
-     * Sets the constraint which governs the bottom border end tab.
-     *
-     * @param bottom double which defines the Y-Tab
-     */
-    public void setBottomInset(double bottom) {
-        invalidateLayout();
-        bottomInsetConstraint.setRightSide(bottom);
-    }
-	
     /**
      * Solve the linear equation with LinearSpec.
      */
@@ -569,6 +463,14 @@ public class LayoutSpec extends LinearSpec {
     }
 
     /**
+     * Removes all Areas from the layout.
+     */
+    public void clear() {
+        while (areas.size() > 0)
+            areas.get(0).remove();
+    }
+
+    /**
      * Get the areas that were added to the specification.
      *
      * @return the areas that were added to the specification.
@@ -629,42 +531,6 @@ public class LayoutSpec extends LinearSpec {
      */
     public YTab getBottom() {
         return bottom;
-    }
-
-    /**
-     * Get the X-tab for the left border of the GUI.
-     *
-     * @return the x-tab.
-     */
-    public XTab getLeftInset() {
-        return leftInset;
-    }
-
-    /**
-     * Get the X-tab for the right border of the GUI.
-     *
-     * @return the x-tab.
-     */
-    public XTab getRightInset() {
-        return rightInset;
-    }
-
-    /**
-     * Get the Y-tab for the top border of the GUI.
-     *
-     * @return the y-tab.
-     */
-    public YTab getTopInset() {
-        return topInset;
-    }
-
-    /**
-     * Get the Y-tab for the top border of the GUI.
-     *
-     * @return the y-tab.
-     */
-    public YTab getBottomInset() {
-        return bottomInset;
     }
 
     /**
