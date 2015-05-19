@@ -64,6 +64,16 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
 
+        if (id == R.id.action_pin_wheel_xml) {
+            setFragment(new XMLFragment(R.layout.pin_wheel));
+            return true;
+        }
+
+        if (id == R.id.action_pin_wheel_tabs_xml) {
+            setFragment(new XMLFragment(R.layout.pin_wheel_tabs));
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -76,7 +86,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public static class ThreeButtonsFragment extends Fragment {
-
         public ThreeButtonsFragment() {
         }
 
@@ -114,7 +123,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public static class PinWheelFragment extends Fragment {
-
         public PinWheelFragment() {
         }
 
@@ -159,6 +167,20 @@ public class MainActivity extends ActionBarActivity {
             almLayout.areaOf(buttonMiddle).setAlignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER);
 
             return almLayout;
+        }
+    }
+
+    public static class XMLFragment extends Fragment {
+        int resourceId;
+
+        public XMLFragment(int resourceId) {
+            this.resourceId = resourceId;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            return inflater.inflate(resourceId, container, false);
         }
     }
 }

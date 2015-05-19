@@ -2,4 +2,6 @@
     <string name="app_name">ALM Test</string>
     <string name="action_three_buttons">Three Buttons</string>
     <string name="action_pin_wheel">Pin Wheel</string>
+    <string name="action_pin_wheel_xml">Pin Wheel XML</string>
+    <string name="action_pin_wheel_tabs_xml">Pin Wheel Tabs XML</string>
 </resources>
