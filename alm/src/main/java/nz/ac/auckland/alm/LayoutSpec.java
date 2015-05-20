@@ -9,46 +9,51 @@ import java.util.List;
 /**
  * Layout specification.
  */
-public class LayoutSpec extends LinearSpec {
+public class LayoutSpec {
+    final LinearSpec linearSpec;
     /**
      * The areas that were added to the specification.
      */
-    private List<Area> areas = new ArrayList<Area>();
+    final List<Area> areas = new ArrayList<Area>();
 
-    private List<Row> rows = new ArrayList<Row>();
+    final List<Row> rows = new ArrayList<Row>();
 
-    private List<Column> columns = new ArrayList<Column>();
+    final List<Column> columns = new ArrayList<Column>();
 
     /**
      * X-tab for the left of the GUI.
      */
-    private XTab left;
+    XTab left;
+
     /**
      * X-tab for the right of the GUI.
      */
-    private XTab right;
+    XTab right;
 
-    /** Y-tab for the top of the GUI. */
-    private YTab top;
+    /**
+     * Y-tab for the top of the GUI.
+     */
+    YTab top;
 
     /**
      * Y-tab for the bottom of the GUI.
      */
-    private YTab bottom;
+    YTab bottom;
 
-    private Constraint rightConstraint;
-    private Constraint bottomConstraint;
-    private Constraint leftConstraint;
-    private Constraint topConstraint;
+    Constraint rightConstraint;
+    Constraint bottomConstraint;
+    Constraint leftConstraint;
+    Constraint topConstraint;
+
+    final List<Constraint> customConstraints = new ArrayList<>();
 
     /** Creates a new, empty layout specification containing only four tabstops left, right, top, bottom for the layout
      * boundaries. */
     public LayoutSpec() {
         //this(new AddingSoftSolver(new KaczmarzSolver()));
         this(new GroupingSoftSolver(new KaczmarzSolver()));
-        //this(new LpSolve());
+        //this(new GroupingSoftSolver(new KaczmarzLeastSquares()));
         //this(new AddingSoftSolver(new GaussSeidelSolver(new DeterministicPivotSummandSelector(), 500)));
-        //this(new MatlabLinProgSolver());
     }
 
     /**
@@ -57,21 +62,50 @@ public class LayoutSpec extends LinearSpec {
      * @param solver the Linear Solver that defines the LayoutSpec
      */
     public LayoutSpec(LinearSolver solver) {
-        super(solver);
+        linearSpec = new LinearSpec(solver);
 
         //Create the Tabs defining the edge of the layout.
-        left = new XTab(this);
+        left = new XTab(linearSpec);
         left.setName("left");
-        top = new YTab(this);
+        top = new YTab(linearSpec);
         top.setName("top");
-        right = new XTab(this);
+        right = new XTab(linearSpec);
         right.setName("right");
-        bottom = new YTab(this);
+        bottom = new YTab(linearSpec);
         bottom.setName("bottom");
 
         //Set Default Constraints
-        leftConstraint = addConstraint(1, left, OperatorType.EQ, 0, Penalties.LEFT);
-        topConstraint = addConstraint(1, top, OperatorType.EQ, 0, Penalties.TOP);
+        leftConstraint = linearSpec.addConstraint(1, left, OperatorType.EQ, 0, Penalties.LEFT);
+        topConstraint = linearSpec.addConstraint(1, top, OperatorType.EQ, 0, Penalties.TOP);
+    }
+
+    public void release() {
+        clear();
+
+        for (Constraint constraint : customConstraints)
+            linearSpec.removeConstraint(constraint);
+        customConstraints.clear();
+
+        // clean internal constraints and variables
+        linearSpec.removeConstraint(rightConstraint);
+        linearSpec.removeConstraint(bottomConstraint);
+        linearSpec.removeConstraint(leftConstraint);
+        linearSpec.removeConstraint(topConstraint);
+
+        leftConstraint = null;
+        topConstraint = null;
+        rightConstraint = null;
+        bottomConstraint = null;
+
+        linearSpec.removeVariable(left);
+        linearSpec.removeVariable(top);
+        linearSpec.removeVariable(right);
+        linearSpec.removeVariable(bottom);
+
+        left = null;
+        top = null;
+        right = null;
+        bottom = null;
     }
 
     /**
@@ -80,8 +114,8 @@ public class LayoutSpec extends LinearSpec {
      * @param r double which defines the X-tab
      */
     public void setRight(double r) {
-        if (rightConstraint == null || !constraints.contains(rightConstraint))
-            rightConstraint = addConstraint(1, right, OperatorType.EQ, r);
+        if (rightConstraint == null || !linearSpec.getConstraints().contains(rightConstraint))
+            rightConstraint = linearSpec.addConstraint(1, right, OperatorType.EQ, r);
         else
             rightConstraint.setRightSide(r);
     }
@@ -92,8 +126,8 @@ public class LayoutSpec extends LinearSpec {
      * @param b double which defines the Y-tab
      */
     public void setBottom(double b) {
-        if (bottomConstraint == null || !constraints.contains(bottomConstraint))
-            bottomConstraint = addConstraint(1, bottom, OperatorType.EQ, b);
+        if (bottomConstraint == null || !linearSpec.getConstraints().contains(bottomConstraint))
+            bottomConstraint = linearSpec.addConstraint(1, bottom, OperatorType.EQ, b);
         else
             bottomConstraint.setRightSide(b);
     }
@@ -130,9 +164,8 @@ public class LayoutSpec extends LinearSpec {
     /**
      * Solve the linear equation with LinearSpec.
      */
-    @Override
-    public void solve() {
-        super.solve();
+    public ResultType solve() {
+        return linearSpec.solve();
     }
 
     // cached layout values
@@ -260,14 +293,14 @@ public class LayoutSpec extends LinearSpec {
         //Remove the constraints from the specification once the values are stored.
         if (rightConstraint != null) {
             rightValue = rightConstraint.getRightSide();
-            removeConstraint(rightConstraint);
+            linearSpec.removeConstraint(rightConstraint);
             rightConstraint = null;
 
         }
 
         if (bottomConstraint != null) {
             bottomValue = bottomConstraint.getRightSide();
-            removeConstraint(bottomConstraint);
+            linearSpec.removeConstraint(bottomConstraint);
             bottomConstraint = null;
 
         }
@@ -303,7 +336,7 @@ public class LayoutSpec extends LinearSpec {
      * @return the new x-tab
      */
     public XTab addXTab() {
-        return new XTab(this);
+        return new XTab(linearSpec);
     }
 
     /**
@@ -313,7 +346,7 @@ public class LayoutSpec extends LinearSpec {
      * @return the new x-tab
      */
     public XTab addXTab(String name) {
-        XTab x = new XTab(this);
+        XTab x = addXTab();
         x.setName(name);
         return x;
     }
@@ -324,7 +357,7 @@ public class LayoutSpec extends LinearSpec {
      * @return the new y-tab
      */
     public YTab addYTab() {
-        return new YTab(this);
+        return new YTab(linearSpec);
     }
 
     /**
@@ -334,7 +367,7 @@ public class LayoutSpec extends LinearSpec {
      * @return the new y-tab
      */
     public YTab addYTab(String name) {
-        YTab y = new YTab(this);
+        YTab y = addYTab();
         y.setName(name);
         return y;
     }

@@ -246,7 +246,7 @@ public class Row {
 	* @param value double that will be used to setup the height constraint
 	*/
 	public void setHeight(double value) {
-		Constraint c = ls.addConstraint(-1, top, 1, bottom, OperatorType.EQ,
+		Constraint c = ls.linearSpec.addConstraint(-1, top, 1, bottom, OperatorType.EQ,
 				value);
 		c.Owner = this;
 		constraints.add(c);
@@ -288,7 +288,7 @@ public class Row {
 	 * @return the resulting same-height constraint
 	 */
 	public Constraint hasSameHeightAs(Row row) {
-		Constraint c = ls.addConstraint(-1, top, 1, bottom, 1, row.top, -1,
+		Constraint c = ls.linearSpec.addConstraint(-1, top, 1, bottom, 1, row.top, -1,
 				row.bottom, OperatorType.EQ, 0);
 		c.Owner = this;
 		constraints.add(c);
@@ -316,7 +316,7 @@ public class Row {
      * @return the resulting same-height constraint
      */
 	public Constraint hasSameHeightAs(Row row, int value) throws Exception {
-		Constraint c = ls.addConstraint(-(value), top, value, bottom, 1,
+		Constraint c = ls.linearSpec.addConstraint(-(value), top, value, bottom, 1,
 				row.top, -1, row.bottom, OperatorType.EQ, 0);
 		c.Owner = this;
 		constraints.add(c);
@@ -329,8 +329,8 @@ public class Row {
 	 */
 	protected Row(LayoutSpec ls) {
 		this.ls = ls;
-		top = new YTab(ls);
-		bottom = new YTab(ls);
+		top = ls.addYTab();
+		bottom = ls.addYTab();
 	}
 	/**
 	 * Constructor for class <code>Row</code>.
@@ -355,7 +355,7 @@ public class Row {
 		if (previous != null) {
 			previous = null;
 		}
-		Constraint c = ls.addConstraint(1.0, this.top, -1.0, ls.getTop(),
+		Constraint c = ls.linearSpec.addConstraint(1.0, this.top, -1.0, ls.getTop(),
 				OperatorType.EQ, 0);
 		constraints.add(c);
 		c.Owner = this;
@@ -375,7 +375,7 @@ public class Row {
 		if (previous != null) {
 			previous = null;
 		}
-		Constraint c = ls.addConstraint(1.0, this.top, OperatorType.EQ, value);
+		Constraint c = ls.linearSpec.addConstraint(1.0, this.top, OperatorType.EQ, value);
 		constraints.add(c);
 		c.Owner = this;
 		return c;
@@ -441,7 +441,7 @@ public class Row {
 		if (next != null) {
 			next = null;
 		}
-		Constraint c = ls.addConstraint(1.0, this.bottom, -1.0, ls.getBottom(),
+		Constraint c = ls.linearSpec.addConstraint(1.0, this.bottom, -1.0, ls.getBottom(),
 				OperatorType.EQ, 0);
 		constraints.add(c);
 
@@ -463,7 +463,7 @@ public class Row {
 
 		// Constraint c = ls.addConstraint(1.0, this.bottom, -1.0,
 		// ls.getBottom(), OperatorType.EQ, 0);
-		Constraint c = ls.addConstraint(1.0, this.bottom, OperatorType.EQ,
+		Constraint c = ls.linearSpec.addConstraint(1.0, this.bottom, OperatorType.EQ,
 				value);
 		constraints.add(c);
 		return c;

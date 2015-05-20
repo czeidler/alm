@@ -92,7 +92,7 @@ public class Column {
 	* @param value the desired width in double.
 	*/
 	public void setWidth(double value) {
-		Constraint c = ls.addConstraint(1.0, this.right, -1.0, this.left,
+		Constraint c = ls.linearSpec.addConstraint(1.0, this.right, -1.0, this.left,
 				OperatorType.EQ, value);
 		c.Owner = this;
 		constraints.add(c);
@@ -139,7 +139,7 @@ public class Column {
 		if (previous != null) {
 			previous = null;
 		}
-		Constraint c = ls.addConstraint(1.0, this.left, OperatorType.EQ, value);
+		Constraint c = ls.linearSpec.addConstraint(1.0, this.left, OperatorType.EQ, value);
 		c.Owner = this;
 		constraints.add(c);
 	}
@@ -285,7 +285,7 @@ public class Column {
 	 * @return the resulting same-width constraint
 	 */
 	public Constraint hasSameWidthAs(Column column) {
-		Constraint c = ls.addConstraint(-1, left, 1, right, 1, column.left, -1,
+		Constraint c = ls.linearSpec.addConstraint(-1, left, 1, right, 1, column.left, -1,
 				column.right, OperatorType.EQ, 0);
 		c.Owner = this;
 		constraints.add(c);
@@ -297,8 +297,8 @@ public class Column {
 	*/
 	protected Column(LayoutSpec ls) {
 		this.ls = ls;
-		left = new XTab(ls);
-		right = new XTab(ls);
+		left = ls.addXTab();
+		right = ls.addXTab();
 	}
 	/**
 	* Detach the column from the list of columns, This column will not appear after it is removed.
@@ -324,7 +324,7 @@ public class Column {
 		if (next != null) {
 			next = null;
 		}
-		Constraint c = ls
+		Constraint c = ls.linearSpec
 				.addConstraint(1.0, this.right, OperatorType.EQ, value);
 		c.Owner = this;
 		constraints.add(c);

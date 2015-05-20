@@ -277,8 +277,8 @@ public class LinearSpec {
         Collections.sort(constraints, new ConstraintComparatorByPenalty());
     }
 
-    public void solve() {
-        ResultType result = solver.solve();
+    public ResultType solve() {
+        return solver.solve();
     }
 
     /**

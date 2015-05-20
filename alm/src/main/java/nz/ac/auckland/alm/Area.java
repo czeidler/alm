@@ -254,7 +254,7 @@ public class Area {
 
 		if (maxSize.getWidth() > 0) {
 			if (maxWidthConstraint == null) {
-				maxWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.LE, 0,
+				maxWidthConstraint = ls.linearSpec.addConstraint(-1, left, 1, right, OperatorType.LE, 0,
 						growPenalties.getWidth());
 				maxWidthConstraint.Owner = this;
 				constraints.add(maxWidthConstraint);
@@ -267,7 +267,7 @@ public class Area {
 
 		if (maxSize.getHeight() > 0) {
 			if (maxHeightConstraint == null) {
-				maxHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.LE, 0,
+				maxHeightConstraint = ls.linearSpec.addConstraint(-1, top, 1, bottom, OperatorType.LE, 0,
 						growPenalties.getHeight());
 				maxHeightConstraint.Owner = this;
 				constraints.add(maxHeightConstraint);
@@ -304,7 +304,8 @@ public class Area {
 
 		if (preferredSize.getWidth() > 0) {
 			if (preferredWidthConstraint == null) {
-				preferredWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.EQ, 0, shrinkPenaltyWidth);
+				preferredWidthConstraint = ls.linearSpec.addConstraint(-1, left, 1, right, OperatorType.EQ, 0,
+						shrinkPenaltyWidth);
 				preferredWidthConstraint.Owner = this;
 				constraints.add(preferredWidthConstraint);
 			}
@@ -316,7 +317,8 @@ public class Area {
 
 		if (preferredSize.getHeight() > 0) {
 			if (preferredHeightConstraint == null) {
-				preferredHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.EQ, 0, shrinkPenaltyWidth);
+				preferredHeightConstraint = ls.linearSpec.addConstraint(-1, top, 1, bottom, OperatorType.EQ, 0,
+						shrinkPenaltyWidth);
 				preferredHeightConstraint.Owner = this;
 				constraints.add(preferredWidthConstraint);
 			}
@@ -404,8 +406,8 @@ public class Area {
 		aspectRatio = value;
 		if (aspectRatio > 0) {
 			if (aspectRatioConstraint == null) {
-				aspectRatioConstraint = ls.addConstraint(-1, left, 1, right, aspectRatio, top, -aspectRatio, bottom,
-						OperatorType.EQ, 0);
+				aspectRatioConstraint = ls.linearSpec.addConstraint(-1, left, 1, right, aspectRatio, top, -aspectRatio,
+						bottom,	OperatorType.EQ, 0);
 				aspectRatioConstraint.Owner = this;
 				constraints.add(aspectRatioConstraint);
 			} else
@@ -619,11 +621,11 @@ public class Area {
 		// bottom y-tab
 		// TODO: the preferred size constraints need to have a smaller penalty
 		// (not INFINITY as per default)
-		minWidthConstraint = ls.addConstraint(-1, left, 1, right, OperatorType.GE, minSize.getWidth());
+		minWidthConstraint = ls.linearSpec.addConstraint(-1, left, 1, right, OperatorType.GE, minSize.getWidth());
 		minWidthConstraint.Owner = this;
 		minWidthConstraint.setName("minWidthConstraint");
 		constraints.add(minWidthConstraint);
-		minHeightConstraint = ls.addConstraint(-1, top, 1, bottom, OperatorType.GE, minSize.getHeight());
+		minHeightConstraint = ls.linearSpec.addConstraint(-1, top, 1, bottom, OperatorType.GE, minSize.getHeight());
 		minHeightConstraint.Owner = this;
 		minHeightConstraint.setName("minHeightConstraint");
 		constraints.add(minHeightConstraint);
