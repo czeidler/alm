@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.ViewGroup;
 import nz.ac.auckland.alm.*;
 
@@ -281,14 +280,36 @@ public class ALMLayout extends ViewGroup {
     }
 
     private Area.Size getPreferredSize(View view) {
-        view.measure(MeasureSpec.makeMeasureSpec(ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.AT_MOST));
+        view.measure(MeasureSpec.makeMeasureSpec(LayoutParams.WRAP_CONTENT, MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(LayoutParams.WRAP_CONTENT, MeasureSpec.AT_MOST));
         return new Area.Size(view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
     private Area.Size getMaximumSize(View view) {
-        //if (getWidth() == LayoutParams.MATCH_PARENT || getHeight())
-        return getPreferredSize(view);
+        final int LARGE_SIZE = 8000;
+
+        ViewGroup.LayoutParams viewLayoutParams = view.getLayoutParams();
+
+        Area.Size maxSize;
+        if (viewLayoutParams.width == LayoutParams.WRAP_CONTENT
+                || viewLayoutParams.height == LayoutParams.WRAP_CONTENT)
+            maxSize = getPreferredSize(view);
+        else
+            maxSize = new Area.Size(0, 0);
+
+        // max width
+        if (viewLayoutParams.width == LayoutParams.MATCH_PARENT)
+            maxSize.setWidth(LARGE_SIZE);
+        else if (viewLayoutParams.width != LayoutParams.WRAP_CONTENT)
+            maxSize.setWidth(viewLayoutParams.width);
+
+        // max height
+        if (viewLayoutParams.height == LayoutParams.MATCH_PARENT)
+            maxSize.setHeight(LARGE_SIZE);
+        else if (viewLayoutParams.height != LayoutParams.WRAP_CONTENT)
+            maxSize.setHeight(viewLayoutParams.height);
+
+        return maxSize;
     }
 
     /**
