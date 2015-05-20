@@ -14,6 +14,16 @@ public class Area {
 		double width;
 		double height;
 
+		final public static int UNDEFINED = -2;
+
+		public Size() {
+		}
+
+		public Size(Size size) {
+			this.width = size.width;
+			this.height = size.height;
+		}
+
 		public Size(double width, double height) {
 			this.width = width;
 			this.height = height;
@@ -59,20 +69,9 @@ public class Area {
 	}
 
 	/**
-	 * Minimum possible size. Use this if there is no lower bound.
-	 */
-	static Size MIN_SIZE = new Size(0, 0);
-
-	/**
-	 * Maximum possible size. Use this if there is no upper bound.
-	 */
-	static Size MAX_SIZE = new Size(Integer.MAX_VALUE,
-			Integer.MAX_VALUE);
-
-	/**
 	 * Undefined size. Used if a certain size constraint is not set.
 	 */
-	static Size UNDEFINED_SIZE = new Size(-1, -1);
+	static final Size UNDEFINED_SIZE = new Size(Size.UNDEFINED, Size.UNDEFINED);
 
 	/**
 	 * The layout specification this area belongs to.
@@ -91,9 +90,9 @@ public class Area {
 	 */
 	List<Constraint> constraints = new ArrayList<Constraint>();
 
-	Size minSize = MIN_SIZE;
+	Size minSize = new Size(0, 0);
 	Size preferredSize = UNDEFINED_SIZE;
-	Size maxSize = MAX_SIZE;
+	Size maxSize = new Size(Integer.MAX_VALUE, Integer.MAX_VALUE);;
 
 	/**
 	 * Size constraint for the content. Valid even if the content is actually in

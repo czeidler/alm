@@ -47,6 +47,16 @@ public class LayoutSpec {
 
     final List<Constraint> customConstraints = new ArrayList<>();
 
+    // cached layout values
+    // need to be invalidated whenever the layout specification is changed
+    Area.Size minSize = Area.UNDEFINED_SIZE;
+    Area.Size maxSize = Area.UNDEFINED_SIZE;
+    Area.Size preferredSize = Area.UNDEFINED_SIZE;
+    // explicit size values
+    Area.Size explicitMinSize = Area.UNDEFINED_SIZE;
+    Area.Size explicitMaxSize = Area.UNDEFINED_SIZE;
+    Area.Size explicitPreferredSize = Area.UNDEFINED_SIZE;
+
     /** Creates a new, empty layout specification containing only four tabstops left, right, top, bottom for the layout
      * boundaries. */
     public LayoutSpec() {
@@ -168,12 +178,6 @@ public class LayoutSpec {
         return linearSpec.solve();
     }
 
-    // cached layout values
-    // need to be invalidated whenever the layout specification is changed
-    Area.Size minSize = Area.UNDEFINED_SIZE;
-    Area.Size maxSize = Area.UNDEFINED_SIZE;
-    Area.Size preferredSize = Area.UNDEFINED_SIZE;
-
     /**
      * If the layout is solved previously the cached mininum size,
      * maximum size and preferred size are invalidated;
@@ -185,6 +189,15 @@ public class LayoutSpec {
         preferredSize = Area.UNDEFINED_SIZE;
     }
 
+    private Area.Size composeSize(Area.Size explicitSize, Area.Size size) {
+        Area.Size composedSize = new Area.Size(size);
+        if (explicitSize.getWidth() != Area.Size.UNDEFINED)
+            composedSize.setWidth(explicitSize.getWidth());
+        if (explicitSize.getHeight() != Area.Size.UNDEFINED)
+            composedSize.setHeight(explicitSize.getHeight());
+        return composedSize;
+    }
+
     /**
      * Get the cached minimal size of the GUI, if there was none it will be calculated.
      * To invalidate the cache use invalidateLayout().
@@ -192,9 +205,11 @@ public class LayoutSpec {
      * @return Size defining the minimal size of the GUI
      */
     public Area.Size getMinSize() {
+        if (explicitMinSize.getWidth() != Area.Size.UNDEFINED && explicitMinSize.getHeight() != Area.Size.UNDEFINED)
+            return explicitMinSize;
         if (minSize == Area.UNDEFINED_SIZE)
             minSize = calculateMinSize();
-        return minSize;
+        return composeSize(explicitMinSize, minSize);
     }
 
     /**
@@ -204,9 +219,11 @@ public class LayoutSpec {
      * @return Size defining the maximal size of the GUI
      */
     public Area.Size getMaxSize() {
+        if (explicitMaxSize.getWidth() != Area.Size.UNDEFINED && explicitMaxSize.getHeight() != Area.Size.UNDEFINED)
+            return explicitMaxSize;
         if (maxSize == Area.UNDEFINED_SIZE)
             maxSize = calculateMaxSize();
-        return maxSize;
+        return composeSize(explicitMaxSize, maxSize);
     }
 
     /**
@@ -216,9 +233,45 @@ public class LayoutSpec {
      * @return Size defining the preferred size of the GUI
      */
     public Area.Size getPreferredSize() {
+        if (explicitPreferredSize.getWidth() != Area.Size.UNDEFINED
+                && explicitPreferredSize.getHeight() != Area.Size.UNDEFINED)
+            return explicitPreferredSize;
         if (preferredSize == Area.UNDEFINED_SIZE)
             preferredSize = calculatePreferredSize();
-        return preferredSize;
+        return composeSize(explicitPreferredSize, preferredSize);
+    }
+
+    /**
+     * Set explicit layout minimal size.
+     *
+     * This overrides the calculated value.
+     *
+     * @param explicitMinSize The explicit size.
+     */
+    public void setExplicitMinSize(Area.Size explicitMinSize) {
+        this.explicitMinSize = explicitMinSize;
+    }
+
+    /**
+     * Set explicit layout maximal size.
+     *
+     * This overrides the calculated value.
+     *
+     * @param explicitMaxSize The explicit size.
+     */
+    public void setExplicitMaxSize(Area.Size explicitMaxSize) {
+        this.explicitMaxSize = explicitMaxSize;
+    }
+
+    /**
+     * Set explicit layout preferred size.
+     *
+     * This overrides the calculated value.
+     *
+     * @param explicitPreferredSize The explicit size.
+     */
+    public void setExplicitPreferredSize(Area.Size explicitPreferredSize) {
+        this.explicitPreferredSize = explicitPreferredSize;
     }
 
     /**
@@ -564,33 +617,5 @@ public class LayoutSpec {
      */
     public YTab getBottom() {
         return bottom;
-    }
-
-    /**
-     * Set the minimal size of the GUI
-     *
-     * @param minSize defining the minimal size of the GUI
-     */
-    public void setMinSize(Area.Size minSize) {
-        this.minSize = minSize;
-    }
-
-
-    /**
-     * Set the maximal size of the GUI
-     *
-     * @param maxSize defining the maximal size of the GUI
-     */
-    public void setMaxSize(Area.Size maxSize) {
-        this.maxSize = maxSize;
-    }
-
-    /**
-     * Set the preferred size of the GUI
-     *
-     * @param preferredSize defining the preferred size of the GUI
-     */
-    public void setPreferredSize(Area.Size preferredSize) {
-        this.preferredSize = preferredSize;
     }
 }
