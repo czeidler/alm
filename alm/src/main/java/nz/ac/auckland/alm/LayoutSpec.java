@@ -618,4 +618,64 @@ public class LayoutSpec {
     public YTab getBottom() {
         return bottom;
     }
+
+    /**
+     * Creates a new hard constraint with the given values and adds it to the this
+     * <c>LinearSpec</c>.
+     *
+     * @param leftSide the left hand side of the constraint. Consists of all summands
+     * @param operator  the operator type. Can be le, ge or eq
+     * @param rightSide the right hand side of the constraint.
+     */
+    public Constraint addConstraint(Summand[] leftSide, OperatorType operator, double rightSide) {
+        Constraint constraint = linearSpec.addConstraint(leftSide, operator, rightSide, Constraint.MAX_PENALTY);
+        customConstraints.add(constraint);
+        return constraint;
+    }
+
+    /**
+     * Creates a new soft constraint with the given values and adds it to the this
+     * <c>LinearSpec</c>.
+     *
+     * @param leftSide     the left hand side of the constraint. Consists of all summands
+     * @param operator      the operator type. Can be le, ge or eq
+     * @param rightSide     the right hand side of the constraint.
+     * @param penalty the penalty of this soft constraint
+     */
+    public Constraint addConstraint(Summand[] leftSide, OperatorType operator, double rightSide, double penalty) {
+        Constraint constraint = linearSpec.addConstraint(leftSide, operator, rightSide, penalty);
+        customConstraints.add(constraint);
+        return constraint;
+    }
+
+    public boolean removeConstraint(Constraint constraint) {
+        if (!customConstraints.remove(constraint))
+            return false;
+        linearSpec.removeConstraint(constraint);
+        return true;
+    }
+
+    private Summand[] toArray(Summand ... summands) {
+        return summands;
+    }
+
+    public Constraint addConstraint(double coeff1, Variable var1, OperatorType operator, double rightSide) {
+        return addConstraint(toArray(new Summand(coeff1, var1)), operator, rightSide);
+    }
+
+    public Constraint addConstraint(double coeff1, Variable var1, double coeff2, Variable var2, OperatorType operator,
+                                    double rightSide) {
+        return addConstraint(toArray(new Summand(coeff1, var1), new Summand(coeff2, var2)), operator, rightSide);
+    }
+
+    public Constraint addConstraint(double coeff1, Variable var1, OperatorType operator, double rightSide,
+                                    double penalty) {
+        return addConstraint(toArray(new Summand(coeff1, var1)), operator, rightSide, penalty);
+    }
+
+    public Constraint addConstraint(double coeff1, Variable var1, double coeff2, Variable var2, OperatorType operator,
+                                    double rightSide, double penalty) {
+        return addConstraint(toArray(new Summand(coeff1, var1), new Summand(coeff2, var2)), operator, rightSide,
+                penalty);
+    }
 }
