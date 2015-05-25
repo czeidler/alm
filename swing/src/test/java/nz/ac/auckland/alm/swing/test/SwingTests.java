@@ -11,11 +11,37 @@ import nz.ac.auckland.alm.*;
 import nz.ac.auckland.alm.swing.ALMLayout;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SwingTests {
-    static public void testThreeButtons() {
+    List<JDialog> dialogList = new ArrayList<JDialog>();
+
+    private void addDialog(final JDialog dialog) {
+        dialogList.add(dialog);
+
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        dialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+
+                dialogList.remove(dialog);
+                if (dialogList.size() == 0)
+                    System.exit(0);
+            }
+        });
+    }
+
+    public void testThreeButtons() {
         JDialog dialog = new JDialog();
+        addDialog(dialog);
+
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
 
@@ -45,8 +71,10 @@ public class SwingTests {
         dialog.setVisible(true);
     }
 
-    static public void testPinWheel() {
+    public void testPinWheel() {
         JDialog dialog = new JDialog();
+        addDialog(dialog);
+
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
 
@@ -86,7 +114,8 @@ public class SwingTests {
     }
 
     public static void main(String[] args) {
-        testThreeButtons();
-        testPinWheel();
+        SwingTests swingTests = new SwingTests();
+        swingTests.testThreeButtons();
+        swingTests.testPinWheel();
     }
 }
