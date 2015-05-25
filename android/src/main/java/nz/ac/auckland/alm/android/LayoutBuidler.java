@@ -30,6 +30,7 @@ class AreaRef {
             TAB,
             TAB_NAME,
             AREA_ID,
+            ALIGN_AREA_ID,
             UNSET
         }
 
@@ -55,9 +56,14 @@ class AreaRef {
             this.type = Type.TAB_NAME;
         }
 
-        public void setTo(int areaId) {
+        public void setTo(Integer areaId) {
             this.relation = areaId;
             this.type = Type.AREA_ID;
+        }
+
+        public void setAlignTo(Integer areaId) {
+            this.relation = areaId;
+            this.type = Type.ALIGN_AREA_ID;
         }
     }
 }
@@ -163,13 +169,18 @@ class LayoutBuilder {
                 relation.relation = existingTab;
                 relation.type = AreaRef.Relation.Type.TAB;
                 break;
+            case ALIGN_AREA_ID:
             case AREA_ID:
-                AreaRef areaRef = getById(areas, (int)relation.relation);
+                AreaRef areaRef = getById(areas, (Integer)relation.relation);
                 if (areaRef == null)
                     throw new RuntimeException("bad layout specification");
-                AreaRef.Relation opRelation = direction.getOppositeRelation(areaRef);
+                AreaRef.Relation opRelation;
+                if (relation.type == AreaRef.Relation.Type.AREA_ID)
+                    opRelation = direction.getOppositeRelation(areaRef);
+                else
+                    opRelation = direction.getRelation(areaRef);
                 if (opRelation.type == AreaRef.Relation.Type.AREA_ID
-                        && opRelation.relation != area.id)
+                        && (Integer)opRelation.relation != area.id)
                     throw new RuntimeException("bad layout specification");
                 else if (opRelation.type == AreaRef.Relation.Type.TAB)
                     existingTab = (Variable) opRelation.relation;
@@ -185,8 +196,8 @@ class LayoutBuilder {
     }
 
     static public void resolveToTabs(List<AreaRef> areas, LayoutSpec layoutSpec) {
-        Map<String, XTab> namedXTabs = new Hashtable<>();
-        Map<String, YTab> namedYTabs = new Hashtable<>();
+        Map<String, XTab> namedXTabs = new Hashtable<String, XTab>();
+        Map<String, YTab> namedYTabs = new Hashtable<String, YTab>();
 
         for (AreaRef area : areas) {
             resolveToTabs(area, layoutSpec, areas, namedXTabs, new LeftDirection());

@@ -65,6 +65,18 @@ public class ALMLayout extends ViewGroup {
                     case R.styleable.ALMLayout_Layout_layout_above:
                         areaRef.bottom.setTo(a.getResourceId(attr, 0));
                         break;
+                    case R.styleable.ALMLayout_Layout_layout_alignLeft:
+                        areaRef.left.setAlignTo(a.getResourceId(attr, 0));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_alignTop:
+                        areaRef.top.setAlignTo(a.getResourceId(attr, 0));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_alignRight:
+                        areaRef.right.setAlignTo(a.getResourceId(attr, 0));
+                        break;
+                    case R.styleable.ALMLayout_Layout_layout_alignBottom:
+                        areaRef.bottom.setAlignTo(a.getResourceId(attr, 0));
+                        break;
                     case R.styleable.ALMLayout_Layout_layout_leftTab:
                         areaRef.left.setTo(a.getString(attr));
                         break;
@@ -214,7 +226,7 @@ public class ALMLayout extends ViewGroup {
         layoutSpec.clear();
         areaMap.clear();
 
-        List<AreaRef> areaRefList = new ArrayList<>();
+        List<AreaRef> areaRefList = new ArrayList<AreaRef>();
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             LayoutParams params = (LayoutParams)child.getLayoutParams();
