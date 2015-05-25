@@ -45,7 +45,7 @@ public class LayoutSpec {
     Constraint leftConstraint;
     Constraint topConstraint;
 
-    final List<Constraint> customConstraints = new ArrayList<>();
+    final List<Constraint> customConstraints = new ArrayList<Constraint>();
 
     // cached layout values
     // need to be invalidated whenever the layout specification is changed
