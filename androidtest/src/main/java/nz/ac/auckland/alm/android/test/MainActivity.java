@@ -65,16 +65,29 @@ public class MainActivity extends ActionBarActivity {
         }
 
         if (id == R.id.action_pin_wheel_xml) {
-            setFragment(new XMLFragment(R.layout.pin_wheel));
+            setFragment(createFragment(R.layout.pin_wheel));
             return true;
         }
 
         if (id == R.id.action_pin_wheel_tabs_xml) {
-            setFragment(new XMLFragment(R.layout.pin_wheel_tabs));
+            setFragment(createFragment(R.layout.pin_wheel_tabs));
+            return true;
+        }
+
+        if (id == R.id.action_align_xml) {
+            setFragment(createFragment(R.layout.align_grid));
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private Fragment createFragment(int id) {
+        Fragment fragment = new XMLFragment();
+        Bundle arguments = new Bundle();
+        arguments.putInt("resourceId", id);
+        fragment.setArguments(arguments);
+        return fragment;
     }
 
     private void setFragment(Fragment fragment) {
@@ -171,16 +184,14 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public static class XMLFragment extends Fragment {
-        int resourceId;
-
-        public XMLFragment(int resourceId) {
-            this.resourceId = resourceId;
+        public XMLFragment() {
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            return inflater.inflate(resourceId, container, false);
+            int id = getArguments().getInt("resourceId");
+            return inflater.inflate(id, container, false);
         }
     }
 }

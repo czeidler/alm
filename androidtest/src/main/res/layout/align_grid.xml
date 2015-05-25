@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<view xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:ale="http://schemas.android.com/apk/res-auto"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      class="nz.ac.auckland.alm.android.ALMLayout" android:id="@+id/view"
+      android:layout_gravity="center_horizontal">
+    <Button android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Button 1" android:id="@+id/button1"/>
+    <Button android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Button 2" android:id="@+id/button2"
+            ale:layout_toRightOf="@id/button1" ale:layout_alignBottom="@id/button1"/>
+    <Button android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Button 3" android:id="@+id/button3"
+            ale:layout_toRightOf="@id/button2" ale:layout_alignBottom="@id/button1"/>
+    <Button android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Button 4" android:id="@+id/button4"
+            ale:layout_alignRight="@id/button1" ale:layout_below="@id/button1"/>
+    <Button android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Button 5" android:id="@+id/button5"
+            ale:layout_alignLeft="@id/button2" ale:layout_alignTop="@id/button4"
+            ale:layout_alignRight="@id/button2"/>
+    <Button android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Button 6" android:id="@+id/button6"
+            ale:layout_alignLeft="@id/button3" ale:layout_alignTop="@id/button4"/>
+</view>

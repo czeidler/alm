@@ -18,4 +18,8 @@
           android:title="@string/action_pin_wheel_tabs_xml"
           android:orderInCategory="100"
           app:showAsAction="never"/>
+    <item android:id="@+id/action_align_xml"
+          android:title="@string/action_align_grid_xml"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
 </menu>

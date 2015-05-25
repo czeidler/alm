@@ -4,4 +4,5 @@
     <string name="action_pin_wheel">Pin Wheel</string>
     <string name="action_pin_wheel_xml">Pin Wheel XML</string>
     <string name="action_pin_wheel_tabs_xml">Pin Wheel Tabs XML</string>
+    <string name="action_align_grid_xml">Align Grid XML</string>
 </resources>
