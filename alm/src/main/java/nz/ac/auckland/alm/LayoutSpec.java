@@ -45,6 +45,14 @@ public class LayoutSpec {
     Constraint leftConstraint;
     Constraint topConstraint;
 
+    float leftInset;
+    float topInset;
+    float rightInset;
+    float bottomInset;
+
+    float horizontalSpacing;
+    float verticalSpacing;
+
     final List<Constraint> customConstraints = new ArrayList<Constraint>();
 
     // cached layout values
@@ -86,7 +94,9 @@ public class LayoutSpec {
 
         //Set Default Constraints
         leftConstraint = linearSpec.addConstraint(1, left, OperatorType.EQ, 0, Penalties.LEFT);
+        setLeft(0);
         topConstraint = linearSpec.addConstraint(1, top, OperatorType.EQ, 0, Penalties.TOP);
+        setTop(0);
     }
 
     public void release() {
@@ -121,54 +131,43 @@ public class LayoutSpec {
     /**
      * Set the X-tab for the right border of the GUI.
      *
-     * @param r double which defines the X-tab
+     * @param right double which defines the X-tab
      */
-    public void setRight(double r) {
+    public void setRight(double right) {
         if (rightConstraint == null || !linearSpec.getConstraints().contains(rightConstraint))
-            rightConstraint = linearSpec.addConstraint(1, right, OperatorType.EQ, r);
-        else
-            rightConstraint.setRightSide(r);
+            rightConstraint = linearSpec.addConstraint(1, this.right, OperatorType.EQ, 0);
+
+        rightConstraint.setRightSide(right - rightInset);
     }
 
     /**
      * Set the Y-tab for the bottom border of the GUI.
      *
-     * @param b double which defines the Y-tab
+     * @param bottom double which defines the Y-tab
      */
-    public void setBottom(double b) {
+    public void setBottom(double bottom) {
         if (bottomConstraint == null || !linearSpec.getConstraints().contains(bottomConstraint))
-            bottomConstraint = linearSpec.addConstraint(1, bottom, OperatorType.EQ, b);
-        else
-            bottomConstraint.setRightSide(b);
+            bottomConstraint = linearSpec.addConstraint(1, this.bottom, OperatorType.EQ, 0);
+
+        bottomConstraint.setRightSide(bottom - bottomInset);
     }
 
     /**
      * Set the X-tab for the left border of the GUI.
      *
-     * @param l double which defines the X-tab
+     * @param left double which defines the X-tab
      */
-    public void setLeft(double l) {
-        leftConstraint.setRightSide(l);
+    public void setLeft(double left) {
+        leftConstraint.setRightSide(left + leftInset);
     }
 
     /**
      * Set the Y-tab for the top border of the GUI.
      *
-     * @param t double which defines the X-tab
+     * @param top double which defines the X-tab
      */
-    public void setTop(double t) {
-        topConstraint.setRightSide(t);
-    }
-
-    /**
-     * Set the X-tab for the right border and the Y-tab for the bottom border of the GUI.
-     *
-     * @param bot double which defines the Y-tab
-     * @param rig double which defines the X-tab
-     */
-    public void setBottomRight(YTab bot, XTab rig) {
-        bottom = bot;
-        right = rig;
+    public void setTop(double top) {
+        topConstraint.setRightSide(top + topInset);
     }
 
     /**
@@ -617,6 +616,59 @@ public class LayoutSpec {
      */
     public YTab getBottom() {
         return bottom;
+    }
+
+    public float getLeftInset() {
+        return leftInset;
+    }
+
+    public void setLeftInset(float leftInset) {
+        this.leftInset = leftInset;
+    }
+
+    public float getTopInset() {
+        return topInset;
+    }
+
+    public void setTopInset(float topInset) {
+        this.topInset = topInset;
+    }
+
+    public float getRightInset() {
+        return rightInset;
+    }
+
+    public void setRightInset(float rightInset) {
+        this.rightInset = rightInset;
+    }
+
+    public float getBottomInset() {
+        return bottomInset;
+    }
+
+    public void setBottomInset(float bottomInset) {
+        this.bottomInset = bottomInset;
+    }
+
+    public float getHorizontalSpacing() {
+        return horizontalSpacing;
+    }
+
+    public void setHorizontalSpacing(float horizontalSpacing) {
+        this.horizontalSpacing = horizontalSpacing;
+    }
+
+    public float getVerticalSpacing() {
+        return verticalSpacing;
+    }
+
+    public void setVerticalSpacing(float verticalSpacing) {
+        this.verticalSpacing = verticalSpacing;
+    }
+
+    public void setSpacing(float spacing) {
+        setHorizontalSpacing(spacing);
+        setVerticalSpacing(spacing);
     }
 
     /**

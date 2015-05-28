@@ -221,14 +221,21 @@ public class Area {
 		return minSize;
 	}
 
+	private Size addSpacingAndInset(Size value) {
+		// Add insets and 2 times the half of the horizontal and vertical spacing.
+		return new Size(value.getWidth() + ls.getHorizontalSpacing() + getLeftInset() + getRightInset(),
+				value.getHeight() + ls.getVerticalSpacing() + getTopInset() + getBottomInset());
+	}
+
 	/**
 	* Set the minimum size of the area's content.
 	* @param value Size that defines the desired minimum size.
 	*/
 	public void setMinSize(Size value) {
         minSize = value;
-		minWidthConstraint.setRightSide(value.getWidth());
-		minHeightConstraint.setRightSide(value.getHeight());
+		Size effectiveSize = addSpacingAndInset(value);
+		minWidthConstraint.setRightSide(effectiveSize.getWidth());
+		minHeightConstraint.setRightSide(effectiveSize.getHeight());
 
         ls.invalidateLayout();
 	}
@@ -250,6 +257,9 @@ public class Area {
 	*/
 	public void setMaxSize(Size value) {
         maxSize = value;
+		Size effectiveSize = null;
+		if (maxSize.getWidth() > 0 || maxSize.getHeight() > 0)
+			effectiveSize = addSpacingAndInset(value);
 
 		if (maxSize.getWidth() > 0) {
 			if (maxWidthConstraint == null) {
@@ -258,7 +268,7 @@ public class Area {
 				maxWidthConstraint.Owner = this;
 				constraints.add(maxWidthConstraint);
 			}
-			updateRightSideHorizontal(maxWidthConstraint, maxSize.getWidth());
+			updateRightSideHorizontal(maxWidthConstraint, effectiveSize.getWidth());
 		} else if (maxWidthConstraint != null) {
 			maxWidthConstraint.remove();
 			maxWidthConstraint = null;
@@ -271,7 +281,7 @@ public class Area {
 				maxHeightConstraint.Owner = this;
 				constraints.add(maxHeightConstraint);
 			}
-			updateRightSideVertical(maxHeightConstraint, maxSize.getHeight());
+			updateRightSideVertical(maxHeightConstraint, effectiveSize.getHeight());
 		} else if (maxHeightConstraint != null) {
 			maxHeightConstraint.remove();
 			maxHeightConstraint = null;
@@ -300,6 +310,9 @@ public class Area {
 	*/
 	public void setPreferredSize(Size value) {
         preferredSize = value;
+		Size effectiveSize = null;
+		if (preferredSize.getWidth() > 0 || preferredSize.getHeight() > 0)
+			effectiveSize = addSpacingAndInset(value);
 
 		if (preferredSize.getWidth() > 0) {
 			if (preferredWidthConstraint == null) {
@@ -308,7 +321,7 @@ public class Area {
 				preferredWidthConstraint.Owner = this;
 				constraints.add(preferredWidthConstraint);
 			}
-			updateRightSideHorizontal(preferredWidthConstraint, preferredSize.getWidth());
+			updateRightSideHorizontal(preferredWidthConstraint, effectiveSize.getWidth());
 		} else if (preferredWidthConstraint != null) {
 			preferredWidthConstraint.remove();
 			preferredWidthConstraint = null;
@@ -321,7 +334,7 @@ public class Area {
 				preferredHeightConstraint.Owner = this;
 				constraints.add(preferredWidthConstraint);
 			}
-			updateRightSideVertical(preferredHeightConstraint, preferredSize.getHeight());
+			updateRightSideVertical(preferredHeightConstraint, effectiveSize.getHeight());
 		} else if (preferredHeightConstraint != null){
 			preferredHeightConstraint.remove();
 			preferredHeightConstraint = null;
@@ -482,13 +495,16 @@ public class Area {
 	 *
 	 * This takes the inset, alignment and layout spacing into account. This rect can, for example, be used to position
 	 * a widget on the screen.
-	 * 
+	 *
 	 * @return The area's content rect.
 	 */
 	public Rect getContentRect() {
-		Rect frame = new Rect((float)(getLeft().getValue() + getLeftInset()),
-				(float)(getTop().getValue() + getTopInset()), (float)(getRight().getValue() - getRightInset()),
-				(float)(getBottom().getValue() - getBottomInset()));
+		float hSpacing2 = ls.getHorizontalSpacing() / 2;
+		float vSpacing2 = ls.getVerticalSpacing() / 2;
+		Rect frame = new Rect((float)(getLeft().getValue() + getLeftInset() + hSpacing2),
+				(float)(getTop().getValue() + getTopInset() + vSpacing2),
+				(float)(getRight().getValue() - getRightInset() - hSpacing2),
+				(float)(getBottom().getValue() - getBottomInset() - vSpacing2));
 
 		// Taken from the Haiku source code:
 		// align according to the given alignment
