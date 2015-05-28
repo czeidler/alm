@@ -233,44 +233,6 @@ public class ALMLayout implements LayoutManager2 {
     }
 
     /**
-     * Adds a new x-tab to the specification.
-     *
-     * @return the new x-tab
-     */
-    public XTab addXTab() {
-        return layoutSpec.addXTab();
-    }
-
-    /**
-     * Adds a new x-tab to the specification.
-     *
-     * @param name String define the name of resulting x-tab
-     * @return the new x-tab
-     */
-    public XTab addXTab(String name) {
-        return layoutSpec.addXTab(name);
-    }
-
-    /**
-     * Adds a new y-tab to the specification.
-     *
-     * @return the new y-tab
-     */
-    public YTab addYTab() {
-        return layoutSpec.addYTab();
-    }
-
-    /**
-     * Adds a new y-tab to the specification.
-     *
-     * @param name String define the name of resulting y-tab
-     * @return the new y-tab
-     */
-    public YTab addYTab(String name) {
-        return layoutSpec.addYTab(name);
-    }
-
-    /**
      * Finds the area that contains the given control.
      *
      * @param component the control to look for

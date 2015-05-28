@@ -13,8 +13,6 @@ import nz.ac.auckland.alm.swing.ALMLayout;
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,8 +48,8 @@ public class SwingTests {
         XTab right = almLayout.getRight();
         YTab bottom = almLayout.getBottom();
 
-        XTab x1 = almLayout.addXTab();
-        XTab x2 = almLayout.addXTab();
+        XTab x1 = new XTab();
+        XTab x2 = new XTab();
 
         JButton button1 = new JButton("Button 1");
         JButton button2 = new JButton("Button 2");
@@ -83,11 +81,11 @@ public class SwingTests {
         XTab right = almLayout.getRight();
         YTab bottom = almLayout.getBottom();
 
-        XTab x1 = almLayout.addXTab();
-        XTab x2 = almLayout.addXTab();
+        XTab x1 = new XTab();
+        XTab x2 = new XTab();
 
-        YTab y1 = almLayout.addYTab();
-        YTab y2 = almLayout.addYTab();
+        YTab y1 = new YTab();
+        YTab y2 = new YTab();
 
         JButton button1 = new JButton("Button 1");
         JButton button2 = new JButton("Button 2");
@@ -128,9 +126,9 @@ public class SwingTests {
         XTab right = almLayout.getRight();
         YTab bottom = almLayout.getBottom();
 
-        XTab x1 = almLayout.addXTab();
+        XTab x1 = new XTab();
 
-        YTab y1 = almLayout.addYTab();
+        YTab y1 = new YTab();
 
         JButton button1 = new JButton("Left Inset");
         JButton button2 = new JButton("Right Inset");

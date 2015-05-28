@@ -113,8 +113,8 @@ public class MainActivity extends ActionBarActivity {
             XTab right = almLayout.getRightTab();
             YTab bottom = almLayout.getBottomTab();
 
-            XTab x1 = almLayout.addXTab();
-            XTab x2 = almLayout.addXTab();
+            XTab x1 = new XTab();
+            XTab x2 = new XTab();
 
             Button button1 = new Button(context);
             button1.setText("Button 1");
@@ -150,11 +150,11 @@ public class MainActivity extends ActionBarActivity {
             XTab right = almLayout.getRightTab();
             YTab bottom = almLayout.getBottomTab();
 
-            XTab x1 = almLayout.addXTab();
-            XTab x2 = almLayout.addXTab();
+            XTab x1 = new XTab();
+            XTab x2 = new XTab();
 
-            YTab y1 = almLayout.addYTab();
-            YTab y2 = almLayout.addYTab();
+            YTab y1 = new YTab();
+            YTab y2 = new YTab();
 
             Button button1 = new Button(context);
             button1.setText("Button 1");

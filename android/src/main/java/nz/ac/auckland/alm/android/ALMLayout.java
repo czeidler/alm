@@ -257,25 +257,6 @@ public class ALMLayout extends ViewGroup {
     }
 
     /**
-     * Adds a new x-tab to the specification.
-     *
-     * @return the new x-tab
-     */
-    public XTab addXTab() {
-        return layoutSpec.addXTab();
-    }
-
-    /**
-     * Adds a new y-tab to the specification.
-     *
-     * @return the new y-tab
-     */
-    public YTab addYTab() {
-        return layoutSpec.addYTab();
-    }
-
-
-    /**
      * Finds the area that contains the given control.
      *
      * @param view the control to look for

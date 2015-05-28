@@ -78,7 +78,7 @@ interface IRectDirection {
 class LeftDirection implements IRectDirection {
     @Override
     public Variable addTab(LayoutSpec layoutSpec) {
-        return layoutSpec.addXTab();
+        return new XTab();
     }
 
     @Override
@@ -95,7 +95,7 @@ class LeftDirection implements IRectDirection {
 class TopDirection implements IRectDirection {
     @Override
     public Variable addTab(LayoutSpec layoutSpec) {
-        return layoutSpec.addYTab();
+        return new YTab();
     }
 
     @Override
@@ -112,7 +112,7 @@ class TopDirection implements IRectDirection {
 class RightDirection implements IRectDirection {
     @Override
     public Variable addTab(LayoutSpec layoutSpec) {
-        return layoutSpec.addXTab();
+        return new XTab();
     }
 
     @Override
@@ -129,7 +129,7 @@ class RightDirection implements IRectDirection {
 class BottomDirection implements IRectDirection {
     @Override
     public Variable addTab(LayoutSpec layoutSpec) {
-        return layoutSpec.addYTab();
+        return new YTab();
     }
 
     @Override
