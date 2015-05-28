@@ -39,6 +39,7 @@ public class SwingTests {
     public void testThreeButtons() {
         JDialog dialog = new JDialog();
         addDialog(dialog);
+        dialog.setTitle("Three Buttons");
 
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
@@ -72,6 +73,7 @@ public class SwingTests {
     public void testPinWheel() {
         JDialog dialog = new JDialog();
         addDialog(dialog);
+        dialog.setTitle("Pin Wheel");
 
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
@@ -114,6 +116,7 @@ public class SwingTests {
     public void testInsetsAndSpacing() {
         JDialog dialog = new JDialog();
         addDialog(dialog);
+        dialog.setTitle("Insets And Spacing");
 
         ALMLayout almLayout = new ALMLayout();
         dialog.setLayout(almLayout);
