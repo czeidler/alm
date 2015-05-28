@@ -1,6 +1,5 @@
 package nz.ac.auckland.alm;
 
-import nz.ac.auckland.linsolve.LinearSpec;
 import nz.ac.auckland.linsolve.Variable;
 
 /**
@@ -10,10 +9,12 @@ public class YTab extends Variable {
 	/**
 	* Constructor for class <code>Y-Tab</code>.
 	* Y-Tab defines the horizontal grid line.
-	* @param ls the desired linear specification.
 	*/
-	public YTab(LinearSpec ls) {
-		super(ls);
+	public YTab() {
+	}
+
+	public YTab(String name) {
+		setName(name);
 	}
 
 	/**

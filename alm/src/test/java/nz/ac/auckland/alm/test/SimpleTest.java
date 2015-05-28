@@ -43,8 +43,8 @@ public class SimpleTest extends TestCase {
         XTab right = layoutSpec.getRight();
         YTab bottom = layoutSpec.getBottom();
 
-        XTab x1 = layoutSpec.addXTab();
-        XTab x2 = layoutSpec.addXTab();
+        XTab x1 = new XTab();
+        XTab x2 = new XTab();
 
         addDefaultArea(layoutSpec, left, top, x1, bottom);
         addDefaultArea(layoutSpec, x1, top, x2, bottom);
@@ -80,11 +80,11 @@ public class SimpleTest extends TestCase {
         XTab right = layoutSpec.getRight();
         YTab bottom = layoutSpec.getBottom();
 
-        XTab x1 = layoutSpec.addXTab();
-        XTab x2 = layoutSpec.addXTab();
+        XTab x1 = new XTab();
+        XTab x2 = new XTab();
 
-        YTab y1 = layoutSpec.addYTab();
-        YTab y2 = layoutSpec.addYTab();
+        YTab y1 = new YTab();
+        YTab y2 = new YTab();
 
         // outer areas
         addDefaultArea(layoutSpec, left, top, x2, y1);

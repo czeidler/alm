@@ -16,10 +16,6 @@ public class LayoutSpec {
      */
     final List<Area> areas = new ArrayList<Area>();
 
-    final List<Row> rows = new ArrayList<Row>();
-
-    final List<Column> columns = new ArrayList<Column>();
-
     /**
      * X-tab for the left of the GUI.
      */
@@ -83,14 +79,10 @@ public class LayoutSpec {
         linearSpec = new LinearSpec(solver);
 
         //Create the Tabs defining the edge of the layout.
-        left = new XTab(linearSpec);
-        left.setName("left");
-        top = new YTab(linearSpec);
-        top.setName("top");
-        right = new XTab(linearSpec);
-        right.setName("right");
-        bottom = new YTab(linearSpec);
-        bottom.setName("bottom");
+        left = new XTab("left");
+        top = new YTab("top");
+        right = new XTab("right");
+        bottom = new YTab("bottom");
 
         //Set Default Constraints
         leftConstraint = linearSpec.addConstraint(1, left, OperatorType.EQ, 0, Penalties.LEFT);
@@ -116,11 +108,6 @@ public class LayoutSpec {
         topConstraint = null;
         rightConstraint = null;
         bottomConstraint = null;
-
-        linearSpec.removeVariable(left);
-        linearSpec.removeVariable(top);
-        linearSpec.removeVariable(right);
-        linearSpec.removeVariable(bottom);
 
         left = null;
         top = null;
@@ -383,154 +370,6 @@ public class LayoutSpec {
     }
 
     /**
-     * Adds a new x-tab to the specification.
-     *
-     * @return the new x-tab
-     */
-    public XTab addXTab() {
-        return new XTab(linearSpec);
-    }
-
-    /**
-     * Adds a new x-tab to the specification.
-     *
-     * @param name String define the name of resulting x-tab
-     * @return the new x-tab
-     */
-    public XTab addXTab(String name) {
-        XTab x = addXTab();
-        x.setName(name);
-        return x;
-    }
-
-    /**
-     * Adds a new y-tab to the specification.
-     *
-     * @return the new y-tab
-     */
-    public YTab addYTab() {
-        return new YTab(linearSpec);
-    }
-
-    /**
-     * Adds a new y-tab to the specification.
-     *
-     * @param name String define the name of resulting y-tab
-     * @return the new y-tab
-     */
-    public YTab addYTab(String name) {
-        YTab y = addYTab();
-        y.setName(name);
-        return y;
-    }
-
-    /**
-     * Adds a new row to the specification.
-     *
-     * @return the new row
-     */
-    public Row addRow() {
-        Row r = new Row(this);
-        rows.add(r);
-        return r;
-    }
-
-    /**
-     * Add a row by presenting existing tabs.
-     *
-     * @param x the YTab
-     * @param y the YTab
-     * @return the new Row
-     */
-    public Row addRowWithReuseTabs(YTab x, YTab y) {
-        Row r = new Row(this, x, y);
-        rows.add(r);
-        return r;
-    }
-
-    /**
-     * Add a row by presenting existing tabs to the specified index.
-     *
-     * @param i the target index
-     * @param x the YTab
-     * @param y the YTab
-     * @return the new Row
-     */
-    public Row addRowWithReuseTabs(int i, YTab x, YTab y) {
-        Row r = new Row(this, x, y);
-        rows.add(i, r);
-        return r;
-    }
-
-    /**
-     * Adds a new row to the specification at an index.
-     *
-     * @param index
-     * @return the new row
-     */
-    public Row addRow(int index) {
-        Row r = new Row(this);
-        rows.add(index, r);
-        return r;
-    }
-
-    /**
-     * Adds a new row to the specification that is glued to the given y-tabs.
-     *
-     * @param top
-     * @param bottom
-     * @return the new row
-     */
-    public Row addRow(YTab top, YTab bottom) {
-        Row row = new Row(this);
-        if (top != null)
-            row.constraints.add(row.getTop().isEqual(top));
-        if (bottom != null)
-            row.constraints.add(row.getBottom().isEqual(bottom));
-        rows.add(row);
-        return row;
-    }
-
-    /**
-     * Adds a new column to the specification.
-     *
-     * @return the new column
-     */
-    public Column addColumn() {
-        Column c = new Column(this);
-        columns.add(c);
-        return c;
-    }
-
-    /**
-     * Adds a new column to the specification at an index.
-     *
-     * @return the new column
-     */
-    public Column addColumn(int index) {
-        Column c = new Column(this);
-        columns.add(index, c);
-        return c;
-    }
-
-    /**
-     * Adds a new column to the specification that is glued to the given x-tabs.
-     *
-     * @param left
-     * @param right
-     * @return the new column
-     */
-    public Column addColumn(XTab left, XTab right) {
-        Column column = new Column(this);
-        if (left != null)
-            column.constraints.add(column.getLeft().isEqual(left));
-        if (right != null)
-            column.constraints.add(column.getRight().isEqual(right));
-        columns.add(column);
-        return column;
-    }
-
-    /**
      * Adds a new area to the specification, automatically setting preferred
      * size constraints.
      *
@@ -562,24 +401,6 @@ public class LayoutSpec {
      */
     public List<Area> getAreas() {
         return areas;
-    }
-
-    /**
-     * Get the rows that were added to the specification.
-     *
-     * @return the rows that were added to the specification.
-     */
-    public List<Row> getRows() {
-        return rows;
-    }
-
-    /**
-     * Get the columns that were added to the specification.
-     *
-     * @return the columns that were added to the specification.
-     */
-    public List<Column> getColumns() {
-        return columns;
     }
 
     /**
