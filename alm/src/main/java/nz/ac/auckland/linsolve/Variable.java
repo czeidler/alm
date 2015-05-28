@@ -1,6 +1,9 @@
 package nz.ac.auckland.linsolve;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class represents a variable in a linear constraint. 
  */
@@ -12,7 +15,7 @@ public class Variable {
 	String name; // name of the variable
 	protected nz.ac.auckland.linsolve.Summand summandWhereMaxDominant;
 	protected double maxDominance = 0;
-
+	final List<Constraint> activeConstraints = new ArrayList<Constraint>();
 
 	/**
 	 * The pivot constraint of a variable is the constraint where this variable
@@ -53,15 +56,27 @@ public class Variable {
 		this.name = name;
 	}
 
-	public Variable(LinearSpec ls) {
-		this.ls = ls;
-		this.ls.addVariable(this);
-		this.ls.getSolver().add(this);
+	protected void onConstraintActivated(Constraint constraint) {
+		if (activeConstraints.contains(constraint)) {
+			throw new RuntimeException("onConstraintActivated: Variable '" + this.toString()
+					+ "' can be added twice to: " + constraint.toString());
+		}
+		activeConstraints.add(constraint);
+		if (ls == null) {
+			ls = constraint.ls;
+			ls.addVariableIfNotInSpec(this);
+		} else if (ls != constraint.ls)
+			throw new RuntimeException("Variables can't be shared between different linear specs");
 	}
-	
-	public Variable(String name, double value) {
-		this.name = name;
-		this.value = value;
+
+	public void onConstraintDeactivated(Constraint constraint) {
+		if (!activeConstraints.remove(constraint))
+			throw new RuntimeException("onConstraintDeactivated: Variable '" + this.toString()
+					+ "' was not part of the constraint:" + constraint.toString());
+		if (activeConstraints.size() == 0) {
+			ls.removeVariable(this);
+			ls = null;
+		}
 	}
 
 	/**
@@ -70,9 +85,12 @@ public class Variable {
 	 * @return the index of the variable
 	 */
 	public int getIndex() {
-		int i = ls.getVariables().indexOf(this);
-		if (i == -1)
-			throw new RuntimeException("Variable not part of ls.variables.");
+		int i = -1;
+		if (ls != null) {
+			i = ls.getVariables().indexOf(this);
+			if (i == -1)
+				throw new RuntimeException("Variable not part of ls.variables.");
+		}
 		return i + 1;
 	}
 
@@ -90,49 +108,6 @@ public class Variable {
 		} catch (Exception e) {
 			return "Exception in getIndex().";
 		}
-	}
-
-	/**
-	 * Adds a constraint that sets this variable equal to the given one.
-	 * 
-	 * @param v
-	 *            variable that should have the same value
-	 * @return the new equality constraint
-	 */
-	public Constraint isEqual(Variable v) {
-		return ls.addConstraint(1.0, this, -1.0, v, OperatorType.EQ, 0);
-	}
-
-	/**
-	 * Adds a constraint that sets this variable smaller or equal to the given
-	 * one.
-	 * 
-	 * @param v
-	 *            variable that should have a larger or equal value
-	 * @return the new constraint
-	 */
-	public Constraint isSmallerOrEqual(Variable v) {
-		return ls.addConstraint(1.0, this, -1.0, v, OperatorType.LE, 0);
-	}
-
-	/**
-	 * Adds a constraint that sets this variable greater or equal to the given
-	 * one.
-	 * 
-	 * @param v
-	 *            variable that should have a smaller or equal value
-	 * @return the new constraint
-	 */
-	public Constraint isGreaterOrEqual(Variable v) {
-		return ls.addConstraint(-1.0, v, 1.0, this, OperatorType.GE, 0);
-	}
-
-	/**
-	 * Removes the variable from its specification.
-	 */
-	public void remove() {
-		ls.getSolver().remove(this);
-		ls.removeVariable(this);
 	}
 
 	public void setValue(double value) {

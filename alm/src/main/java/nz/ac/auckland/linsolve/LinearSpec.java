@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Specification for a linear system in the LpSove solver. It contains variables and constraints.
+ * Specification for a linear system. It contains variables and constraints.
  */
 public class LinearSpec {
 
@@ -55,6 +55,29 @@ public class LinearSpec {
     }
 
     /**
+     * Adds a new variable to the specification.
+     *
+     * @return false if the variable is already in the specification
+     */
+    protected boolean addVariableIfNotInSpec(Variable variable) {
+        if (variables.contains(variable))
+            return false;
+        variables.add(variable);
+        getSolver().add(variable);
+        return true;
+    }
+
+    /**
+     * Removes a variable from spec.
+     */
+    protected boolean removeVariable(Variable variable) {
+        if (!variables.remove(variable))
+            return false;
+        getSolver().remove(variable);
+        return true;
+    }
+
+    /**
      * Returns a list of constraints defined in this spec.
      */
     public List<Constraint> getConstraints() {
@@ -62,59 +85,29 @@ public class LinearSpec {
     }
 
     /**
-     * Adds a new variable to the specification.
-     *
-     * @return the new variable
-     */
-    public Variable addVariable(Variable v) {
-        variables.add(v);
-        return v;
-    }
-
-    /**
-     * Creates and adds a new variable to the specification.
-     *
-     * @return the new variable
-     */
-    public Variable addVariable() {
-        Variable v = new Variable(this);
-        return v;
-    }
-
-    /**
-     * Creates and adds a new variable with the specified name to the specification.
-     *
-     * @return the new variable
-     */
-    public Variable addVariable(String name) {
-        Variable v = new Variable(this);
-        v.setName(name);
-        return v;
-    }
-
-    /**
-     * Removes a variable from spec.
-     */
-
-    public void removeVariable(Variable v) {
-        variables.remove(v);
-    }
-
-    /**
      * Adds a new constraint to the specification.
      *
      * @return the new constraint
      */
-    public Constraint addConstraint(Constraint c) {
-        constraints.add(c);
-        return c;
+    public boolean addConstraint(Constraint constraint) {
+        if (constraints.contains(constraint))
+            return false;
+        constraints.add(constraint);
+        solver.add(constraint);
+        solver.removePresolved();
+        constraint.onConstraintAddedToLinearSpec(this);
+        return true;
     }
 
     /**
      * removes a constraint from specification.
      */
-    public void removeConstraint(Constraint c) {
-        solver.remove(c);
+    public boolean removeConstraint(Constraint constraint) {
+        if (!constraints.remove(constraint))
+            return false;
+        solver.remove(constraint);
+        constraint.onConstraintRemovedFromLinearSpec(this);
+        return true;
     }
 
     /**
@@ -137,16 +130,16 @@ public class LinearSpec {
      * Creates a new soft constraint with the given values and adds it to the this
      * <c>LinearSpec</c>.
      *
-     * @param lhs     the left hand side of the constraint. Consists of all summands
-     * @param op      the operator type. Can be le, ge or eq
-     * @param rhs     the right hand side of the constraint.
-     * @param penalty the penalty of this soft constraint
+     * @param leftSide  the left hand side of the constraint. Consists of all summands
+     * @param op        the operator type. Can be le, ge or eq
+     * @param rightSide the right hand side of the constraint.
+     * @param penalty   the penalty of this soft constraint
      */
-    public Constraint addConstraint(Summand[] lhs, OperatorType op, double rhs, double penalty) {
-        Constraint c = new Constraint(this, lhs, op, rhs, penalty);
-        c.setName(desc);
-        solver.removePresolved();
-        return c;
+    public Constraint addConstraint(Summand[] leftSide, OperatorType op, double rightSide, double penalty) {
+        Constraint constraint = new Constraint(leftSide, op, rightSide, penalty);
+        constraint.setName(desc);
+        addConstraint(constraint);
+        return constraint;
     }
 
     /**
@@ -303,23 +296,5 @@ public class LinearSpec {
         }
         return s.toString();
 
-    }
-
-    /**
-     * Generates a test method for the current specification.
-     */
-    public String toTestMethod() {
-        StringBuffer s = new StringBuffer();
-        s.append("\tpublic static LinearSpec XXX(LinearSolver solver){\n\t\tLinearSpec ls = new LinearSpec(solver);\n\n");
-        for (Variable v : variables) {
-            if (!v.toString().contains("Var"))
-                s.append("\t\tVariable " + v.toString() + " = ls.addVariable(\"" + v.toString() + "\");\n");
-        }
-        s.append("\n");
-        for (Constraint c : constraints) {
-            s.append("\t\t" + c.toCommand() + "\n");
-        }
-        s.append("\n\t\treturn ls;\n}\n");
-        return s.toString();
     }
 }

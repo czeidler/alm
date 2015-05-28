@@ -37,7 +37,7 @@ public class Constraint implements Cloneable {
      */
     private static double tolerance = GUI_TOLERANCE;
 
-    private LinearSpec ls; // linear spec which holds this constraint
+    protected LinearSpec ls; // linear spec which holds this constraint
     private Summand[] leftSide; // left side of the constraint
     private OperatorType op; // constraint operator (i.e. =, <-, >=)
     private boolean enabled = true; // is constraint enabled?
@@ -52,23 +52,24 @@ public class Constraint implements Cloneable {
     /**
      * Constructor.
      */
-    public Constraint(Constraint c2) {
-        this(c2.ls, c2.leftSide, c2.op, c2.rightSide, c2.getPenalty());
+    protected Constraint(Summand[] summands, OperatorType op, double rightSide, double penalty) {
+        setLeftSide(summands);
+        setOp(op);
+        setRightSide(rightSide);
+        setPenalty(penalty);
     }
 
-    /**
-     * Constructor.
-     */
-    public Constraint(LinearSpec ls, Summand[] summands, OperatorType op,
-                      double rightSide, double penalty) {
+    protected void onConstraintAddedToLinearSpec(LinearSpec ls) {
+        if (this.ls != null)
+            throw new RuntimeException("Constraint is already added to a LinearSpec!");
         this.ls = ls;
-        this.leftSide = summands;
-        this.op = op;
-        this.rightSide = rightSide;
-        this.penalty = penalty;
-        checkConstraint();
-        ls.addConstraint(this);
-        ls.getSolver().add(this);
+        activateSummands();
+    }
+
+    protected void onConstraintRemovedFromLinearSpec(LinearSpec ls) {
+        if (this.ls != ls)
+            throw new RuntimeException("Constraint is not attached to LinearSpec.");
+        this.ls = null;
     }
 
     /**
@@ -170,9 +171,12 @@ public class Constraint implements Cloneable {
      * @return the index of the constraint or -1 if not found
      */
     public int getIndex() {
-        int i = ls.getConstraints().indexOf(this);
-        if (i == -1)
-            throw new RuntimeException("Constraint not part of ls.constraints.");
+        int i = -1;
+        if (ls != null) {
+            i = ls.getConstraints().indexOf(this);
+            if (i == -1)
+                throw new RuntimeException("Constraint not part of ls.constraints.");
+        }
         return i + 1;
     }
 
@@ -350,6 +354,12 @@ public class Constraint implements Cloneable {
         return coefficients;
     }
 
+    private void notifyConstraintUpdated() {
+        if (ls == null)
+            return;
+        ls.getSolver().update(this);
+    }
+
     /**
      * Gets the left side of the constraint.
      *
@@ -365,8 +375,27 @@ public class Constraint implements Cloneable {
      *
      * @param summands an array of Summand objects that make up the new left side
      */
-    public void setLeftSide(Summand[] summands) {
+    public void setLeftSide(Summand... summands) {
+        deactivateSummands();
         leftSide = summands;
+        activateSummands();
+
+        notifyConstraintUpdated();
+    }
+
+    private void deactivateSummands() {
+        if (leftSide == null)
+            return;
+
+        for (int i = 0; i < leftSide.length; i++)
+            leftSide[i].getVar().onConstraintDeactivated(this);
+    }
+
+    private void activateSummands() {
+        if (leftSide == null || ls == null)
+            return;
+        for (int i = 0; i < leftSide.length; i++)
+            leftSide[i].getVar().onConstraintActivated(this);
     }
 
     /**
@@ -399,11 +428,7 @@ public class Constraint implements Cloneable {
      * one summand.
      */
     public void setLeftSide(double coeff1, Variable var1) {
-        for (int i = 0; i < leftSide.length; i++)
-            leftSide[i].remove();
-        leftSide = new Summand[1];
-        leftSide[0] = new Summand(coeff1, var1);
-        ls.getSolver().update(this);
+        setLeftSide(new Summand(coeff1, var1));
     }
 
     /**
@@ -412,12 +437,7 @@ public class Constraint implements Cloneable {
      */
     public void setLeftSide(double coeff1, Variable var1, double coeff2,
                             Variable var2) {
-        for (int i = 0; i < leftSide.length; i++)
-            leftSide[i].remove();
-        leftSide = new Summand[2];
-        leftSide[0] = new Summand(coeff1, var1);
-        leftSide[1] = new Summand(coeff2, var2);
-        ls.getSolver().update(this);
+        setLeftSide(new Summand(coeff1, var1), new Summand(coeff2, var2));
     }
 
     /**
@@ -426,13 +446,7 @@ public class Constraint implements Cloneable {
      */
     public void setLeftSide(double coeff1, Variable var1, double coeff2,
                             Variable var2, double coeff3, Variable var3) {
-        for (int i = 0; i < leftSide.length; i++)
-            leftSide[i].remove();
-        leftSide = new Summand[3];
-        leftSide[0] = new Summand(coeff1, var1);
-        leftSide[1] = new Summand(coeff2, var2);
-        leftSide[2] = new Summand(coeff3, var3);
-        ls.getSolver().update(this);
+        setLeftSide(new Summand(coeff1, var1), new Summand(coeff2, var2), new Summand(coeff3, var3));
     }
 
     /**
@@ -442,14 +456,8 @@ public class Constraint implements Cloneable {
     public void setLeftSide(double coeff1, Variable var1, double coeff2,
                             Variable var2, double coeff3, Variable var3, double coeff4,
                             Variable var4) {
-        for (int i = 0; i < leftSide.length; i++)
-            leftSide[i].remove();
-        leftSide = new Summand[4];
-        leftSide[0] = new Summand(coeff1, var1);
-        leftSide[1] = new Summand(coeff2, var2);
-        leftSide[2] = new Summand(coeff3, var3);
-        leftSide[3] = new Summand(coeff4, var4);
-        ls.getSolver().update(this);
+        setLeftSide(new Summand(coeff1, var1), new Summand(coeff2, var2), new Summand(coeff3, var3),
+                new Summand(coeff4, var4));
     }
 
     /**
@@ -468,7 +476,7 @@ public class Constraint implements Cloneable {
      */
     public void setOp(OperatorType value) {
         op = value;
-        ls.getSolver().update(this);
+        notifyConstraintUpdated();
     }
 
     /**
@@ -487,7 +495,7 @@ public class Constraint implements Cloneable {
      */
     public void setRightSide(double value) {
         rightSide = value;
-        ls.getSolver().update(this);
+        notifyConstraintUpdated();
     }
 
     /**
@@ -507,7 +515,7 @@ public class Constraint implements Cloneable {
      */
     public void setPenalty(double value) {
         penalty = value;
-        ls.getSolver().update(this);
+        notifyConstraintUpdated();
     }
 
     /**
@@ -535,13 +543,6 @@ public class Constraint implements Cloneable {
         return Math.abs(residual());
     }
 
-    /**
-     * Removes the constraint from its specification.
-     */
-    public void remove() {
-        ls.getSolver().remove(this);
-    }
-
     public void writeXML(OutputStreamWriter out) {
         try {
             out.write("\n");
@@ -561,23 +562,6 @@ public class Constraint implements Cloneable {
 
         } catch (IOException e) {
             System.out.println(e.getMessage());
-        }
-    }
-
-    /**
-     * Checks the constraint to make sure the data are correct.
-     * <p/>
-     * NOTE: at the moment it only checks to make sure each variable appears only
-     * once in a constraint. Duplicate variables causes JVM to crash with LpSolve.
-     */
-    private void checkConstraint() {
-        for (int i = 0; i < leftSide.length - 1; i++) {
-            for (int j = i + 1; j < leftSide.length; j++) {
-                if (leftSide[i].getVar().toString().equals(leftSide[j].getVar().toString())) {
-                    throw new RuntimeException("Variable '" + leftSide[i].getVar().toString() +
-                            "' has been used twice in: " + toString());
-                }
-            }
         }
     }
 
@@ -630,5 +614,11 @@ public class Constraint implements Cloneable {
         for (Summand s : leftSide)
             variables.add(s.var);
         return variables;
+    }
+
+    public void remove() {
+        if (ls == null)
+            return;
+        ls.removeConstraint(this);
     }
 }
