@@ -366,7 +366,7 @@ public class ALMLayout extends ViewGroup {
     }
 
     public void setSpacing(float spacing) {
-        setSpacing(spacing, spacing)
+        setSpacing(spacing, spacing);
     }
 
     public void setInset(float left, float top, float right, float bottom) {
