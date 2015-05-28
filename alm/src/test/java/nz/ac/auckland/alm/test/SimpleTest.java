@@ -24,9 +24,9 @@ public class SimpleTest extends TestCase {
 
     Area addDefaultArea(LayoutSpec layoutSpec, XTab left, YTab top, XTab right, YTab bottom) {
         Area area = layoutSpec.addArea(left, top, right, bottom);
-        area.setMinContentSize(10, 10);
+        area.setMinSize(10, 10);
         area.setMaxSize(-1, -1);
-        area.setPreferredContentSize(20, 50);
+        area.setPreferredSize(20, 50);
         return area;
     }
 

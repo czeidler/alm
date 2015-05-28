@@ -233,7 +233,7 @@ public class Area {
         ls.invalidateLayout();
 	}
 
-    public void setMinContentSize(double width, double height) {
+    public void setMinSize(double width, double height) {
         setMinSize(new Size(width, height));
     }
 
@@ -330,7 +330,7 @@ public class Area {
         ls.invalidateLayout();
 	}
 
-    public void setPreferredContentSize(double width, double height) {
+    public void setPreferredSize(double width, double height) {
         setPreferredSize(new Size(width, height));
     }
 
@@ -477,6 +477,14 @@ public class Area {
 		return 0;
 	}
 
+	/**
+	 * Get the area's content rect.
+	 *
+	 * This takes the inset, alignment and layout spacing into account. This rect can, for example, be used to position
+	 * a widget on the screen.
+	 * 
+	 * @return The area's content rect.
+	 */
 	public Rect getContentRect() {
 		Rect frame = new Rect((float)(getLeft().getValue() + getLeftInset()),
 				(float)(getTop().getValue() + getTopInset()), (float)(getRight().getValue() - getRightInset()),

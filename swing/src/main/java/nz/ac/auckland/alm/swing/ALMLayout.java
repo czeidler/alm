@@ -227,8 +227,8 @@ public class ALMLayout implements LayoutManager2 {
         Dimension prefSize = component.getPreferredSize();
         Dimension maxSize = component.getMaximumSize();
 
-        area.setMinContentSize(minSize.getWidth(), minSize.getHeight());
-        area.setPreferredContentSize(prefSize.getWidth(), prefSize.getHeight());
+        area.setMinSize(minSize.getWidth(), minSize.getHeight());
+        area.setPreferredSize(prefSize.getWidth(), prefSize.getHeight());
         area.setMaxSize(maxSize.getWidth(), maxSize.getHeight());
     }
 
