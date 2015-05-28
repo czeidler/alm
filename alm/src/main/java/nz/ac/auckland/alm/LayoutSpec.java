@@ -84,9 +84,9 @@ public class LayoutSpec {
         bottom = new YTab("bottom");
 
         //Set Default Constraints
-        leftConstraint = linearSpec.addConstraint(1, left, OperatorType.EQ, 0, Penalties.LEFT);
+        leftConstraint = linearSpec.addConstraint(1, left, OperatorType.EQ, 0);
         setLeft(0);
-        topConstraint = linearSpec.addConstraint(1, top, OperatorType.EQ, 0, Penalties.TOP);
+        topConstraint = linearSpec.addConstraint(1, top, OperatorType.EQ, 0);
         setTop(0);
     }
 
