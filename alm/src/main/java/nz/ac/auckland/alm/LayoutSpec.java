@@ -1,7 +1,6 @@
 package nz.ac.auckland.alm;
 
 import nz.ac.auckland.linsolve.*;
-import nz.ac.auckland.linsolve.softconstraints.GroupingSoftSolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,10 +63,7 @@ public class LayoutSpec {
     /** Creates a new, empty layout specification containing only four tabstops left, right, top, bottom for the layout
      * boundaries. */
     public LayoutSpec() {
-        //this(new AddingSoftSolver(new KaczmarzSolver()));
-        this(new GroupingSoftSolver(new KaczmarzSolver()));
-        //this(new GroupingSoftSolver(new KaczmarzLeastSquares()));
-        //this(new AddingSoftSolver(new GaussSeidelSolver(new DeterministicPivotSummandSelector(), 500)));
+        this(null);
     }
 
     /**
@@ -76,7 +72,10 @@ public class LayoutSpec {
      * @param solver the Linear Solver that defines the LayoutSpec
      */
     public LayoutSpec(LinearSolver solver) {
-        linearSpec = new LinearSpec(solver);
+        if (solver == null)
+            linearSpec = new LinearSpec();
+        else
+            linearSpec = new LinearSpec(solver);
 
         //Create the Tabs defining the edge of the layout.
         left = new XTab("left");

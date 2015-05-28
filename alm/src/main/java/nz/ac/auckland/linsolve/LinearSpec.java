@@ -1,5 +1,7 @@
 package nz.ac.auckland.linsolve;
 
+import nz.ac.auckland.linsolve.softconstraints.GroupingSoftSolver;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +42,10 @@ public class LinearSpec {
 
 
     public LinearSpec() {
+        //this(new AddingSoftSolver(new KaczmarzSolver()));
+        this(new GroupingSoftSolver(new KaczmarzSolver()));
+        //this(new GroupingSoftSolver(new KaczmarzLeastSquares()));
+        //this(new AddingSoftSolver(new GaussSeidelSolver(new DeterministicPivotSummandSelector(), 500)));
     }
 
     public LinearSpec(LinearSolver solver) {
