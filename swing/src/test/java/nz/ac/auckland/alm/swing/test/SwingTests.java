@@ -113,9 +113,58 @@ public class SwingTests {
         dialog.setVisible(true);
     }
 
+    public void testInsetsAndSpacing() {
+        JDialog dialog = new JDialog();
+        addDialog(dialog);
+
+        ALMLayout almLayout = new ALMLayout();
+        dialog.setLayout(almLayout);
+
+        almLayout.setSpacing(5, 10);
+        almLayout.setInset(10, 20, 30, 40);
+
+        XTab left = almLayout.getLeft();
+        YTab top = almLayout.getTop();
+        XTab right = almLayout.getRight();
+        YTab bottom = almLayout.getBottom();
+
+        XTab x1 = almLayout.addXTab();
+
+        YTab y1 = almLayout.addYTab();
+
+        JButton button1 = new JButton("Left Inset");
+        JButton button2 = new JButton("Right Inset");
+        JButton button3 = new JButton("Top Inset");
+        JButton button4 = new JButton("Bottom Inset");
+
+        dialog.add(button1, new ALMLayout.LayoutParams(left, top, x1, y1));
+        dialog.add(button2, new ALMLayout.LayoutParams(x1, top, right, y1));
+        dialog.add(button3, new ALMLayout.LayoutParams(left, y1, x1, bottom));
+        dialog.add(button4, new ALMLayout.LayoutParams(x1, y1, right, bottom));
+
+        Area area1 = almLayout.areaOf(button1);
+        area1.setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+        area1.setLeftInset(10);
+        Area area2 = almLayout.areaOf(button2);
+        area2.setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+        area2.setRightInset(10);
+        Area area3 = almLayout.areaOf(button3);
+        area3.setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+        area3.setTopInset(10);
+        Area area4 = almLayout.areaOf(button4);
+        area4.setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+        area4.setBottomInset(10);
+
+        dialog.setMinimumSize(almLayout.minimumLayoutSize(dialog));
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
     public static void main(String[] args) {
         SwingTests swingTests = new SwingTests();
         swingTests.testThreeButtons();
         swingTests.testPinWheel();
+        swingTests.testInsetsAndSpacing();
     }
 }
