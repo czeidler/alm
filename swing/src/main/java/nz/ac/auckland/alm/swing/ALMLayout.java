@@ -316,4 +316,20 @@ public class ALMLayout implements LayoutManager2 {
         return layoutSpec.getBottom();
     }
 
+    public void setSpacing(float horizontalSpacing, float verticalSpacing) {
+        layoutSpec.setHorizontalSpacing(horizontalSpacing);
+        layoutSpec.setVerticalSpacing(verticalSpacing);
+    }
+
+    public void setSpacing(float spacing) {
+        setSpacing(spacing, spacing);
+    }
+
+    public void setInset(float left, float top, float right, float bottom) {
+        layoutSpec.setLeftInset(left);
+        layoutSpec.setTopInset(top);
+        layoutSpec.setRightInset(right);
+        layoutSpec.setBottomInset(bottom);
+    }
+
 }

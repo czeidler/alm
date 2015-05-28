@@ -359,4 +359,20 @@ public class ALMLayout extends ViewGroup {
     public YTab getBottomTab() {
         return layoutSpec.getBottom();
     }
+
+    public void setSpacing(float horizontalSpacing, float verticalSpacing) {
+        layoutSpec.setHorizontalSpacing(horizontalSpacing);
+        layoutSpec.setVerticalSpacing(verticalSpacing);
+    }
+
+    public void setSpacing(float spacing) {
+        setSpacing(spacing, spacing)
+    }
+
+    public void setInset(float left, float top, float right, float bottom) {
+        layoutSpec.setLeftInset(left);
+        layoutSpec.setTopInset(top);
+        layoutSpec.setRightInset(right);
+        layoutSpec.setBottomInset(bottom);
+    }
 }
