@@ -15,7 +15,7 @@ import nz.ac.auckland.alm.YTab;
 import junit.framework.TestCase;
 
 
-public class SimpleTest extends TestCase {
+public class ALM extends TestCase {
     void assertFuzzyEqual(double expected, double value) throws Exception {
         if (Math.abs(expected - value) < 0.01)
             return;
