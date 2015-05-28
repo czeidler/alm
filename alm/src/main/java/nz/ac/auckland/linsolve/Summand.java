@@ -9,11 +9,6 @@ import java.text.DecimalFormat;
  * A summand of the objective function.
  */
 public class Summand {
-
-    // TODO remove unused attributes
-    // TODO implement information hiding
-    public double lastValue;
-    public double lastButOne;
     double coeff;
     Variable var;
 
