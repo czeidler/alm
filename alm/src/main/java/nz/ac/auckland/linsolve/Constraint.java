@@ -70,6 +70,7 @@ public class Constraint implements Cloneable {
         if (this.ls != ls)
             throw new RuntimeException("Constraint is not attached to LinearSpec.");
         this.ls = null;
+        deactivateSummands();
     }
 
     /**
