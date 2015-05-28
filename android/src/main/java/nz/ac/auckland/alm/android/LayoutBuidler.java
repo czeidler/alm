@@ -10,7 +10,7 @@ package nz.ac.auckland.alm.android;
 import nz.ac.auckland.alm.*;
 import nz.ac.auckland.linsolve.Variable;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -196,8 +196,8 @@ class LayoutBuilder {
     }
 
     static public void resolveToTabs(List<AreaRef> areas, LayoutSpec layoutSpec) {
-        Map<String, XTab> namedXTabs = new Hashtable<String, XTab>();
-        Map<String, YTab> namedYTabs = new Hashtable<String, YTab>();
+        Map<String, XTab> namedXTabs = new HashMap<String, XTab>();
+        Map<String, YTab> namedYTabs = new HashMap<String, YTab>();
 
         for (AreaRef area : areas) {
             resolveToTabs(area, layoutSpec, areas, namedXTabs, new LeftDirection());
