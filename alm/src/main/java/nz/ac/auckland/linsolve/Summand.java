@@ -70,12 +70,6 @@ public class Summand {
         this.var = var;
     }
 
-    /**
-     * Removes the summand from the objective function.
-     */
-    public void remove() {
-    }
-
     public void writeXML(OutputStreamWriter out) {
         try {
             out.write("\t\t\t<summand>\n");
