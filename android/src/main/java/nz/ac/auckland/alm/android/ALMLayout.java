@@ -13,14 +13,12 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import nz.ac.auckland.alm.*;
+import nz.ac.auckland.linsolve.Constraint;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
-public class ALMLayout extends ViewGroup {
+public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
     public final static int LEFT = 1;
     public final static int RIGHT = 2;
     public final static int TOP = 1;
@@ -52,75 +50,74 @@ public class ALMLayout extends ViewGroup {
             final int n = a.getIndexCount();
             for (int i = 0; i < n; i++) {
                 int attr = a.getIndex(i);
-                switch (attr) {
-                    case R.styleable.ALMLayout_Layout_layout_toLeftOf:
-                        areaRef.right.setTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_below:
-                        areaRef.top.setTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_toRightOf:
-                        areaRef.left.setTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_above:
-                        areaRef.bottom.setTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_alignLeft:
-                        areaRef.left.setAlignTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_alignTop:
-                        areaRef.top.setAlignTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_alignRight:
-                        areaRef.right.setAlignTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_alignBottom:
-                        areaRef.bottom.setAlignTo(a.getResourceId(attr, 0));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_leftTab:
-                        areaRef.left.setTo(a.getString(attr));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_topTab:
-                        areaRef.top.setTo(a.getString(attr));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_rightTab:
-                        areaRef.right.setTo(a.getString(attr));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_bottomTab:
-                        areaRef.bottom.setTo(a.getString(attr));
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_horizontal_alignment:
-                        switch (a.getInteger(attr, 0)) {
-                            case LEFT:
-                                areaRef.horizontalAlignment = HorizontalAlignment.LEFT;
-                                break;
-                            case RIGHT:
-                                areaRef.horizontalAlignment = HorizontalAlignment.RIGHT;
-                                break;
-                            case CENTER:
-                                areaRef.horizontalAlignment = HorizontalAlignment.CENTER;
-                                break;
-                            case FILL:
-                                areaRef.horizontalAlignment = HorizontalAlignment.FILL;
-                                break;
-                        }
-                        break;
-                    case R.styleable.ALMLayout_Layout_layout_vertical_alignment:
-                        switch (a.getInteger(attr, 0)) {
-                            case TOP:
-                                areaRef.verticalAlignment = VerticalAlignment.TOP;
-                                break;
-                            case BOTTOM:
-                                areaRef.verticalAlignment = VerticalAlignment.BOTTOM;
-                                break;
-                            case CENTER:
-                                areaRef.verticalAlignment = VerticalAlignment.CENTER;
-                                break;
-                            case FILL:
-                                areaRef.verticalAlignment = VerticalAlignment.FILL;
-                                break;
-                        }
-                        break;
+                if (attr == R.styleable.ALMLayout_Layout_layout_toLeftOf) {
+                    areaRef.right.setTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_below) {
+                    areaRef.top.setTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_toRightOf) {
+                    areaRef.left.setTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_above) {
+                    areaRef.bottom.setTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_alignLeft) {
+                    areaRef.left.setAlignTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_alignTop) {
+                    areaRef.top.setAlignTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_alignRight) {
+                    areaRef.right.setAlignTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_alignBottom) {
+                    areaRef.bottom.setAlignTo(a.getResourceId(attr, 0));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_leftTab) {
+                    areaRef.left.setTo(a.getString(attr));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_topTab) {
+                    areaRef.top.setTo(a.getString(attr));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_rightTab) {
+                    areaRef.right.setTo(a.getString(attr));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_bottomTab) {
+                    areaRef.bottom.setTo(a.getString(attr));
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_horizontal_alignment) {
+                    switch (a.getInteger(attr, 0)) {
+                        case LEFT:
+                            areaRef.horizontalAlignment = HorizontalAlignment.LEFT;
+                            break;
+                        case RIGHT:
+                            areaRef.horizontalAlignment = HorizontalAlignment.RIGHT;
+                            break;
+                        case CENTER:
+                            areaRef.horizontalAlignment = HorizontalAlignment.CENTER;
+                            break;
+                        case FILL:
+                            areaRef.horizontalAlignment = HorizontalAlignment.FILL;
+                            break;
+                    }
+
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_vertical_alignment) {
+                    switch (a.getInteger(attr, 0)) {
+                        case TOP:
+                            areaRef.verticalAlignment = VerticalAlignment.TOP;
+                            break;
+                        case BOTTOM:
+                            areaRef.verticalAlignment = VerticalAlignment.BOTTOM;
+                            break;
+                        case CENTER:
+                            areaRef.verticalAlignment = VerticalAlignment.CENTER;
+                            break;
+                        case FILL:
+                            areaRef.verticalAlignment = VerticalAlignment.FILL;
+                            break;
+                    }
+
                 }
             }
             a.recycle();
@@ -305,42 +302,6 @@ public class ALMLayout extends ViewGroup {
         return maxSize;
     }
 
-    /**
-     * Get the X-tab for the left border of the GUI
-     *
-     * @return X-tab for the left border of the GUI
-     */
-    public XTab getLeftTab() {
-        return layoutSpec.getLeft();
-    }
-
-    /**
-     * Get the X-tab for the right border of the GUI
-     *
-     * @return X-tab for the right border of the GUI
-     */
-    public XTab getRightTab() {
-        return layoutSpec.getRight();
-    }
-
-    /**
-     * Get the Y-tab for the top border of the GUI
-     *
-     * @return Y-tab for the top border of the GUI
-     */
-    public YTab getTopTab() {
-        return layoutSpec.getTop();
-    }
-
-    /**
-     * Get the Y-tab for the bottom border of the GUI
-     *
-     * @return Y-tab for the bottom border of the GUI
-     */
-    public YTab getBottomTab() {
-        return layoutSpec.getBottom();
-    }
-
     public void setSpacing(float horizontalSpacing, float verticalSpacing) {
         layoutSpec.setHorizontalSpacing(horizontalSpacing);
         layoutSpec.setVerticalSpacing(verticalSpacing);
@@ -355,5 +316,40 @@ public class ALMLayout extends ViewGroup {
         layoutSpec.setTopInset(top);
         layoutSpec.setRightInset(right);
         layoutSpec.setBottomInset(bottom);
+    }
+
+    @Override
+    public XTab getLeftTab() {
+        return layoutSpec.getLeft();
+    }
+
+    @Override
+    public XTab getRightTab() {
+        return layoutSpec.getRight();
+    }
+
+    @Override
+    public YTab getTopTab() {
+        return layoutSpec.getTop();
+    }
+
+    @Override
+    public YTab getBottomTab() {
+        return layoutSpec.getBottom();
+    }
+
+    @Override
+    public Area getArea(Object object) {
+        return areaOf((View)object);
+    }
+
+    @Override
+    public List<Area> getAreas() {
+        return  new ArrayList<Area>(areaMap.values());
+    }
+
+    @Override
+    public List<Constraint> getCustomConstraints() {
+        return Collections.emptyList();
     }
 }
