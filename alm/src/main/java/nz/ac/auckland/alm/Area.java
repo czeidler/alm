@@ -490,6 +490,11 @@ public class Area {
 		return 0;
 	}
 
+	public Rect getRect() {
+		return new Rect((float)getLeft().getValue(), (float)getTop().getValue(), (float)getRight().getValue(),
+				(float)getBottom().getValue());
+	}
+
 	/**
 	 * Get the area's content rect.
 	 *
