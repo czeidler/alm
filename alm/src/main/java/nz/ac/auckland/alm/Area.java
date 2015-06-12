@@ -29,6 +29,16 @@ public class Area {
 			this.height = height;
 		}
 
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null || getClass() != obj.getClass())
+				return false;
+			final Size other = (Size) obj;
+			if (this.width != other.width || this.height != other.height)
+				return false;
+			return true;
+		}
+
 		public double getWidth() {
 			return width;
 		}

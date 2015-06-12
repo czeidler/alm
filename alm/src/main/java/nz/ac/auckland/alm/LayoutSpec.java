@@ -3,7 +3,9 @@ package nz.ac.auckland.alm;
 import nz.ac.auckland.linsolve.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Layout specification.
@@ -88,6 +90,94 @@ public class LayoutSpec {
         setLeft(0);
         topConstraint = linearSpec.addConstraint(1, top, OperatorType.EQ, 0);
         setTop(0);
+    }
+
+    public LayoutSpec clone() {
+        return clone(getAreas(), customConstraints, getLeft(), getTop(), getRight(), getBottom());
+    }
+
+    static public LayoutSpec clone(List<Area> areas, List<Constraint> customConstraints, XTab left, YTab top,
+                                   XTab right, YTab bottom) {
+        LayoutSpec layoutSpec = new LayoutSpec();
+
+        final Map<XTab, XTab> oldToCloneXTabs = new HashMap<XTab, XTab>();
+        final Map<YTab, YTab> oldToCloneYTabs = new HashMap<YTab, YTab>();
+        oldToCloneXTabs.put(left, layoutSpec.getLeft());
+        oldToCloneYTabs.put(top, layoutSpec.getTop());
+        oldToCloneXTabs.put(right, layoutSpec.getRight());
+        oldToCloneYTabs.put(bottom, layoutSpec.getBottom());
+        layoutSpec.setLeft(left.getValue());
+        layoutSpec.setTop(top.getValue());
+        layoutSpec.setRight(right.getValue());
+        layoutSpec.setBottom(bottom.getValue());
+
+        ITabCreator xTabCreator = new ITabCreator() {
+            @Override
+            public <Tab> Tab create(String name) {
+                return (Tab)(new XTab(name));
+            }
+        };
+        ITabCreator yTabCreator = new ITabCreator() {
+            @Override
+            public <Tab> Tab create(String name) {
+                return (Tab)(new YTab(name));
+            }
+        };
+
+        for (Area area : areas) {
+            XTab clonedLeft = getClonedTab(oldToCloneXTabs, area.getLeft(), xTabCreator);
+            YTab clonedTop = getClonedTab(oldToCloneYTabs, area.getTop(), yTabCreator);
+            XTab clonedRight = getClonedTab(oldToCloneXTabs, area.getRight(), xTabCreator);
+            YTab clonedBottom = getClonedTab(oldToCloneYTabs, area.getBottom(), yTabCreator);
+
+            Area clone = layoutSpec.addArea(clonedLeft, clonedTop, clonedRight, clonedBottom);
+            clone.setAlignment(area.getHorizontalAlignment(), area.getVerticalAlignment());
+            clone.setMinSize(area.getMinSize());
+            clone.setPreferredSize(area.getPreferredSize());
+            clone.setMaxSize(area.getMaxSize());
+        }
+
+        final Map<Variable, Variable> oldToCloneVariable = new HashMap<Variable, Variable>();
+        ITabCreator varCreator = new ITabCreator() {
+            @Override
+            public <Tab> Tab create(String name) {
+                return (Tab)(new Variable(name));
+            }
+        };
+        for (Constraint constraint : customConstraints) {
+            Summand[] oldSummands = constraint.getLeftSide();
+            Summand[] newSummands = new Summand[oldSummands.length];
+            for (int i = 0; i < oldSummands.length; i++) {
+                Summand summand = oldSummands[i];
+                Variable existingVar = summand.getVar();
+                Variable newVar;
+                if (existingVar instanceof XTab)
+                    newVar = getClonedTab(oldToCloneXTabs, (XTab) existingVar, xTabCreator);
+                else if (existingVar instanceof YTab)
+                    newVar = getClonedTab(oldToCloneYTabs, (YTab) existingVar, yTabCreator);
+                else
+                    newVar = getClonedTab(oldToCloneVariable, existingVar, varCreator);
+                newSummands[i] = new Summand(summand.getCoeff(), newVar);
+            }
+            layoutSpec.addConstraint(newSummands, constraint.getOp(), constraint.getRightSide(),
+                    constraint.getPenalty());
+        }
+
+        return layoutSpec;
+    }
+
+    private interface ITabCreator {
+        <Tab> Tab create(String name);
+    }
+
+    static private <Tab extends Variable> Tab getClonedTab(Map<Tab, Tab> oldToCloneMap, Tab oldTab,
+                                                           ITabCreator creator) {
+        Tab tab = oldToCloneMap.get(oldTab);
+        if (tab == null) {
+            tab = creator.create(oldTab.getName());
+            oldToCloneMap.put(oldTab, tab);
+        }
+        return tab;
     }
 
     public void release() {
@@ -402,6 +492,10 @@ public class LayoutSpec {
         return areas;
     }
 
+    public List<Constraint> getCustomConstraints() {
+        return customConstraints;
+    }
+
     /**
      * Get the X-tab for the left of the GUI.
      *
@@ -549,5 +643,18 @@ public class LayoutSpec {
                                     double rightSide, double penalty) {
         return addConstraint(toArray(new Summand(coeff1, var1), new Summand(coeff2, var2)), operator, rightSide,
                 penalty);
+    }
+
+    @Override
+    public String toString() {
+        String out = "Areas:\n";
+        for (Area area : getAreas())
+            out += area.toString() + "\n";
+
+        out += "Custom Constraints:\n";
+        for (Constraint constraint : getCustomConstraints())
+            out += constraint.toString() + "\n";
+
+        return out;
     }
 }
