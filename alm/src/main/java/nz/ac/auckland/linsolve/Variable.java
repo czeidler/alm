@@ -21,7 +21,14 @@ public class Variable {
 	 * The pivot constraint of a variable is the constraint where this variable
 	 * is most dominant, as compared with all editor constraints.
 	 */
-	
+
+	public Variable() {
+
+	}
+
+	public Variable(String name) {
+		setName(name);
+	}
 
 	protected Constraint constraintWhereMaxDominant;
 	public Constraint getConstraintWhereMaxDominant() {
