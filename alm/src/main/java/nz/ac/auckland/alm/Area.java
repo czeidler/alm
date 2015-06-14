@@ -76,6 +76,14 @@ public class Area {
 		public float getHeight() {
 			return bottom - top;
 		}
+
+		public boolean contains(float x, float y) {
+			if (left > x || right < x)
+				return false;
+			if (top > y || bottom < y)
+				return false;
+			return true;
+		}
 	}
 
 	/**
@@ -220,6 +228,16 @@ public class Area {
 	*/
 	public void setBottom(YTab value) {
 		bottom = value;
+		updateVerticalConstraintVars();
+	}
+
+	public void setTo(XTab left, YTab top, XTab right, YTab bottom) {
+		this.left = left;
+		this.top = top;
+		this.right = right;
+		this.bottom = bottom;
+
+		updateHorizontalConstraintVars();
 		updateVerticalConstraintVars();
 	}
 
