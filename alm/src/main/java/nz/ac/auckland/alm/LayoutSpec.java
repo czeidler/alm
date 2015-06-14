@@ -110,6 +110,10 @@ public class LayoutSpec {
         layoutSpec.setTop(top.getValue());
         layoutSpec.setRight(right.getValue());
         layoutSpec.setBottom(bottom.getValue());
+        layoutSpec.getLeft().setValue(left.getValue());
+        layoutSpec.getTop().setValue(top.getValue());
+        layoutSpec.getRight().setValue(right.getValue());
+        layoutSpec.getBottom().setValue(bottom.getValue());
 
         ITabCreator xTabCreator = new ITabCreator() {
             @Override
@@ -175,6 +179,7 @@ public class LayoutSpec {
         Tab tab = oldToCloneMap.get(oldTab);
         if (tab == null) {
             tab = creator.create(oldTab.getName());
+            tab.setValue(oldTab.getValue());
             oldToCloneMap.put(oldTab, tab);
         }
         return tab;
