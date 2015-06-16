@@ -474,10 +474,20 @@ public class LayoutSpec {
      * @return the new area
      */
     public Area addArea(XTab left, YTab top, XTab right, YTab bottom) {
-        invalidateLayout();
-        Area area = new Area(this, left, top, right, bottom);
-        areas.add(area);
+        Area area = new Area(left, top, right, bottom);
+        addArea(area);
         return area;
+    }
+
+    public void addArea(Area area) {
+        invalidateLayout();
+        areas.add(area);
+        area.attachedToLayoutSpec(this);
+    }
+
+    public void removeArea(Area area) {
+        getAreas().remove(area);
+        area.detachedFromLinearSpec(this);
     }
 
     /**

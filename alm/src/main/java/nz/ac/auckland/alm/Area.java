@@ -114,40 +114,30 @@ public class Area {
 	YTab top;
 	YTab bottom;
 
-	/**
-	 * A list of constraints which are removed form the speciifcation when the
-	 * area is removed.
-	 */
-	List<Constraint> constraints = new ArrayList<Constraint>();
-
-	Size minSize = new Size(0, 0);
-	Size preferredSize = UNDEFINED_SIZE;
-	Size maxSize = new Size(Integer.MAX_VALUE, Integer.MAX_VALUE);;
-
-	/**
-	 * Size constraint for the content. Valid even if the content is actually in
-	 * a child area.
-	 */
+	// size constraint for the content
 	Constraint minWidthConstraint;
 	Constraint maxWidthConstraint;
 	Constraint minHeightConstraint;
 	Constraint maxHeightConstraint;
 	Constraint preferredWidthConstraint;
 	Constraint preferredHeightConstraint;
+	// A list of constraints which are removed form the specification when the area is removed.
+	final List<Constraint> constraints = new ArrayList<Constraint>();
 
-	HorizontalAlignment hAlignment = HorizontalAlignment.CENTER;
-	VerticalAlignment vAlignment = VerticalAlignment.CENTER;
+	final Size shrinkPenalty = new Size();
+	final Size growPenalties = new Size(1, 1);
+
+	Size minSize = new Size(0, 0);
+	Size preferredSize = UNDEFINED_SIZE;
+	Size maxSize = new Size(Integer.MAX_VALUE, Integer.MAX_VALUE);;
+
 	int leftInset = 0;
 	int topInset = 0;
 	int rightInset = 0;
 	int bottomInset = 0;
 
-    // TODO remove
-	//Size shrinkPenalties = new Size(2, 2);
-	double shrinkPenaltyWidth;
-    double shrinkPenaltyHeight;
-
-    Size growPenalties = new Size(1, 1);
+	HorizontalAlignment hAlignment = HorizontalAlignment.CENTER;
+	VerticalAlignment vAlignment = VerticalAlignment.CENTER;
 
 	double aspectRatio = -1;
 	Constraint aspectRatioConstraint;
@@ -180,7 +170,12 @@ public class Area {
 		return bottom;
 	}
 
-	void updateHorizontalConstraintVars() {
+	private void invalidateLayoutSpec() {
+		if (layoutSpec != null)
+			layoutSpec.invalidateLayout();
+	}
+
+	private void updateHorizontalConstraintVars() {
 		minWidthConstraint.setLeftSide(-1, left, 1, right);
 
 		// if a maximum constraint was set, then it nees to use the new tab
@@ -190,10 +185,10 @@ public class Area {
 		if (preferredWidthConstraint != null)
 			maxWidthConstraint.setLeftSide(-1, left, 1, right);
 
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
-	void updateVerticalConstraintVars() {
+	private void updateVerticalConstraintVars() {
 		// the respective minimum constraint needs to use the new tab
 		minHeightConstraint.setLeftSide(-1, top, 1, bottom);
 
@@ -204,7 +199,7 @@ public class Area {
 		if (preferredHeightConstraint != null)
 			preferredHeightConstraint.setLeftSide(-1, top, 1, bottom);
 
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	/**
@@ -263,8 +258,8 @@ public class Area {
 
 	private Size addSpacingAndInset(Size value) {
 		// Add insets and 2 times the half of the horizontal and vertical spacing.
-		return new Size(value.getWidth() + layoutSpec.getHorizontalSpacing() + getLeftInset() + getRightInset(),
-				value.getHeight() + layoutSpec.getVerticalSpacing() + getTopInset() + getBottomInset());
+		return new Size(value.getWidth() + getLayoutHSpacing() + getLeftInset() + getRightInset(),
+				value.getHeight() + getLayoutHSpacing() + getTopInset() + getBottomInset());
 	}
 
 	/**
@@ -277,7 +272,7 @@ public class Area {
 		minWidthConstraint.setRightSide(effectiveSize.getWidth());
 		minHeightConstraint.setRightSide(effectiveSize.getHeight());
 
-        layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
     public void setMinSize(double width, double height) {
@@ -303,10 +298,8 @@ public class Area {
 
 		if (maxSize.getWidth() > 0) {
 			if (maxWidthConstraint == null) {
-				maxWidthConstraint = layoutSpec.linearSpec.addConstraint(-1, left, 1, right, OperatorType.LE, 0,
-						growPenalties.getWidth());
-				maxWidthConstraint.Owner = this;
-				constraints.add(maxWidthConstraint);
+				maxWidthConstraint = new Constraint(-1, left, 1, right, OperatorType.LE, 0,	growPenalties.getWidth());
+				addConstraint(maxWidthConstraint);
 			}
 			updateRightSideHorizontal(maxWidthConstraint, effectiveSize.getWidth());
 		} else if (maxWidthConstraint != null) {
@@ -316,10 +309,8 @@ public class Area {
 
 		if (maxSize.getHeight() > 0) {
 			if (maxHeightConstraint == null) {
-				maxHeightConstraint = layoutSpec.linearSpec.addConstraint(-1, top, 1, bottom, OperatorType.LE, 0,
-						growPenalties.getHeight());
-				maxHeightConstraint.Owner = this;
-				constraints.add(maxHeightConstraint);
+				maxHeightConstraint = new Constraint(-1, top, 1, bottom, OperatorType.LE, 0, growPenalties.getHeight());
+				addConstraint(maxHeightConstraint);
 			}
 			updateRightSideVertical(maxHeightConstraint, effectiveSize.getHeight());
 		} else if (maxHeightConstraint != null) {
@@ -327,7 +318,7 @@ public class Area {
 			maxHeightConstraint = null;
 		}
 
-        layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
     public void setMaxSize(double width, double height) {
@@ -356,10 +347,8 @@ public class Area {
 
 		if (preferredSize.getWidth() > 0) {
 			if (preferredWidthConstraint == null) {
-				preferredWidthConstraint = layoutSpec.linearSpec.addConstraint(-1, left, 1, right, OperatorType.EQ, 0,
-						shrinkPenaltyWidth);
-				preferredWidthConstraint.Owner = this;
-				constraints.add(preferredWidthConstraint);
+				preferredWidthConstraint = new Constraint(-1, left, 1, right, OperatorType.EQ, 0, shrinkPenalty.width);
+				addConstraint(preferredWidthConstraint);
 			}
 			updateRightSideHorizontal(preferredWidthConstraint, effectiveSize.getWidth());
 		} else if (preferredWidthConstraint != null) {
@@ -369,10 +358,8 @@ public class Area {
 
 		if (preferredSize.getHeight() > 0) {
 			if (preferredHeightConstraint == null) {
-				preferredHeightConstraint = layoutSpec.linearSpec.addConstraint(-1, top, 1, bottom, OperatorType.EQ, 0,
-						shrinkPenaltyWidth);
-				preferredHeightConstraint.Owner = this;
-				constraints.add(preferredWidthConstraint);
+				preferredHeightConstraint = new Constraint(-1, top, 1, bottom, OperatorType.EQ, 0, shrinkPenalty.width);
+				addConstraint(preferredWidthConstraint);
 			}
 			updateRightSideVertical(preferredHeightConstraint, effectiveSize.getHeight());
 		} else if (preferredHeightConstraint != null){
@@ -380,7 +367,7 @@ public class Area {
 			preferredHeightConstraint = null;
 		}
 
-        layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
     public void setPreferredSize(double width, double height) {
@@ -392,11 +379,11 @@ public class Area {
 	 * size. The bigger the less likely is such shrinking.
 	 */
 	public double getShrinkPenaltyWidth() {
-		return shrinkPenaltyWidth;
+		return shrinkPenalty.width;
 	}
 
     public double getShrinkPenaltyHeight() {
-        return shrinkPenaltyHeight;
+        return shrinkPenalty.height;
     }
 
 	/**
@@ -404,8 +391,8 @@ public class Area {
 	* size. The bigger the less likely is such shrinking.
 	*/
 	public void setShrinkPenalties(double width, double height) {
-		shrinkPenaltyWidth = width;
-		shrinkPenaltyHeight = height;
+		shrinkPenalty.setWidth(width);
+		shrinkPenalty.setHeight(height);
 
 		// penalties are only relevant if a preferred size is set
 		if (preferredWidthConstraint != null) {
@@ -415,7 +402,7 @@ public class Area {
 			preferredHeightConstraint.setPenalty(height);
 		}
 
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	/**
@@ -431,7 +418,8 @@ public class Area {
 	* @param value Size that defines the grow penalties.
 	*/
 	public void setGrowPenalties(Size value) {
-		growPenalties = value;
+		growPenalties.setWidth(value.width);
+		growPenalties.setHeight(value.height);
 		if (preferredWidthConstraint != null) { // penalties are only relevant
 			// if a
 			// preferred size is set
@@ -439,7 +427,7 @@ public class Area {
 			preferredHeightConstraint.setPenalty(value.getHeight());
 		}
 
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	/**
@@ -458,10 +446,9 @@ public class Area {
 		aspectRatio = value;
 		if (aspectRatio > 0) {
 			if (aspectRatioConstraint == null) {
-				aspectRatioConstraint = layoutSpec.linearSpec.addConstraint(-1, left, 1, right, aspectRatio, top, -aspectRatio,
-						bottom,	OperatorType.EQ, 0);
-				aspectRatioConstraint.Owner = this;
-				constraints.add(aspectRatioConstraint);
+				aspectRatioConstraint = new Constraint(-1, left, 1, right, aspectRatio, top, -aspectRatio, bottom,
+						OperatorType.EQ, 0);
+				addConstraint(aspectRatioConstraint);
 			} else
 				aspectRatioConstraint.setLeftSide(-1, left, 1, right, aspectRatio, top, -aspectRatio, bottom);
 		} else if (aspectRatioConstraint != null) {
@@ -469,7 +456,7 @@ public class Area {
 			aspectRatioConstraint = null;
 		}
 
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	/**
@@ -535,6 +522,14 @@ public class Area {
 				(float)getBottom().getValue());
 	}
 
+	private float getLayoutHSpacing() {
+		return layoutSpec == null ? 0 : layoutSpec.getHorizontalSpacing();
+	}
+
+	private float getLayoutVSpacing() {
+		return layoutSpec == null ? 0 : layoutSpec.getVerticalSpacing();
+	}
+
 	/**
 	 * Get the area's content rect.
 	 *
@@ -544,8 +539,8 @@ public class Area {
 	 * @return The area's content rect.
 	 */
 	public Rect getContentRect() {
-		float hSpacing2 = layoutSpec.getHorizontalSpacing() / 2;
-		float vSpacing2 = layoutSpec.getVerticalSpacing() / 2;
+		float hSpacing2 = getLayoutHSpacing() / 2;
+		float vSpacing2 = getLayoutVSpacing() / 2;
 		Rect frame = new Rect((float)(getLeft().getValue() + getLeftInset() + hSpacing2),
 				(float)(getTop().getValue() + getTopInset() + vSpacing2),
 				(float)(getRight().getValue() - getRightInset() - hSpacing2),
@@ -578,7 +573,7 @@ public class Area {
 	public void setLeftInset(int value) {
 		leftInset = value;
 		updateHorizontal();
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	/**
@@ -594,7 +589,7 @@ public class Area {
 	public void setTopInset(int value) {
 		topInset = value;
 		updateVertical();
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	/**
@@ -610,7 +605,7 @@ public class Area {
 	public void setRightInset(int value) {
 		rightInset = value;
 		updateHorizontal();
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	/**
@@ -626,7 +621,7 @@ public class Area {
 	public void setBottomInset(int value) {
 		bottomInset = value;
 		updateVertical();
-		layoutSpec.invalidateLayout();
+		invalidateLayoutSpec();
 	}
 
 	void updateRightSideHorizontal(Constraint constraint, double rightSide) {
@@ -670,14 +665,12 @@ public class Area {
 
 	/**
 	* Construct the area based on the given tabs
-	* @param layoutSpec the layout specification
 	* @param left the left vertical grid line
 	* @param top the top horziontal grid line
 	* @param right the right vertical grid line
 	* @param bottom the bottom horziontal grid line
 	*/
-	protected Area(LayoutSpec layoutSpec, XTab left, YTab top, XTab right, YTab bottom) {
-		this.layoutSpec = layoutSpec;
+	public Area(XTab left, YTab top, XTab right, YTab bottom) {
 		this.left = left;
 		this.right = right;
 		this.top = top;
@@ -689,17 +682,43 @@ public class Area {
 		// bottom y-tab
 		// TODO: the preferred size constraints need to have a smaller penalty
 		// (not INFINITY as per default)
-		minWidthConstraint = layoutSpec.linearSpec.addConstraint(-1, left, 1, right, OperatorType.GE, minSize.getWidth());
-		minWidthConstraint.Owner = this;
+		minWidthConstraint = new Constraint(-1, left, 1, right, OperatorType.GE,
+				minSize.getWidth());
 		minWidthConstraint.setName("minWidthConstraint");
-		constraints.add(minWidthConstraint);
-		minHeightConstraint = layoutSpec.linearSpec.addConstraint(-1, top, 1, bottom, OperatorType.GE, minSize.getHeight());
-		minHeightConstraint.Owner = this;
+		addConstraint(minWidthConstraint);
+		minHeightConstraint = new Constraint(-1, top, 1, bottom, OperatorType.GE,
+				minSize.getHeight());
 		minHeightConstraint.setName("minHeightConstraint");
-		constraints.add(minHeightConstraint);
+		addConstraint(minHeightConstraint);
 
 		setGrowPenalties(new Size(0, 0));
  		setShrinkPenalties(Constraint.PREFERRED_SIZE_PENALTY, Constraint.PREFERRED_SIZE_PENALTY);
+	}
+
+	private void addConstraint(Constraint constraint) {
+		constraints.add(constraint);
+		if (layoutSpec != null)
+			layoutSpec.linearSpec.addConstraint(constraint);
+	}
+
+	protected void attachedToLayoutSpec(LayoutSpec layoutSpec) {
+		if (this.layoutSpec != null)
+			throw new RuntimeException("Area can't be attached to LinearSpec twice.");
+		this.layoutSpec = layoutSpec;
+
+		for (Constraint constraint : constraints)
+			layoutSpec.linearSpec.addConstraint(constraint);
+
+		// take the layout spec spacing into account
+		setMinSize(minSize);
+		setPreferredSize(preferredSize);
+		setMaxSize(maxSize);
+	}
+
+	public void detachedFromLinearSpec(LayoutSpec layoutSpec) {
+		if (this.layoutSpec != layoutSpec)
+			throw new RuntimeException("Area is attached to different LayoutSpec!");
+		this.layoutSpec = null;
 	}
 
 	/**
@@ -708,6 +727,7 @@ public class Area {
 	public void remove() {
 		for (Constraint c : constraints)
 			c.remove();
-		layoutSpec.getAreas().remove(this);
+		if (layoutSpec != null)
+			layoutSpec.removeArea(this);
 	}
 }
