@@ -16,16 +16,6 @@ public class LinearSpec {
     protected ArrayList<Variable> variables = new ArrayList<Variable>(); // list of variables in the spec
     protected ArrayList<Constraint> constraints = new ArrayList<Constraint>(); // list of constraints in the spec
     protected LinearSolver solver; // the linear solver which is used for solving the spec
-    private String desc; // A string which appears in debug messages
-
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
 
     public void setConstraints(ArrayList<Constraint> constraints) {
         this.constraints = constraints;
@@ -126,7 +116,6 @@ public class LinearSpec {
     /**
      * Creates an array of summands
      */
-
     public static Summand[] lhs(Summand... summands) {
         return summands;
     }
@@ -143,7 +132,6 @@ public class LinearSpec {
      */
     public Constraint addConstraint(Summand[] leftSide, OperatorType op, double rightSide, double penalty) {
         Constraint constraint = new Constraint(leftSide, op, rightSide, penalty);
-        constraint.setName(desc);
         addConstraint(constraint);
         return constraint;
     }

@@ -1,7 +1,5 @@
 package nz.ac.auckland.linsolve;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +10,6 @@ import java.util.List;
  * violated.
  */
 public class Constraint implements Cloneable {
-
     public static final double MIN_PENALTY = 0.0;
     public static final double PREFERRED_SIZE_PENALTY = 0.5;
     public static final double MAX_PENALTY = 1.0;
@@ -37,7 +34,7 @@ public class Constraint implements Cloneable {
      */
     private static double tolerance = GUI_TOLERANCE;
 
-    protected LinearSpec ls; // linear spec which holds this constraint
+    protected LinearSpec linearSpec; // linear spec which holds this constraint
     private Summand[] leftSide; // left side of the constraint
     private OperatorType op; // constraint operator (i.e. =, <-, >=)
     private boolean enabled = true; // is constraint enabled?
@@ -47,29 +44,113 @@ public class Constraint implements Cloneable {
     private double rightSide; // right side of the constraint
     private double penalty = Double.POSITIVE_INFINITY; // penalty, if the constraint gets violated
     private String name; // a string which specifies the constraint. useful for debugging
-    public Object Owner;
 
     /**
      * Constructor.
      */
-    protected Constraint(Summand[] summands, OperatorType op, double rightSide, double penalty) {
+    public Constraint(Summand[] summands, OperatorType op, double rightSide, double penalty) {
         setLeftSide(summands);
         setOp(op);
         setRightSide(rightSide);
         setPenalty(penalty);
     }
 
+    /**
+     * Creates an array of summands
+     */
+    private static Summand[] lhs(Summand... summands) {
+        return summands;
+    }
+
+    /**
+     * Creates a new hard constraint with the given values and adds it to the this
+     * <c>LinearSpec</c>.
+     *
+     * @param lhs the left hand side of the constraint. Consists of all summands
+     * @param op  the operator type. Can be le, ge or eq
+     * @param rhs the right hand side of the constraint.
+     */
+    public Constraint(Summand[] lhs, OperatorType op, double rhs) {
+        this(lhs, op, rhs, Constraint.MAX_PENALTY);
+    }
+
+    /**
+     * creates a constraint with one summand at the lhs.
+     *
+     * @param coeff1 the coefficient of the first summand of the lhs
+     * @param var1   the variable fo the first summand of the lhs
+     */
+    public Constraint(double coeff1, Variable var1, OperatorType op, double rhs) {
+        this(lhs(new Summand(coeff1, var1)), op, rhs);
+    }
+
+    /**
+     * creates a constraint with two summands at the lhs.
+     */
+    public Constraint(double coeff1, Variable var1, double coeff2, Variable var2, OperatorType op, double rhs) {
+        this(lhs(new Summand(coeff1, var1), new Summand(coeff2, var2)), op, rhs);
+    }
+
+    /**
+     * creates a constraint with three summands at the lhs.
+     */
+    public Constraint(double coeff1, Variable var1, double coeff2, Variable var2, double coeff3, Variable var3,
+                      OperatorType op, double rhs) {
+        this(lhs(new Summand(coeff1, var1), new Summand(coeff2, var2), new Summand(coeff3, var3)), op, rhs);
+    }
+
+    /**
+     * creates a constraint with four summands at the lhs.
+     */
+    public Constraint(double coeff1, Variable var1, double coeff2, Variable var2, double coeff3, Variable var3,
+                      double coeff4, Variable var4, OperatorType op, double rhs) {
+        this(lhs(new Summand(coeff1, var1), new Summand(coeff2, var2), new Summand(coeff3, var3), new Summand(coeff4, var4)), op, rhs);
+    }
+
+
+    /**
+     * creates a soft constraint with one summand at the lhs.
+     */
+    public Constraint(double coeff1, Variable var1, OperatorType op, double rhs, double penalty) {
+        this(lhs(new Summand(coeff1, var1)), op, rhs, penalty);
+    }
+
+    /**
+     * creates a soft constraint with two summands at the lhs.
+     */
+    public Constraint(double coeff1, Variable var1, double coeff2, Variable var2, OperatorType op, double rhs,
+                      double penalty) {
+        this(lhs(new Summand(coeff1, var1), new Summand(coeff2, var2)), op, rhs, penalty);
+    }
+
+    /**
+     * creates a soft constraint with three summand at the lhs.
+     */
+    public Constraint(double coeff1, Variable var1, double coeff2, Variable var2, double coeff3, Variable var3,
+                      OperatorType op, double rhs, double penalty) {
+        this(lhs(new Summand(coeff1, var1), new Summand(coeff2, var2), new Summand(coeff3, var3)), op, rhs, penalty);
+    }
+
+    /**
+     * creates a soft constraint with four summands at the lhs.
+     */
+    public Constraint(double coeff1, Variable var1, double coeff2, Variable var2, double coeff3, Variable var3,
+                      double coeff4, Variable var4, OperatorType op, double rhs, double penalty) {
+        this(lhs(new Summand(coeff1, var1), new Summand(coeff2, var2), new Summand(coeff3, var3),
+                new Summand(coeff4, var4)), op, rhs, penalty);
+    }
+
     protected void onConstraintAddedToLinearSpec(LinearSpec ls) {
-        if (this.ls != null)
+        if (this.linearSpec != null)
             throw new RuntimeException("Constraint is already added to a LinearSpec!");
-        this.ls = ls;
+        this.linearSpec = ls;
         activateSummands();
     }
 
     protected void onConstraintRemovedFromLinearSpec(LinearSpec ls) {
-        if (this.ls != ls)
+        if (this.linearSpec != ls)
             throw new RuntimeException("Constraint is not attached to LinearSpec.");
-        this.ls = null;
+        this.linearSpec = null;
         deactivateSummands();
     }
 
@@ -173,10 +254,10 @@ public class Constraint implements Cloneable {
      */
     public int getIndex() {
         int i = -1;
-        if (ls != null) {
-            i = ls.getConstraints().indexOf(this);
+        if (linearSpec != null) {
+            i = linearSpec.getConstraints().indexOf(this);
             if (i == -1)
-                throw new RuntimeException("Constraint not part of ls.constraints.");
+                throw new RuntimeException("Constraint not part of linearSpec.constraints.");
         }
         return i + 1;
     }
@@ -205,7 +286,7 @@ public class Constraint implements Cloneable {
         strBuf.append("\tpenalty=");
         strBuf.append(this.getPenalty());
         strBuf.append("\terror=" + error());
-        //strBuf.append("\tCurrentSolution=" + ls.getCurrentSolution());
+        //strBuf.append("\tCurrentSolution=" + linearSpec.getCurrentSolution());
         if (name != null)
             strBuf.append("\tname=" + name);
         if (!isEnabled())
@@ -219,7 +300,7 @@ public class Constraint implements Cloneable {
     public String toCommand() {
         StringBuffer strBuf = new StringBuffer();
         Summand[] summands = this.getLeftSide();
-        strBuf.append("ls.addConstraint(");
+        strBuf.append("linearSpec.addConstraint(");
         for (int i = 0; i < summands.length - 1; i++) {
             if (summands[i].equals(pivotSummand))
                 strBuf.append("#");
@@ -356,9 +437,9 @@ public class Constraint implements Cloneable {
     }
 
     private void notifyConstraintUpdated() {
-        if (ls == null)
+        if (linearSpec == null)
             return;
-        ls.getSolver().update(this);
+        linearSpec.getSolver().update(this);
     }
 
     /**
@@ -393,7 +474,7 @@ public class Constraint implements Cloneable {
     }
 
     private void activateSummands() {
-        if (leftSide == null || ls == null)
+        if (leftSide == null || linearSpec == null)
             return;
         for (int i = 0; i < leftSide.length; i++)
             leftSide[i].getVar().onConstraintActivated(this);
@@ -544,28 +625,6 @@ public class Constraint implements Cloneable {
         return Math.abs(residual());
     }
 
-    public void writeXML(OutputStreamWriter out) {
-        try {
-            out.write("\n");
-            out.write("\t<constraint>\n");
-            out.write("\t\t<leftside>\n");
-            Summand[] summands = this.getLeftSide();
-            for (Summand s : summands) {
-                s.writeXML(out);
-            }
-            out.write("\t\t</leftside>\n");
-            out.write("\t\t<op>" + this.getOp() + "</op>\n");
-            out.write("\t\t<rightside>" + this.getRightSide()
-                    + "</rightside>\n");
-            out.write("\t\t<penaltypos>" + this.getPenalty()
-                    + "</penaltypos>\n");
-            out.write("\t</constraint>\n");
-
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     /**
      * Calculates the value for a variable in the constraint.
      */
@@ -618,8 +677,8 @@ public class Constraint implements Cloneable {
     }
 
     public void remove() {
-        if (ls == null)
+        if (linearSpec == null)
             return;
-        ls.removeConstraint(this);
+        linearSpec.removeConstraint(this);
     }
 }

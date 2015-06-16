@@ -70,9 +70,9 @@ public class Variable {
 		}
 		activeConstraints.add(constraint);
 		if (ls == null) {
-			ls = constraint.ls;
+			ls = constraint.linearSpec;
 			ls.addVariableIfNotInSpec(this);
-		} else if (ls != constraint.ls)
+		} else if (ls != constraint.linearSpec)
 			throw new RuntimeException("Variables can't be shared between different linear specs");
 	}
 
@@ -96,7 +96,7 @@ public class Variable {
 		if (ls != null) {
 			i = ls.getVariables().indexOf(this);
 			if (i == -1)
-				throw new RuntimeException("Variable not part of ls.variables.");
+				throw new RuntimeException("Variable not part of linearSpec.variables.");
 		}
 		return i + 1;
 	}
