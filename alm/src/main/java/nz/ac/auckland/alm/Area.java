@@ -84,6 +84,18 @@ public class Area {
 				return false;
 			return true;
 		}
+
+		public boolean intersects(Rect area) {
+			return intersects(area.left, area.top, area.right, area.bottom);
+		}
+
+		public boolean intersects(float left, float top, float right, float bottom) {
+			boolean hIntersection = (left >= this.left && left <= this.right)
+					|| (right >= this.left && right <= this.right) || (left <= this.left && right >= this.right);
+			boolean vIntersection = (top >= this.top && top <= this.bottom)
+					|| (bottom >= this.top && bottom <= this.bottom) || (top <= this.top && bottom >= this.bottom);
+			return hIntersection && vIntersection;
+		}
 	}
 
 	/**
@@ -664,7 +676,7 @@ public class Area {
 	* @param right the right vertical grid line
 	* @param bottom the bottom horziontal grid line
 	*/
-	Area(LayoutSpec layoutSpec, XTab left, YTab top, XTab right, YTab bottom) {
+	protected Area(LayoutSpec layoutSpec, XTab left, YTab top, XTab right, YTab bottom) {
 		this.layoutSpec = layoutSpec;
 		this.left = left;
 		this.right = right;
