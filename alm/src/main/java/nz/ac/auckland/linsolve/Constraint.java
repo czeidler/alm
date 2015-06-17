@@ -458,7 +458,8 @@ public class Constraint implements Cloneable {
      * @param summands an array of Summand objects that make up the new left side
      */
     public void setLeftSide(Summand... summands) {
-        deactivateSummands();
+        if (linearSpec != null)
+            deactivateSummands();
         leftSide = summands;
         activateSummands();
 
