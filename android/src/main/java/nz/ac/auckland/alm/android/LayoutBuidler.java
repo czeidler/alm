@@ -173,7 +173,7 @@ class LayoutBuilder {
             case AREA_ID:
                 AreaRef areaRef = getById(areas, (Integer)relation.relation);
                 if (areaRef == null)
-                    throw new RuntimeException("bad layout specification");
+                    throw new RuntimeException("bad layout specification: can't find area " + relation.relation);
                 AreaRef.Relation opRelation;
                 if (relation.type == AreaRef.Relation.Type.AREA_ID)
                     opRelation = direction.getOppositeRelation(areaRef);
@@ -181,7 +181,7 @@ class LayoutBuilder {
                     opRelation = direction.getRelation(areaRef);
                 if (opRelation.type == AreaRef.Relation.Type.AREA_ID
                         && (Integer)opRelation.relation != area.id)
-                    throw new RuntimeException("bad layout specification");
+                    throw new RuntimeException("bad layout specification: conflicting relations");
                 else if (opRelation.type == AreaRef.Relation.Type.TAB)
                     existingTab = (Variable) opRelation.relation;
                 else {
