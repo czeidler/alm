@@ -9,6 +9,7 @@ package nz.ac.auckland.alm.android;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -266,7 +267,10 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
     }
 
     private Area.Size getMinimumSize(View view) {
-        return new Area.Size(view.getMinimumWidth(), view.getMinimumHeight());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+            return new Area.Size(view.getMinimumWidth(), view.getMinimumHeight());
+
+        return getPreferredSize(view);
     }
 
     private Area.Size getPreferredSize(View view) {
