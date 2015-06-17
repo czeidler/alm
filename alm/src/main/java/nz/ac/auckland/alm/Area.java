@@ -239,12 +239,19 @@ public class Area {
 	}
 
 	public void setTo(XTab left, YTab top, XTab right, YTab bottom) {
-		this.left = left;
-		this.top = top;
-		this.right = right;
-		this.bottom = bottom;
+		setLeftRight(left, right);
+		setTopBottom(top, bottom);
+	}
 
+	public void setLeftRight(XTab left, XTab right) {
+		this.left = left;
+		this.right = right;
 		updateHorizontalConstraintVars();
+	}
+
+	public void setTopBottom(YTab top, YTab bottom) {
+		this.top = top;
+		this.bottom = bottom;
 		updateVerticalConstraintVars();
 	}
 
