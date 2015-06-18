@@ -111,6 +111,13 @@ public class SwingTests {
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
+
+        // test removing and re-adding
+        dialog.remove(buttonMiddle);
+        dialog.invalidate();
+
+        dialog.add(buttonMiddle, new ALMLayout.LayoutParams(x1, y1, x2, y2));
+        dialog.invalidate();
     }
 
     public void testInsetsAndSpacing() {

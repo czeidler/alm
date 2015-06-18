@@ -165,10 +165,7 @@ public class ALMLayout implements LayoutManager2 {
 
     @Override
     public void removeLayoutComponent(Component component) {
-        Area area = areaMap.remove(component);
-        if (area == null)
-            return;
-        component.getParent().remove(component);
+        areaMap.remove(component);
     }
 
     @Override
