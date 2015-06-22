@@ -92,13 +92,9 @@ public class Variable {
 	 * @return the index of the variable
 	 */
 	public int getIndex() {
-		int i = -1;
-		if (ls != null) {
-			i = ls.getVariables().indexOf(this);
-			if (i == -1)
-				throw new RuntimeException("Variable not part of linearSpec.variables.");
-		}
-		return i + 1;
+		if (ls != null)
+			return ls.getVariables().indexOf(this);
+		return -1;
 	}
 
 	/**
@@ -110,11 +106,7 @@ public class Variable {
 		if (name != null)
 			return name;
 
-		try {
-			return "Var" + getIndex();
-		} catch (Exception e) {
-			return "Exception in getIndex().";
-		}
+		return "Var" + getIndex();
 	}
 
 	public void setValue(double value) {

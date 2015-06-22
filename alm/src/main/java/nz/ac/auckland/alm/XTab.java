@@ -23,10 +23,8 @@ public class XTab extends Variable {
 	* @return string identifies the X-Tab
 	*/
 	public String toString() {
-		String value;
-		if (getName() != null)
-			value = getName();
-		else
+		String value = getName();
+		if (getName() == null)
 			value = "X" + this.getIndex();
 
 		value += " (" + getValue() + ")";
