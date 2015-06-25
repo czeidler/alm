@@ -60,6 +60,8 @@ public class LambdaTransformation {
         // 5) merge the initial empty space with the right neighbour
 
         List<EmptySpace> neighbours = collectIntersectingNeighbours(space, direction, orthDirection, tabMap);
+        if (neighbours == null)
+            return false;
         if (!alignNeighboursEnds(space, neighbours, orthDirection, orthTabMap))
             return false;
         if (!alignNeighbours(neighbours, direction, tabMap))
@@ -87,49 +89,56 @@ public class LambdaTransformation {
         assert (direction instanceof RightDirection) || (direction instanceof BottomDirection);
         assert (orthDirection instanceof RightDirection) || (orthDirection instanceof BottomDirection);
 
-        Edge edge = tabMap.get((Tab)direction.getTab(start));
+        Edge edge = tabMap.get(direction.getTab(start));
         List<IArea> areas = direction.getAreas(edge);
-        EmptySpace startArea = null;
+        EmptySpace startNeighbour = null;
         // exact match?
         for (IArea area : areas) {
             if (!isEmptySpace(area))
                 continue;
             if (orthDirection.getOppositeTab(area) == orthDirection.getOppositeTab(start)) {
-                startArea = (EmptySpace)area;
+                startNeighbour = (EmptySpace)area;
                 break;
             }
         }
-        if (startArea == null) {
-            Variable startTab = orthDirection.getOppositeTab(startArea);
+        if (startNeighbour == null) {
+            Variable startTab = orthDirection.getOppositeTab(start);
             for (IArea area : areas) {
                 if (!isEmptySpace(area))
                     continue;
                 if (orthDirection.getOppositeTab(area).getValue() <= startTab.getValue()
                         && orthDirection.getTab(area).getValue() > startTab.getValue()) {
-                    startArea = (EmptySpace)area;
+                    startNeighbour = (EmptySpace)area;
                     break;
                 }
             }
         }
-        if (startArea == null)
+        if (startNeighbour == null)
             return null;
 
-        int chainLength = emptyElementChainSort(areas, startArea, orthDirection);
+        int chainLength = emptyElementChainSort(areas, startNeighbour, orthDirection);
         List<EmptySpace> outList = new ArrayList<EmptySpace>();
-        int startIndex = areas.indexOf(startArea);
+        int startIndex = areas.indexOf(startNeighbour);
+        Variable endTab = orthDirection.getTab(start);
+        boolean chainFound = false;
         for (int i = startIndex; i < startIndex + chainLength; i++) {
-            IArea currentArea = areas.get(i);
-            Variable currentTab = orthDirection.getTab(currentArea);
-            if (currentTab == orthDirection.getTab(startArea)) {
-                outList.add(startArea);
+            EmptySpace area = (EmptySpace)areas.get(i);
+            outList.add(area);
+
+            Variable currentTab = orthDirection.getTab(area);
+            if (currentTab == endTab) {
+                chainFound = true;
                 break;
             }
-            if (currentTab.getValue() > orthDirection.getTab(startArea).getValue())
+            if (currentTab.getValue() > endTab.getValue()) {
+                chainFound = true;
                 break;
-            outList.add(startArea);
+            }
         }
-        if (outList.size() == 0)
+        if (!chainFound)
             return null;
+        assert (outList.size() > 0);
+
         return outList;
     }
 
@@ -170,17 +179,19 @@ public class LambdaTransformation {
                 minDistanceTab = (Tab)direction.getTab(neighbour);
             }
         }
-        for (EmptySpace neigbours : neighbours) {
-            if (direction.getTab(neigbours) == minDistanceTab)
+        if (minDistanceTab == null)
+            return false;
+        for (EmptySpace neighbour : neighbours) {
+            if (direction.getTab(neighbour) == minDistanceTab)
                 continue;
-            EmptySpace newEmptySpace = split(neigbours, minDistanceTab, tabMap, direction);
+            EmptySpace newEmptySpace = split(neighbour, minDistanceTab, tabMap, direction);
             if (newEmptySpace == null)
                 return false;
         }
         return true;
     }
 
-    private <Tab extends Variable> boolean mergeLine(List<EmptySpace> line, IDirection direction) {
+    private boolean mergeLine(List<EmptySpace> line, IDirection direction) {
         while (line.size() > 1) {
             EmptySpace area1 = line.get(0);
             EmptySpace area2 = line.get(1);
@@ -200,7 +211,7 @@ public class LambdaTransformation {
      * @return
      */
     private boolean merge(EmptySpace area1, EmptySpace area2, IDirection direction) {
-        assert (direction.getTab(area1) != direction.getOppositeTab(area2));
+        assert (direction.getTab(area1) == direction.getOppositeTab(area2));
 
         if (direction.getOrthogonalTab1(area1) != direction.getOrthogonalTab1(area2))
             return false;
@@ -209,6 +220,8 @@ public class LambdaTransformation {
 
         direction.setTab(area1, direction.getTab(area2));
         layoutStructure.removeArea(area2);
+        layoutStructure.removeArea(area1);
+        layoutStructure.addArea(area1);
         return true;
     }
 
@@ -254,7 +267,7 @@ public class LambdaTransformation {
                 continue;
             if (direction.getTab(start) == direction.getOppositeTab(area)) {
                 areas.remove(i);
-                areas.add(areas.indexOf(start), area);
+                areas.add(areas.indexOf(start) + 1, area);
                 chainLength += emptyElementChainSort(areas, (EmptySpace)area, direction);
             }
         }

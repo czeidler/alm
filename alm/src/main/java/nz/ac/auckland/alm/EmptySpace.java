@@ -18,10 +18,8 @@ public class EmptySpace extends AbstractArea {
     }
 
     public EmptySpace(XTab left, YTab top, XTab right, YTab bottom) {
-        this.left = left;
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
+        setLeftRight(left, right);
+        setTopBottom(top, bottom);
     }
 
     @Override
