@@ -42,6 +42,6 @@ public interface IALMLayoutSpecs {
     YTab getBottomTab();
 
     Area getArea(Object object);
-    List<Area> getAreas();
+    List<IArea> getAreas();
     List<Constraint> getCustomConstraints();
 }

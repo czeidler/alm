@@ -348,8 +348,8 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
     }
 
     @Override
-    public List<Area> getAreas() {
-        return  new ArrayList<Area>(areaMap.values());
+    public List<IArea> getAreas() {
+        return  new ArrayList<IArea>(areaMap.values());
     }
 
     @Override
