@@ -27,14 +27,18 @@ public class LayoutStructure {
   final Map<YTab, Edge> yTabEdgeMap = new HashMap<YTab, Edge>();
   final List<XTab> xTabs;
   final List<YTab> yTabs;
-  final List<Area> areas;
+  final List<Area> areas = new ArrayList<Area>();
+  final List<EmptySpace> emptySpaces = new ArrayList<EmptySpace>();
 
   public LayoutStructure(LayoutSpec layoutSpec, Area removedArea) {
     this.layoutSpec = layoutSpec;
-    this.areas = new ArrayList<Area>();
     for (IArea area : layoutSpec.getAreas()) {
-      if (area instanceof Area && area != removedArea)
+      if (area == removedArea)
+        continue;
+      if (area instanceof Area)
         this.areas.add((Area)area);
+      if (area instanceof EmptySpace)
+        this.emptySpaces.add((EmptySpace)area);
     }
     Edge.fillEdges(layoutSpec, xTabEdgeMap, yTabEdgeMap, removedArea);
     if (removedArea != null) {
@@ -55,12 +59,32 @@ public class LayoutStructure {
     Collections.sort(yTabs, tabComparator);
   }
 
+  public void applyToLayoutSpec() {
+    while (layoutSpec.getAreas().size() > 0)
+      layoutSpec.removeArea(layoutSpec.getAreas().get(0));
+
+    for (Area area : areas)
+      layoutSpec.addArea(area);
+    for (EmptySpace space : emptySpaces)
+      layoutSpec.addArea(space);
+  }
+
   public void addArea(IArea area) {
     Edge.addArea(area, xTabEdgeMap, yTabEdgeMap);
+
+    if (area instanceof Area)
+      areas.add((Area)area);
+    if (area instanceof EmptySpace)
+      emptySpaces.add((EmptySpace)area);
   }
 
   public void removeArea(IArea area) {
     Edge.removeArea(area, xTabEdgeMap, yTabEdgeMap);
+
+    if (area instanceof Area)
+      areas.remove(area);
+    if (area instanceof EmptySpace)
+      emptySpaces.remove(area);
   }
 
   public LayoutSpec getLayoutSpec() {
@@ -69,6 +93,10 @@ public class LayoutStructure {
 
   public List<Area> getAreas() {
     return areas;
+  }
+
+  public List<EmptySpace> getEmptySpaces() {
+    return emptySpaces;
   }
 
   public Map<XTab, Edge> getXTabEdges() {
