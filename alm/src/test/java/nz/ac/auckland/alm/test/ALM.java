@@ -153,8 +153,8 @@ public class ALM extends TestCase {
         assertFuzzyEqual(layoutSpec.getBottom().getValue(), clone.getBottom().getValue());
 
         for (int i = 0; i < layoutSpec.getAreas().size(); i++) {
-            Area area = layoutSpec.getAreas().get(i);
-            Area clonedArea = clone.getAreas().get(i);
+            Area area = (Area)layoutSpec.getAreas().get(i);
+            Area clonedArea = (Area)clone.getAreas().get(i);
             assertTrue(area.getMinSize().equals(clonedArea.getMinSize()));
             assertTrue(area.getPreferredSize().equals(clonedArea.getPreferredSize()));
             assertTrue(area.getMaxSize().equals(clonedArea.getMaxSize()));
