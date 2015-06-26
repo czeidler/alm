@@ -1,3 +1,10 @@
+/*
+ * Copyright 2015.
+ * Distributed under the terms of the GPLv3 License.
+ *
+ * Authors:
+ *      Clemens Zeidler <czei002@aucklanduni.ac.nz>
+ */
 package nz.ac.auckland.alm.test;
 
 
@@ -5,6 +12,7 @@ import junit.framework.TestCase;
 import nz.ac.auckland.alm.*;
 import nz.ac.auckland.alm.algebra.LambdaTransformation;
 import nz.ac.auckland.alm.algebra.LayoutStructure;
+
 
 public class LambdaTransformationTest extends TestCase {
     private LayoutSpec getLayoutSpec(int width, int height) {
