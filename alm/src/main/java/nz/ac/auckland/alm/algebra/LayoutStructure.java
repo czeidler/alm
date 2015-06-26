@@ -14,16 +14,37 @@ import java.util.*;
 
 
 public class LayoutStructure {
-  final private LayoutSpec layoutSpec;
+  final XTab left;
+  final YTab top;
+  final XTab right;
+  final YTab bottom;
   final Map<XTab, Edge> xTabEdgeMap = new HashMap<XTab, Edge>();
   final Map<YTab, Edge> yTabEdgeMap = new HashMap<YTab, Edge>();
-  final List<XTab> xTabs;
-  final List<YTab> yTabs;
+  List<XTab> xTabs;
+  List<YTab> yTabs;
   final List<Area> areas = new ArrayList<Area>();
   final List<EmptySpace> emptySpaces = new ArrayList<EmptySpace>();
 
+  public LayoutStructure(XTab left, YTab top, XTab right, YTab bottom) {
+    this.left = left;
+    this.top = top;
+    this.right = right;
+    this.bottom = bottom;
+  }
+
+  Comparator<Variable> tabComparator = new Comparator<Variable>() {
+    @Override
+    public int compare(Variable variable, Variable variable2) {
+      return variable.getValue() < variable2.getValue() ? -1 : 1;
+    }
+  };
+
   public LayoutStructure(LayoutSpec layoutSpec, Area removedArea) {
-    this.layoutSpec = layoutSpec;
+    this.left = layoutSpec.getLeft();
+    this.top = layoutSpec.getTop();
+    this.right = layoutSpec.getRight();
+    this.bottom = layoutSpec.getBottom();
+
     for (IArea area : layoutSpec.getAreas()) {
       if (area == removedArea)
         continue;
@@ -37,21 +58,14 @@ public class LayoutStructure {
       Edge.addArea(new EmptySpace(removedArea.getLeft(), removedArea.getTop(), removedArea.getRight(),
               removedArea.getBottom()), xTabEdgeMap, yTabEdgeMap);
     }
-
-    xTabs = new ArrayList<XTab>(xTabEdgeMap.keySet());
-    yTabs = new ArrayList<YTab>(yTabEdgeMap.keySet());
-
-    Comparator<Variable> tabComparator = new Comparator<Variable>() {
-      @Override
-      public int compare(Variable variable, Variable variable2) {
-        return variable.getValue() < variable2.getValue() ? -1 : 1;
-      }
-    };
-    Collections.sort(xTabs, tabComparator);
-    Collections.sort(yTabs, tabComparator);
   }
 
-  public void applyToLayoutSpec() {
+  public void applyToLayoutSpec(LayoutSpec layoutSpec) {
+    assert left == layoutSpec.getLeft();
+    assert top == layoutSpec.getTop();
+    assert right == layoutSpec.getRight();
+    assert bottom == layoutSpec.getBottom();
+
     while (layoutSpec.getAreas().size() > 0)
       layoutSpec.removeArea(layoutSpec.getAreas().get(0));
 
@@ -68,6 +82,8 @@ public class LayoutStructure {
       areas.add((Area)area);
     if (area instanceof EmptySpace)
       emptySpaces.add((EmptySpace)area);
+
+    invalidateTabs();
   }
 
   public void removeArea(IArea area) {
@@ -77,10 +93,8 @@ public class LayoutStructure {
       areas.remove(area);
     if (area instanceof EmptySpace)
       emptySpaces.remove(area);
-  }
 
-  public LayoutSpec getLayoutSpec() {
-    return layoutSpec;
+    invalidateTabs();
   }
 
   public Iterable<IArea> getAllAreas() {
@@ -104,27 +118,57 @@ public class LayoutStructure {
   }
 
   public XTab findTabLeftOf(double x) {
-    return findFirstSmallerTab(x, xTabs);
+    return findFirstSmallerTab(x, getXTabs());
   }
 
   public XTab findTabRightOf(double x) {
-    return findFirstLargerTab(x, xTabs);
+    return findFirstLargerTab(x, getXTabs());
   }
 
   public YTab findTabAbove(double y) {
-    return findFirstSmallerTab(y, yTabs);
+    return findFirstSmallerTab(y, getYTabs());
   }
 
   public YTab findTabBellow(double y) {
-    return findFirstLargerTab(y, yTabs);
+    return findFirstLargerTab(y, getYTabs());
   }
 
   public List<XTab> getXTabs() {
+    if (xTabs != null)
+      return xTabs;
+    xTabs = new ArrayList<XTab>(xTabEdgeMap.keySet());
+    Collections.sort(xTabs, tabComparator);
     return xTabs;
   }
 
   public List<YTab> getYTabs() {
+    if (yTabs != null)
+      return yTabs;
+
+    yTabs = new ArrayList<YTab>(yTabEdgeMap.keySet());
+    Collections.sort(yTabs, tabComparator);
     return yTabs;
+  }
+
+  private void invalidateTabs() {
+    xTabs = null;
+    yTabs = null;
+  }
+
+  public XTab getLeft() {
+    return left;
+  }
+
+  public YTab getTop() {
+    return top;
+  }
+
+  public XTab getRight() {
+    return right;
+  }
+
+  public YTab getBottom() {
+    return bottom;
   }
 
   private <Tab extends Variable> Tab findFirstLargerTab(double value, List<Tab> tabs) {

@@ -135,30 +135,30 @@ public class DensenessChecker {
         IDirection bottom = new BottomDirection();
 
         Map<XTab, Edge> xTabEdgeMap = new HashMap<XTab, Edge>(layoutStructure.getXTabEdges());
-        xTabEdgeMap.remove(layoutStructure.getLayoutSpec().getLeft());
-        xTabEdgeMap.remove(layoutStructure.getLayoutSpec().getRight());
+        xTabEdgeMap.remove(layoutStructure.getLeft());
+        xTabEdgeMap.remove(layoutStructure.getRight());
         Map<YTab, Edge> yTabEdgeMap = new HashMap<YTab, Edge>(layoutStructure.getYTabEdges());
-        yTabEdgeMap.remove(layoutStructure.getLayoutSpec().getTop());
-        yTabEdgeMap.remove(layoutStructure.getLayoutSpec().getBottom());
+        yTabEdgeMap.remove(layoutStructure.getTop());
+        yTabEdgeMap.remove(layoutStructure.getBottom());
         if (!fillEdgeChains(xTabEdgeMap.values(), xEdgeChainMap, right))
             return false;
         if (!fillEdgeChains(yTabEdgeMap.values(), yEdgeChainMap, bottom))
             return false;
 
         for (IArea area : layoutStructure.getAllAreas()) {
-            if (area.getLeft() != layoutStructure.getLayoutSpec().getLeft()
+            if (area.getLeft() != layoutStructure.getLeft()
                 && !checkEdge(area, left, layoutStructure.getXTabEdges(), layoutStructure.getYTabEdges(),
                     xEdgeChainMap))
                 return false;
-            if (area.getRight() != layoutStructure.getLayoutSpec().getRight()
+            if (area.getRight() != layoutStructure.getRight()
                     && !checkEdge(area, right, layoutStructure.getXTabEdges(), layoutStructure.getYTabEdges(),
                     xEdgeChainMap))
                 return false;
-            if (area.getTop() != layoutStructure.getLayoutSpec().getTop()
+            if (area.getTop() != layoutStructure.getTop()
                     && !checkEdge(area, top, layoutStructure.getYTabEdges(), layoutStructure.getXTabEdges(),
                     yEdgeChainMap))
                 return false;
-            if (area.getBottom() != layoutStructure.getLayoutSpec().getBottom()
+            if (area.getBottom() != layoutStructure.getBottom()
                     && !checkEdge(area, bottom, layoutStructure.getYTabEdges(), layoutStructure.getXTabEdges(),
                     yEdgeChainMap))
                 return false;
