@@ -28,28 +28,47 @@ public class Edge {
         return edge;
     }
 
-    static public <Tab extends Variable> boolean isInChain(Edge edge, Variable tab, Map<Tab, Edge> edges,
+    static public <Tab extends Variable> boolean isInChain(Variable startTab, Variable tab, Map<Tab, Edge> edges,
                                                           IDirection direction) {
-    for (IArea area : direction.getAreas(edge)) {
+        if (startTab == tab)
+            return true;
+        Edge edge = edges.get(startTab);
+        for (IArea area : direction.getAreas(edge)) {
           Variable currentTab = direction.getTab(area);
           if (currentTab == tab)
               return true;
-          if (isInChain(edges.get(currentTab), tab, edges, direction))
+          if (isInChain(currentTab, tab, edges, direction))
               return true;
         }
         return false;
     }
 
-    static public <Tab extends Variable> boolean isInReverseChain(Edge edge, Variable tab, Map<Tab, Edge> edges,
-                                                                  IDirection direction) {
-        for (IArea area : direction.getOppositeAreas(edge)) {
-            Variable currentTab = direction.getOppositeTab(area);
-            if (currentTab == tab)
-                return true;
-            if (isInReverseChain(edges.get(currentTab), tab, edges, direction))
-                return true;
+    static public <Tab extends Variable> void collectAreasInChain(Edge edgeToCheck, Map<Tab, Edge> edgeMap,
+                                                                  IDirection direction, List<IArea> areas) {
+        List<Edge> edgesToCheck = new ArrayList<Edge>();
+        edgesToCheck.add(edgeToCheck);
+        collectAreasInChain(edgesToCheck, edgeMap, direction, areas);
+    }
+
+    static public <Tab extends Variable> void collectAreasInChain(List<Edge> edgesToCheck, Map<Tab, Edge> edgeMap,
+                                                                  IDirection direction, List<IArea> areas) {
+        List<Edge> handledEdges = new ArrayList<Edge>();
+        while (edgesToCheck.size() > 0) {
+            Edge edge = edgesToCheck.remove(0);
+            List<IArea> neighbours = direction.getAreas(edge);
+            for (IArea neighbour : neighbours) {
+                ensureInList(areas, neighbour);
+                Edge newEdge = direction.getEdge(neighbour, edgeMap);
+                if (!handledEdges.contains(newEdge))
+                    ensureInList(edgesToCheck, newEdge);
+            }
+            handledEdges.add(edge);
         }
-        return false;
+    }
+
+    static private <T> void ensureInList(List<T> list, T object) {
+        if (!list.contains(object))
+            list.add(object);
     }
 
     static public void fillEdges(LayoutSpec layoutSpec, Map<XTab, Edge> xMap, Map<YTab, Edge> yMap, Area removedArea) {

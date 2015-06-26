@@ -16,11 +16,6 @@ import java.util.Map;
 
 public class BottomDirection extends AbstractVerticalDirection {
   @Override
-  public <Tab> Edge getEdge(IArea area, Map<Tab, Edge> map) {
-    return map.get(area.getBottom());
-  }
-
-  @Override
   public Variable getTab(IArea area) {
     return area.getBottom();
   }
@@ -43,6 +38,11 @@ public class BottomDirection extends AbstractVerticalDirection {
   @Override
   public List<IArea> getOppositeAreas(Edge edge) {
     return edge.areas1;
+  }
+
+  @Override
+  public IDirection getOppositeDirection() {
+    return new TopDirection();
   }
 
   @Override

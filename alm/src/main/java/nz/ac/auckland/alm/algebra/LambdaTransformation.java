@@ -246,9 +246,9 @@ public class LambdaTransformation {
                                                  IDirection direction) {
         Tab spaceTab = (Tab)direction.getTab(space);
         Tab oppositeSpaceTab = (Tab)direction.getOppositeTab(space);
-        if (Edge.isInChain(tabMap.get(spaceTab), splitTab, tabMap, direction))
+        if (Edge.isInChain(spaceTab, splitTab, tabMap, direction))
             return null;
-        if (Edge.isInReverseChain(tabMap.get(oppositeSpaceTab), splitTab, tabMap, direction))
+        if (Edge.isInChain(oppositeSpaceTab, splitTab, tabMap, direction.getOppositeDirection()))
             return null;
 
         direction.setTab(space, splitTab);

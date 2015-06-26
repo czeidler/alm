@@ -16,11 +16,6 @@ import java.util.Map;
 
 public class RightDirection extends AbstractHorizontalDirection {
   @Override
-  public <Tab> Edge getEdge(IArea area, Map<Tab, Edge> map) {
-    return map.get(area.getRight());
-  }
-
-  @Override
   public Variable getTab(IArea area) {
     return area.getRight();
   }
@@ -43,6 +38,11 @@ public class RightDirection extends AbstractHorizontalDirection {
   @Override
   public List<IArea> getOppositeAreas(Edge edge) {
     return edge.areas1;
+  }
+
+  @Override
+  public IDirection getOppositeDirection() {
+    return new LeftDirection();
   }
 
   @Override

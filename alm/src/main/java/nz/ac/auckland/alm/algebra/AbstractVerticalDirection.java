@@ -13,8 +13,20 @@ import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
 import nz.ac.auckland.linsolve.Variable;
 
+import java.util.Map;
+
 
 abstract class AbstractVerticalDirection implements IDirection {
+  @Override
+  public <Tab> Edge getEdge(IArea area, Map<Tab, Edge> map) {
+    return map.get(getTab(area));
+  }
+
+  @Override
+  public <Tab> Edge getOppositeEdge(IArea area, Map<Tab, Edge> map) {
+    return map.get(getOppositeTab(area));
+  }
+
   @Override
   public Variable getOrthogonalTab1(IArea area) {
     return area.getLeft();
@@ -53,5 +65,25 @@ abstract class AbstractVerticalDirection implements IDirection {
   @Override
   public Variable createOrthogonalTab() {
     return new XTab();
+  }
+
+  @Override
+  public <Tab> Edge getOrthogonalEdge1(IArea area, Map<Tab, Edge> map) {
+    return map.get(getOrthogonalTab1(area));
+  }
+
+  @Override
+  public <Tab> Edge getOrthogonalEdge2(IArea area, Map<Tab, Edge> map) {
+    return map.get(getOrthogonalTab2(area));
+  }
+
+  @Override
+  public IDirection getOrthogonalDirection1() {
+    return new LeftDirection();
+  }
+
+  @Override
+  public IDirection getOrthogonalDirection2() {
+    return new RightDirection();
   }
 }

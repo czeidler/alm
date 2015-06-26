@@ -46,6 +46,11 @@ public class LeftDirection extends AbstractHorizontalDirection {
   }
 
   @Override
+  public IDirection getOppositeDirection() {
+    return new RightDirection();
+  }
+
+  @Override
   public void setTab(IArea area, Variable tab) {
     area.setLeftRight((XTab)tab, area.getRight());
   }

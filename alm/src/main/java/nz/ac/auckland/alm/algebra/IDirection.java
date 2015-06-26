@@ -18,6 +18,9 @@ import java.util.Map;
 
 public interface IDirection {
   <Tab> Edge getEdge(IArea area, Map<Tab, Edge> map);
+  <Tab> Edge getOppositeEdge(IArea area, Map<Tab, Edge> map);
+  <Tab> Edge getOrthogonalEdge1(IArea area, Map<Tab, Edge> map);
+  <Tab> Edge getOrthogonalEdge2(IArea area, Map<Tab, Edge> map);
   Variable getTab(IArea area);
   Variable getOppositeTab(IArea area);
   Variable getOrthogonalTab1(IArea area);
@@ -25,6 +28,10 @@ public interface IDirection {
   Variable getTab(LayoutSpec layoutSpec);
   List<IArea> getAreas(Edge edge);
   List<IArea> getOppositeAreas(Edge edge);
+
+  IDirection getOppositeDirection();
+  IDirection getOrthogonalDirection1();
+  IDirection getOrthogonalDirection2();
 
   double getExtent(Area.Size size);
   double getOrthogonalExtent(Area.Size size);
