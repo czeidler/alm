@@ -181,7 +181,7 @@ public class SoundnessChecker extends TestCase {
         YTab top = layoutSpec.getTop();
         XTab right = layoutSpec.getRight();
         YTab bottom = layoutSpec.getBottom();
-        // ((A | B | C) / D / (E | F)) | G
+        // ((A | B | C) / ... / (E | F)) | G
         layoutSpec.addArea(new Area(left, top, x1, y1));
         layoutSpec.addArea(new Area(x1, top, x3, y1));
         layoutSpec.addArea(new Area(x3, top, x4, y1));
