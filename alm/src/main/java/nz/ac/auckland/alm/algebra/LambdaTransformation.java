@@ -28,14 +28,53 @@ public class LambdaTransformation {
     public EmptySpace makeSpace(XTab left, YTab top, XTab right, YTab bottom) {
         Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
         Map<YTab, Edge> yTabEdgeMap = layoutStructure.getYTabEdges();
+        IDirection rightDirection = new RightDirection();
+        IDirection bottomDirection = new BottomDirection();
 
         EmptySpace emptySpace = findEmptySpaceAtCorner(left, top, new LeftDirection(), new TopDirection());
-        if (emptySpace == null)
-            return null;
+        if (emptySpace == null) {
+            // try to create one
+            for (int i = 0; i < layoutStructure.getEmptySpaces().size(); i++) {
+                EmptySpace space = layoutStructure.getEmptySpaces().get(i);
+                if (space.getLeft().getValue() <= left.getValue() && space.getRight().getValue() >= left.getValue()
+                    && space.getTop().getValue() <= top.getValue() && space.getBottom().getValue() >= top.getValue()) {
+                    EmptySpace orgSpace = space;
+                    if (space.getLeft() != left) {
+                        space = split(space, left, xTabEdgeMap, rightDirection);
+                        if (space == null)
+                            continue;
+                    }
+                    if (space.getTop() != top) {
+                        emptySpace = split(space, top, yTabEdgeMap, new BottomDirection());
+                        if (emptySpace == null && orgSpace != space) {
+                            merge(orgSpace, space, new RightDirection());
+                        } else
+                            break;
+                    }
+                }
+            }
+            if (emptySpace == null)
+                return null;
+        }
 
-        if (!extend(emptySpace, right, new RightDirection(), xTabEdgeMap, new BottomDirection(), yTabEdgeMap))
+        // empty space is larger?
+        EmptySpace split = null;
+        if (emptySpace.getRight() != right && right.getValue() <= emptySpace.getRight().getValue()) {
+            split = split(emptySpace, right, xTabEdgeMap, rightDirection);
+            if (split == null)
+                return null;
+        }
+        if (emptySpace.getBottom() != bottom && bottom.getValue() <= emptySpace.getBottom().getValue()) {
+            if (split(emptySpace, bottom, yTabEdgeMap, bottomDirection) == null) {
+                if (split != null)
+                    merge(emptySpace, split, rightDirection);
+                return null;
+            }
+        }
+
+        if (!extend(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
             return null;
-        if (!extend(emptySpace, bottom, new BottomDirection(), yTabEdgeMap, new RightDirection(), xTabEdgeMap))
+        if (!extend(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
             return null;
 
         return emptySpace;
@@ -46,6 +85,8 @@ public class LambdaTransformation {
                                                                             Map<Tab, Edge> tabMap,
                                                                             IDirection orthDirection,
                                                                             Map<OrthTab, Edge> orthTabMap) {
+        if (direction.getTab(space) == targetTab)
+            return true;
         Tab currentXTab = (Tab)direction.getTab(space);
         while (currentXTab != targetTab) {
             if (!extend(space, direction, tabMap, orthDirection, orthTabMap))
