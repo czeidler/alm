@@ -5,9 +5,10 @@
  * Authors:
  *      Clemens Zeidler <czei002@aucklanduni.ac.nz>
  */
-package nz.ac.auckland.alm.test;
+package nz.ac.auckland.alm.algebra;
 
 import nz.ac.auckland.alm.*;
+import nz.ac.auckland.alm.algebra.BaseAlgebraTestCase;
 import nz.ac.auckland.alm.algebra.LambdaTransformation;
 import nz.ac.auckland.alm.algebra.LayoutStructure;
 

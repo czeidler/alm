@@ -5,10 +5,9 @@
  * Authors:
  *      Clemens Zeidler <czei002@aucklanduni.ac.nz>
  */
-package nz.ac.auckland.alm.test;
+package nz.ac.auckland.alm.algebra;
 
 import nz.ac.auckland.alm.*;
-import nz.ac.auckland.alm.algebra.*;
 
 
 public class EmptyAreaCleanerTest extends BaseAlgebraTestCase {
