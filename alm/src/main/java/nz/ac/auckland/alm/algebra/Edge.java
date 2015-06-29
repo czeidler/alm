@@ -95,14 +95,17 @@ public class Edge {
         bottomEdge.areas1.add(area);
     }
 
+    static private <Tab> void removeArea(IArea area, IDirection direction, Map<Tab, Edge> map) {
+        Edge edge = direction.getEdge(area, map);
+        direction.getOppositeAreas(edge).remove(area);
+        if (edge.areas1.size() == 0 && edge.areas2.size() == 0)
+            map.remove(direction.getTab(area));
+    }
+
     static public void removeArea(IArea area, Map<XTab, Edge> xMap, Map<YTab, Edge> yMap) {
-        Edge leftEdge = getEdge(area.getLeft(), xMap);
-        leftEdge.areas2.remove(area);
-        Edge topEdge = getEdge(area.getTop(), yMap);
-        topEdge.areas2.remove(area);
-        Edge rightEdge = getEdge(area.getRight(), xMap);
-        rightEdge.areas1.remove(area);
-        Edge bottomEdge = getEdge(area.getBottom(), yMap);
-        bottomEdge.areas1.remove(area);
+        removeArea(area, new LeftDirection(), xMap);
+        removeArea(area, new RightDirection(), xMap);
+        removeArea(area, new TopDirection(), yMap);
+        removeArea(area, new BottomDirection(), yMap);
     }
 }
