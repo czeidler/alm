@@ -7,35 +7,12 @@
  */
 package nz.ac.auckland.alm.test;
 
-
-import junit.framework.TestCase;
 import nz.ac.auckland.alm.*;
 import nz.ac.auckland.alm.algebra.LambdaTransformation;
 import nz.ac.auckland.alm.algebra.LayoutStructure;
 
 
-public class LambdaTransformationTest extends TestCase {
-    private LayoutSpec getLayoutSpec(int width, int height) {
-        LayoutSpec layoutSpec = new LayoutSpec();
-        layoutSpec.getLeft().setValue(0);
-        layoutSpec.getTop().setValue(0);
-        layoutSpec.getRight().setValue(width);
-        layoutSpec.getBottom().setValue(height);
-        return layoutSpec;
-    }
-
-    private XTab makeXTabAt(double value) {
-        XTab tab = new XTab();
-        tab.setValue(value);
-        return tab;
-    }
-
-    private YTab makeYTabAt(double value) {
-        YTab tab = new YTab();
-        tab.setValue(value);
-        return tab;
-    }
-
+public class LambdaTransformationTest extends BaseAlgebraTestCase {
     private EmptySpace assertMakeSpace(LambdaTransformation trafo, XTab left, YTab top, XTab right, YTab bottom) {
         EmptySpace emptySpace = trafo.makeSpace(left, top, right, bottom);
 

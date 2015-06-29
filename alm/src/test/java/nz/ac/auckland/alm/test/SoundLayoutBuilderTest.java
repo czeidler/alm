@@ -7,7 +7,6 @@
  */
 package nz.ac.auckland.alm.test;
 
-import junit.framework.TestCase;
 import nz.ac.auckland.alm.Area;
 import nz.ac.auckland.alm.LayoutSpec;
 import nz.ac.auckland.alm.XTab;
@@ -18,28 +17,7 @@ import nz.ac.auckland.alm.algebra.OverlapChecker;
 import nz.ac.auckland.alm.algebra.SoundLayoutBuilder;
 
 
-public class SoundLayoutBuilderTest extends TestCase {
-    private LayoutSpec getLayoutSpec(int width, int height) {
-        LayoutSpec layoutSpec = new LayoutSpec();
-        layoutSpec.getLeft().setValue(0);
-        layoutSpec.getTop().setValue(0);
-        layoutSpec.getRight().setValue(width);
-        layoutSpec.getBottom().setValue(height);
-        return layoutSpec;
-    }
-
-    private XTab makeXTabAt(double value) {
-        XTab tab = new XTab();
-        tab.setValue(value);
-        return tab;
-    }
-
-    private YTab makeYTabAt(double value) {
-        YTab tab = new YTab();
-        tab.setValue(value);
-        return tab;
-    }
-
+public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
     public void testThreeButton() {
         LayoutSpec layoutSpec = getLayoutSpec(500, 500);
 
