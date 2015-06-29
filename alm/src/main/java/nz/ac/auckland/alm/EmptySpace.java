@@ -114,4 +114,9 @@ public class EmptySpace extends AbstractArea {
 
         invalidateLayoutSpec();
     }
+
+    public String toString() {
+        return "EmptySpace(" + left.toString() + "," + top.toString() + ","
+                + right.toString() + "," + bottom.toString() + ")";
+    }
 }
