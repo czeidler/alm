@@ -96,7 +96,7 @@ public class LambdaTransformation {
         return true;
     }
 
-    private <Tab extends Variable, OrthTab extends Variable> boolean extend(EmptySpace space, IDirection direction,
+    public <Tab extends Variable, OrthTab extends Variable> boolean extend(EmptySpace space, IDirection direction,
                                                                             Map<Tab, Edge> tabMap,
                                                                             IDirection orthDirection,
                                                                             Map<OrthTab, Edge> orthTabMap) {
@@ -266,9 +266,9 @@ public class LambdaTransformation {
         if (direction.getOrthogonalTab2(area1) != direction.getOrthogonalTab2(area2))
             return false;
 
-        direction.setTab(area1, direction.getTab(area2));
         layoutStructure.removeArea(area2);
         layoutStructure.removeArea(area1);
+        direction.setTab(area1, direction.getTab(area2));
         layoutStructure.addArea(area1);
         return true;
     }
@@ -292,6 +292,8 @@ public class LambdaTransformation {
         if (Edge.isInChain(oppositeSpaceTab, splitTab, tabMap, direction.getOppositeDirection()))
             return null;
 
+        layoutStructure.removeArea(space);
+
         direction.setTab(space, splitTab);
 
         EmptySpace newEmptySpace = new EmptySpace();
@@ -300,6 +302,8 @@ public class LambdaTransformation {
         direction.setOrthogonalTab1(newEmptySpace, direction.getOrthogonalTab1(space));
         direction.setOrthogonalTab2(newEmptySpace, direction.getOrthogonalTab2(space));
 
+        // update the layout structure
+        layoutStructure.addArea(space);
         layoutStructure.addArea(newEmptySpace);
 
         return newEmptySpace;
