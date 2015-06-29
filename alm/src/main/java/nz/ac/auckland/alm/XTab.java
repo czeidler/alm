@@ -25,7 +25,7 @@ public class XTab extends Variable {
 	public String toString() {
 		String value = getName();
 		if (getName() == null)
-			value = "X" + this.getIndex();
+			value = "X" + (this.getIndex() - 2); // there are two border tab stops
 
 		value += " (" + getValue() + ")";
 		return value;

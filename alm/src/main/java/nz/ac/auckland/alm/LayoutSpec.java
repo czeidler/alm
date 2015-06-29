@@ -15,7 +15,7 @@ public class LayoutSpec {
     /**
      * The areas that were added to the specification.
      */
-    final List<Area> areas = new ArrayList<Area>();
+    final List<IArea> areas = new ArrayList<IArea>();
 
     /**
      * X-tab for the left of the GUI.
@@ -96,7 +96,7 @@ public class LayoutSpec {
         return clone(getAreas(), customConstraints, getLeft(), getTop(), getRight(), getBottom());
     }
 
-    static public LayoutSpec clone(List<Area> areas, List<Constraint> customConstraints, XTab left, YTab top,
+    static public LayoutSpec clone(List<IArea> areas, List<Constraint> customConstraints, XTab left, YTab top,
                                    XTab right, YTab bottom) {
         LayoutSpec layoutSpec = new LayoutSpec();
 
@@ -128,17 +128,14 @@ public class LayoutSpec {
             }
         };
 
-        for (Area area : areas) {
+        for (IArea area : areas) {
             XTab clonedLeft = getClonedTab(oldToCloneXTabs, area.getLeft(), xTabCreator);
             YTab clonedTop = getClonedTab(oldToCloneYTabs, area.getTop(), yTabCreator);
             XTab clonedRight = getClonedTab(oldToCloneXTabs, area.getRight(), xTabCreator);
             YTab clonedBottom = getClonedTab(oldToCloneYTabs, area.getBottom(), yTabCreator);
 
-            Area clone = layoutSpec.addArea(clonedLeft, clonedTop, clonedRight, clonedBottom);
-            clone.setAlignment(area.getHorizontalAlignment(), area.getVerticalAlignment());
-            clone.setMinSize(area.getMinSize());
-            clone.setPreferredSize(area.getPreferredSize());
-            clone.setMaxSize(area.getMaxSize());
+            IArea clone = area.clone(clonedLeft, clonedTop, clonedRight, clonedBottom);
+            layoutSpec.addArea(clone);
         }
 
         final Map<Variable, Variable> oldToCloneVariable = new HashMap<Variable, Variable>();
@@ -367,7 +364,9 @@ public class LayoutSpec {
         Area.Size[] store = new Area.Size[areas.size()];
 
         for (int i = 0; i < areas.size(); i++) {
-            Area a = areas.get(i);
+            if (!(areas.get(i) instanceof Area))
+                continue;
+            Area a = (Area)areas.get(i);
             store[i] = a.getPreferredSize();
             a.setPreferredSize(a.getMinSize());
         }
@@ -376,7 +375,9 @@ public class LayoutSpec {
 
         //Restore the original preferredSizeValues.
         for (int i = 0; i < areas.size(); i++) {
-            Area a = areas.get(i);
+            if (!(areas.get(i) instanceof Area))
+                continue;
+            Area a = (Area)areas.get(i);
             a.setPreferredSize(store[i]);
         }
 
@@ -479,13 +480,13 @@ public class LayoutSpec {
         return area;
     }
 
-    public void addArea(Area area) {
+    public void addArea(IArea area) {
         invalidateLayout();
         areas.add(area);
         area.attachedToLayoutSpec(this);
     }
 
-    public void removeArea(Area area) {
+    public void removeArea(IArea area) {
         getAreas().remove(area);
         area.detachedFromLinearSpec(this);
     }
@@ -494,8 +495,12 @@ public class LayoutSpec {
      * Removes all Areas from the layout.
      */
     public void clear() {
+        for (Constraint constraint : customConstraints)
+            constraint.remove();
+        customConstraints.clear();
+
         while (areas.size() > 0)
-            areas.get(0).remove();
+            removeArea(areas.get(0));
     }
 
     /**
@@ -503,7 +508,7 @@ public class LayoutSpec {
      *
      * @return the areas that were added to the specification.
      */
-    public List<Area> getAreas() {
+    public List<IArea> getAreas() {
         return areas;
     }
 
@@ -663,7 +668,7 @@ public class LayoutSpec {
     @Override
     public String toString() {
         String out = "Areas:\n";
-        for (Area area : getAreas())
+        for (IArea area : getAreas())
             out += area.toString() + "\n";
 
         out += "Custom Constraints:\n";

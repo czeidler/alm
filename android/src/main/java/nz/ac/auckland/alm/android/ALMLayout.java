@@ -14,6 +14,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import nz.ac.auckland.alm.*;
+import nz.ac.auckland.alm.algebra.LayoutStructure;
+import nz.ac.auckland.alm.algebra.SoundLayoutBuilder;
 import nz.ac.auckland.linsolve.Constraint;
 
 import java.util.*;
@@ -348,8 +350,8 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
     }
 
     @Override
-    public List<Area> getAreas() {
-        return  new ArrayList<Area>(areaMap.values());
+    public List<IArea> getAreas() {
+        return new ArrayList<IArea>(layoutSpec.getAreas());
     }
 
     @Override

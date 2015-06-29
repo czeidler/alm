@@ -25,7 +25,7 @@ public class YTab extends Variable {
 	public String toString() {
 		String value = getName();
 		if (getName() == null)
-			value = "Y" + this.getIndex();
+			value = "Y" + (this.getIndex() - 2); // there are two border tab stops
 
 		value += " (" + getValue() + ")";
 		return value;
