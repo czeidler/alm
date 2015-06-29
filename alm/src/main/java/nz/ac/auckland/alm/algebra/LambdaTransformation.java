@@ -39,6 +39,7 @@ public class LambdaTransformation {
                 if (space.getLeft().getValue() <= left.getValue() && space.getRight().getValue() >= left.getValue()
                     && space.getTop().getValue() <= top.getValue() && space.getBottom().getValue() >= top.getValue()) {
                     EmptySpace orgSpace = space;
+
                     if (space.getLeft() != left) {
                         space = split(space, left, xTabEdgeMap, rightDirection);
                         if (space == null)
@@ -50,6 +51,9 @@ public class LambdaTransformation {
                             merge(orgSpace, space, new RightDirection());
                         } else
                             break;
+                    } else {
+                        emptySpace = space;
+                        break;
                     }
                 }
             }
