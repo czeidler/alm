@@ -61,38 +61,33 @@ public class LambdaTransformation {
                 return null;
         }
 
-        // empty space is larger?
-        EmptySpace split = null;
-        if (emptySpace.getRight() != right && right.getValue() <= emptySpace.getRight().getValue()) {
-            split = split(emptySpace, right, xTabEdgeMap, rightDirection);
-            if (split == null)
-                return null;
-        }
-        if (emptySpace.getBottom() != bottom && bottom.getValue() <= emptySpace.getBottom().getValue()) {
-            if (split(emptySpace, bottom, yTabEdgeMap, bottomDirection) == null) {
-                if (split != null)
-                    merge(emptySpace, split, rightDirection);
-                return null;
-            }
-        }
-
-        if (!extend(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
+        if (!resize(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
             return null;
-        if (!extend(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
+        if (!resize(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
             return null;
 
         return emptySpace;
     }
 
-    private <Tab extends Variable, OrthTab extends Variable> boolean extend(EmptySpace space, Tab targetTab,
+    private <Tab extends Variable, OrthTab extends Variable> boolean resize(EmptySpace space, Tab targetTab,
                                                                             IDirection direction,
                                                                             Map<Tab, Edge> tabMap,
                                                                             IDirection orthDirection,
                                                                             Map<OrthTab, Edge> orthTabMap) {
         if (direction.getTab(space) == targetTab)
             return true;
+        int compareFactor = 1;
+        if (direction instanceof LeftDirection || direction instanceof TopDirection)
+            compareFactor = -1;
         Tab currentXTab = (Tab)direction.getTab(space);
         while (currentXTab != targetTab) {
+            // are we already too large?
+            if (compareFactor * (currentXTab.getValue() - targetTab.getValue()) >= 0) {
+                if (split(space, targetTab, tabMap, direction) == null)
+                    return false;
+                else
+                    return true;
+            }
             if (!extend(space, direction, tabMap, orthDirection, orthTabMap))
                 return false;
             currentXTab = (Tab)direction.getTab(space);
