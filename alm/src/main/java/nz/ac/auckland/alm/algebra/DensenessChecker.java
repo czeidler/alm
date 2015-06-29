@@ -32,30 +32,24 @@ public class DensenessChecker {
         IDirection orth1 = direction.getOrthogonalDirection1();
         IDirection orth2 = direction.getOrthogonalDirection2();
 
-        boolean addedDirection1 = true;
-        boolean addedDirection2 = true;
-        while ((addedDirection1 || addedDirection2) && areas.size() > 0) {
+        boolean areaAdded = true;
+        while (areaAdded && areas.size() > 0) {
+            areaAdded = false;
+            IArea area1 = chain.get(0);
+            IArea area2 = chain.get(chain.size() - 1);
             for (int i = 0; i < areas.size(); i++) {
                 IArea area = areas.get(i);
-                if (addedDirection1) {
-                    addedDirection1 = false;
-                    IArea area1 = chain.get(0);
-                    if (orth1.getTab(area1) == orth1.getOppositeTab(area)) {
-                        chain.add(0, area);
-                        areas.remove(area);
-                        addedDirection1 = true;
-                        break;
-                    }
+                if (orth1.getTab(area1) == orth1.getOppositeTab(area)) {
+                    chain.add(0, area);
+                    areas.remove(area);
+                    areaAdded = true;
+                    break;
                 }
-                if (addedDirection2) {
-                    addedDirection2 = false;
-                    IArea area2 = chain.get(chain.size() - 1);
-                    if (orth2.getTab(area2) == orth2.getOppositeTab(area)) {
-                        chain.add(area);
-                        areas.remove(area);
-                        addedDirection2 = true;
-                        break;
-                    }
+                if (orth2.getTab(area2) == orth2.getOppositeTab(area)) {
+                    chain.add(area);
+                    areas.remove(area);
+                    areaAdded = true;
+                    break;
                 }
             }
         }
