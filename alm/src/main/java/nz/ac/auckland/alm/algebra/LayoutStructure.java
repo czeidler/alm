@@ -97,6 +97,23 @@ public class LayoutStructure {
     invalidateTabs();
   }
 
+  public void addAreaAtEmptySpace(Area area, EmptySpace emptySpace) {
+    if (emptySpace == null)
+      return;
+    removeArea(emptySpace);
+    area.setTo(emptySpace.getLeft(), emptySpace.getTop(), emptySpace.getRight(), emptySpace.getBottom());
+    addArea(area);
+  }
+
+  public EmptySpace makeAreaEmpty(Area area) {
+    if (!getAreas().contains(area))
+      return null;
+    removeArea(area);
+    EmptySpace space = new EmptySpace(area.getLeft(), area.getTop(), area.getRight(), area.getBottom());
+    addArea(space);
+    return space;
+  }
+
   public Iterable<IArea> getAllAreas() {
     return new JoinedList<IArea>(areas, emptySpaces);
   }
