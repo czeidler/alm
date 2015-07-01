@@ -144,4 +144,42 @@ public class LambdaTransformationTest extends BaseAlgebraTestCase {
         EmptySpace emptySpace = trafo.makeSpace(left, y1, right, y4);
         assertTrue(emptySpace == null);
     }
+
+    public void testNewLeftRightTabs() {
+        LayoutSpec layoutSpec = getLayoutSpec(500, 500);
+        XTab x0 = makeXTabAt(100);
+        YTab y0 = makeYTabAt(100);
+        XTab left = layoutSpec.getLeft();
+        YTab top = layoutSpec.getTop();
+        XTab right = layoutSpec.getRight();
+        YTab bottom = layoutSpec.getBottom();
+        layoutSpec.addArea(new EmptySpace(left, top, right, bottom));
+
+        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
+        LambdaTransformation trafo = new LambdaTransformation(layoutStructure);
+
+        EmptySpace emptySpace = trafo.makeSpace(x0, y0, right, bottom);
+        assertTrue(emptySpace != null);
+    }
+
+    public void testNewLeftTab() {
+        LayoutSpec layoutSpec = getLayoutSpec(500, 500);
+        XTab x0 = makeXTabAt(200);
+        XTab x1 = makeXTabAt(100);
+        YTab y0 = makeYTabAt(100);
+        YTab y1 = makeYTabAt(200);
+        XTab left = layoutSpec.getLeft();
+        YTab top = layoutSpec.getTop();
+        XTab right = layoutSpec.getRight();
+        YTab bottom = layoutSpec.getBottom();
+        layoutSpec.addArea(new EmptySpace(left, top, x0, y0));
+        layoutSpec.addArea(new Area(x0, top, right, y0));
+        layoutSpec.addArea(new EmptySpace(left, y0, right, bottom));
+
+        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
+        LambdaTransformation trafo = new LambdaTransformation(layoutStructure);
+
+        EmptySpace emptySpace = trafo.makeSpace(x1, y0, right, y1);
+        assertTrue(emptySpace != null);
+    }
 }

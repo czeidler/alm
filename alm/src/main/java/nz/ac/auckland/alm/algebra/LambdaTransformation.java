@@ -34,8 +34,8 @@ public class LambdaTransformation {
         EmptySpace emptySpace = findEmptySpaceAtCorner(left, top, new LeftDirection(), new TopDirection());
         if (emptySpace == null) {
             // try to create one
-            for (int i = 0; i < layoutStructure.getEmptySpaces().size(); i++) {
-                EmptySpace space = layoutStructure.getEmptySpaces().get(i);
+            List<EmptySpace> emptySpaces = new ArrayList<EmptySpace>(layoutStructure.getEmptySpaces());
+            for (EmptySpace space : emptySpaces) {
                 if (space.getLeft().getValue() <= left.getValue() && space.getRight().getValue() >= left.getValue()
                     && space.getTop().getValue() <= top.getValue() && space.getBottom().getValue() >= top.getValue()) {
                     EmptySpace orgSpace = space;
@@ -328,7 +328,10 @@ public class LambdaTransformation {
     private EmptySpace findEmptySpaceAtCorner(XTab xTab, YTab yTab, IDirection hDirection, IDirection vDirection) {
         Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
 
-        List<IArea> candidates = hDirection.getOppositeAreas(xTabEdgeMap.get(xTab));
+        Edge xEdge = xTabEdgeMap.get(xTab);
+        if (xEdge == null)
+            return null;
+        List<IArea> candidates = hDirection.getOppositeAreas(xEdge);
         for (IArea candidate : candidates) {
             if (!isEmptySpace(candidate))
                 continue;
