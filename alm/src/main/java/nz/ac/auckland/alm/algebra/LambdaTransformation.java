@@ -177,16 +177,23 @@ public class LambdaTransformation {
                 chainFound = true;
                 break;
             }
-            if (currentTab.getValue() >= endTab.getValue())
+            if (fuzzyEquals(currentTab.getValue(), endTab.getValue()))
                 chainFound = true;
-            if (currentTab.getValue() > endTab.getValue())
+
+            if (currentTab.getValue() > endTab.getValue()) {
+                chainFound = true;
                 break;
+            }
         }
         if (!chainFound)
             return null;
         assert (outList.size() > 0);
 
         return outList;
+    }
+
+    private boolean fuzzyEquals(double value, double value2) {
+        return Math.abs(value - value2) < 0.1;
     }
 
     private <OrthTab extends Variable> boolean alignNeighboursEnds(EmptySpace space, List<EmptySpace> neighbours,

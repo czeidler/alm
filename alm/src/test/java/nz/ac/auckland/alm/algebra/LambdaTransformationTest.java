@@ -189,7 +189,7 @@ public class LambdaTransformationTest extends BaseAlgebraTestCase {
         XTab x1 = makeXTabAt(200);
         YTab y0 = makeYTabAt(100);
         YTab y1 = makeYTabAt(400);
-        YTab y2 = makeYTabAt(400);
+        YTab y2 = makeYTabAt(399.9912);
         XTab left = layoutSpec.getLeft();
         YTab top = layoutSpec.getTop();
         XTab right = layoutSpec.getRight();
