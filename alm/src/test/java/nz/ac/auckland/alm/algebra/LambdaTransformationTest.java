@@ -182,4 +182,28 @@ public class LambdaTransformationTest extends BaseAlgebraTestCase {
         EmptySpace emptySpace = trafo.makeSpace(x1, y0, right, y1);
         assertTrue(emptySpace != null);
     }
+
+    public void testError1() {
+        LayoutSpec layoutSpec = getLayoutSpec(500, 500);
+        XTab x0 = makeXTabAt(100);
+        XTab x1 = makeXTabAt(200);
+        YTab y0 = makeYTabAt(100);
+        YTab y1 = makeYTabAt(400);
+        YTab y2 = makeYTabAt(400);
+        XTab left = layoutSpec.getLeft();
+        YTab top = layoutSpec.getTop();
+        XTab right = layoutSpec.getRight();
+        YTab bottom = layoutSpec.getBottom();
+        layoutSpec.addArea(new Area(left, y1, x0, bottom));
+        layoutSpec.addArea(new Area(x0, y2, x1, bottom));
+        layoutSpec.addArea(new EmptySpace(left, top, x0, y1));
+        layoutSpec.addArea(new EmptySpace(x0, top, x1, y2));
+        layoutSpec.addArea(new EmptySpace(x1, top, right, bottom));
+
+        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
+        LambdaTransformation trafo = new LambdaTransformation(layoutStructure);
+
+        EmptySpace emptySpace = trafo.makeSpace(left, top, right, y0);
+        assertTrue(emptySpace != null);
+    }
 }

@@ -177,10 +177,10 @@ public class LambdaTransformation {
                 chainFound = true;
                 break;
             }
-            if (currentTab.getValue() > endTab.getValue()) {
+            if (currentTab.getValue() >= endTab.getValue())
                 chainFound = true;
+            if (currentTab.getValue() > endTab.getValue())
                 break;
-            }
         }
         if (!chainFound)
             return null;
