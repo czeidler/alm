@@ -8,10 +8,7 @@
 package nz.ac.auckland.alm.algebra;
 
 
-import nz.ac.auckland.alm.EmptySpace;
-import nz.ac.auckland.alm.IArea;
-import nz.ac.auckland.alm.XTab;
-import nz.ac.auckland.alm.YTab;
+import nz.ac.auckland.alm.*;
 import nz.ac.auckland.linsolve.Variable;
 
 import java.util.ArrayList;
@@ -133,7 +130,6 @@ public class LambdaTransformation {
     private <Tab extends Variable> List<EmptySpace> collectIntersectingNeighbours(IArea start, IDirection direction,
                                                                                   IDirection orthDirection,
                                                                                   Map<Tab, Edge> tabMap) {
-        assert (direction instanceof RightDirection) || (direction instanceof BottomDirection);
         assert (orthDirection instanceof RightDirection) || (orthDirection instanceof BottomDirection);
 
         Edge edge = tabMap.get(direction.getTab(start));
@@ -177,7 +173,7 @@ public class LambdaTransformation {
                 chainFound = true;
                 break;
             }
-            if (fuzzyEquals(currentTab.getValue(), endTab.getValue()))
+            if (LayoutSpec.fuzzyEquals(currentTab, endTab))
                 chainFound = true;
 
             if (currentTab.getValue() > endTab.getValue()) {
@@ -190,10 +186,6 @@ public class LambdaTransformation {
         assert (outList.size() > 0);
 
         return outList;
-    }
-
-    private boolean fuzzyEquals(double value, double value2) {
-        return Math.abs(value - value2) < 0.1;
     }
 
     private <OrthTab extends Variable> boolean alignNeighboursEnds(EmptySpace space, List<EmptySpace> neighbours,
