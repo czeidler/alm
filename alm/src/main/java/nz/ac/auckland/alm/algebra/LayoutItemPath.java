@@ -25,8 +25,9 @@ import java.util.Map;
  * Transitivity: if A, B are on a path p and B, C are on the same path p, then also A, C are on path p.
  */
 public class LayoutItemPath {
-    static private <Tab extends Variable> void collect(Area seed, IDirection direction, Map<Tab, Edge> map,
-                                                       List<Area> out, List<Area> seeds) {
+    static private <Tab extends Variable, OrthTab extends Variable>
+        void collect(Area seed, IDirection<Tab, OrthTab> direction, Map<Tab, Edge> map, List<Area> out,
+                     List<Area> seeds) {
         Edge edge = direction.getEdge(seed, map);
         Tab orthTab1 = (Tab)direction.getOrthogonalTab1(seed);
         Tab orthTab2 = (Tab)direction.getOrthogonalTab2(seed);

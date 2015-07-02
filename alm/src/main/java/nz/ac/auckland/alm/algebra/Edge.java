@@ -28,8 +28,8 @@ public class Edge {
         return edge;
     }
 
-    static public <Tab extends Variable> boolean isInChain(Variable startTab, Variable tab, Map<Tab, Edge> edges,
-                                                          IDirection direction) {
+    static public <Tab extends Variable, OrthTab extends Variable>
+    boolean isInChain(Variable startTab, Variable tab, Map<Tab, Edge> edges, IDirection<Tab, OrthTab> direction) {
         if (startTab == tab)
             return true;
         Edge edge = edges.get(startTab);
