@@ -51,4 +51,10 @@ abstract class AbstractArea implements IArea {
             c.remove();
         this.layoutSpec = null;
     }
+
+    @Override
+    public Area.Rect getRect() {
+        return new Area.Rect((float)getLeft().getValue(), (float)getTop().getValue(), (float)getRight().getValue(),
+                (float)getBottom().getValue());
+    }
 }

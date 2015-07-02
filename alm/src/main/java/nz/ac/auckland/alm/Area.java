@@ -520,11 +520,6 @@ public class Area extends AbstractArea {
 		return 0;
 	}
 
-	public Rect getRect() {
-		return new Rect((float)getLeft().getValue(), (float)getTop().getValue(), (float)getRight().getValue(),
-				(float)getBottom().getValue());
-	}
-
 	private float getLayoutHSpacing() {
 		return layoutSpec == null ? 0 : layoutSpec.getHorizontalSpacing();
 	}

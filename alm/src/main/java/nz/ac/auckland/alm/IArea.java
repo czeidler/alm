@@ -25,4 +25,6 @@ public interface IArea {
 
     void attachedToLayoutSpec(LayoutSpec layoutSpec);
     void detachedFromLinearSpec(LayoutSpec layoutSpec);
+
+    Area.Rect getRect();
 }
