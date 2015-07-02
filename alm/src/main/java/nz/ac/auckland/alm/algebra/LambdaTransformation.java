@@ -16,36 +16,37 @@ import java.util.List;
 import java.util.Map;
 
 public class LambdaTransformation {
-    LayoutStructure layoutStructure;
+    AlgebraData algebraData;
 
-    public LambdaTransformation(LayoutStructure layoutStructure) {
-        this.layoutStructure = layoutStructure;
+    public LambdaTransformation(AlgebraData algebraData) {
+        this.algebraData = algebraData;
     }
 
     public EmptySpace makeSpace(XTab left, YTab top, XTab right, YTab bottom) {
-        Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
-        Map<YTab, Edge> yTabEdgeMap = layoutStructure.getYTabEdges();
+        Map<XTab, Edge> xTabEdgeMap = algebraData.getXTabEdges();
+        Map<YTab, Edge> yTabEdgeMap = algebraData.getYTabEdges();
         IDirection rightDirection = new RightDirection();
         IDirection bottomDirection = new BottomDirection();
 
         EmptySpace emptySpace = findEmptySpaceAtCorner(left, top, new LeftDirection(), new TopDirection());
         if (emptySpace == null) {
             // try to create one
-            List<EmptySpace> emptySpaces = new ArrayList<EmptySpace>(layoutStructure.getEmptySpaces());
+            List<EmptySpace> emptySpaces = new ArrayList<EmptySpace>(algebraData.getEmptySpaces());
             for (EmptySpace space : emptySpaces) {
                 if (space.getLeft().getValue() <= left.getValue() && space.getRight().getValue() >= left.getValue()
                     && space.getTop().getValue() <= top.getValue() && space.getBottom().getValue() >= top.getValue()) {
                     EmptySpace orgSpace = space;
 
                     if (space.getLeft() != left) {
-                        space = split(space, left, xTabEdgeMap, rightDirection);
+                        space = AlgebraOperations.split(algebraData, space, left, xTabEdgeMap, rightDirection);
                         if (space == null)
                             continue;
                     }
                     if (space.getTop() != top) {
-                        emptySpace = split(space, top, yTabEdgeMap, new BottomDirection());
+                        emptySpace = AlgebraOperations.split(algebraData, space, top, yTabEdgeMap,
+                                new BottomDirection());
                         if (emptySpace == null && orgSpace != space) {
-                            merge(orgSpace, space, new RightDirection());
+                            AlgebraOperations.merge(algebraData, orgSpace, space, new RightDirection());
                         } else
                             break;
                     } else {
@@ -80,7 +81,7 @@ public class LambdaTransformation {
         while (currentXTab != targetTab) {
             // are we already too large?
             if (compareFactor * (currentXTab.getValue() - targetTab.getValue()) >= 0) {
-                if (split(space, targetTab, tabMap, direction) == null)
+                if (AlgebraOperations.split(algebraData, space, targetTab, tabMap, direction) == null)
                     return false;
                 else
                     return true;
@@ -103,7 +104,8 @@ public class LambdaTransformation {
         // 4) 2 and 3 results in an aligned, rectangular box of empty spaces, merge this box into a single empty space
         // 5) merge the initial empty space with the right neighbour
 
-        List<EmptySpace> neighbours = collectIntersectingNeighbours(space, direction, orthDirection, tabMap);
+        List<EmptySpace> neighbours = collectIntersectingNeighbours(space, direction, tabMap, orthDirection,
+                orthTabMap);
         if (neighbours == null)
             return false;
         if (!alignNeighboursEnds(space, neighbours, orthDirection, orthTabMap))
@@ -112,7 +114,7 @@ public class LambdaTransformation {
             return false;
         if (!mergeLine(neighbours, orthDirection))
             return false;
-        if (!merge(space, neighbours.get(0), direction))
+        if (!AlgebraOperations.merge(algebraData, space, neighbours.get(0), direction))
             return false;
         return true;
     }
@@ -127,9 +129,9 @@ public class LambdaTransformation {
      * @param <Tab>
      * @return
      */
-    private <Tab extends Variable> List<EmptySpace> collectIntersectingNeighbours(IArea start, IDirection direction,
-                                                                                  IDirection orthDirection,
-                                                                                  Map<Tab, Edge> tabMap) {
+    private <Tab extends Variable, OrthTab extends Variable>
+    List<EmptySpace> collectIntersectingNeighbours(IArea start, IDirection direction, Map<Tab, Edge> tabMap,
+                                                   IDirection orthDirection, Map<OrthTab, Edge> orthMap) {
         assert (orthDirection instanceof RightDirection) || (orthDirection instanceof BottomDirection);
 
         Edge edge = tabMap.get(direction.getTab(start));
@@ -173,8 +175,11 @@ public class LambdaTransformation {
                 chainFound = true;
                 break;
             }
-            if (LayoutSpec.fuzzyEquals(currentTab, endTab))
+            if (LayoutSpec.fuzzyEquals(currentTab, endTab)) {
                 chainFound = true;
+                if (Edge.isInChain(endTab, currentTab, orthMap, orthDirection))
+                    break;
+            }
 
             if (currentTab.getValue() > endTab.getValue()) {
                 chainFound = true;
@@ -194,8 +199,8 @@ public class LambdaTransformation {
         // cut both ends
         EmptySpace firstNeighbour = neighbours.get(0);
         if (orthDirection.getOppositeTab(firstNeighbour) != orthDirection.getOppositeTab(space)) {
-            EmptySpace newEmptySpace = split(firstNeighbour, (OrthTab)orthDirection.getOppositeTab(space), orthTabMap,
-                    orthDirection);
+            EmptySpace newEmptySpace = AlgebraOperations.split(algebraData, firstNeighbour,
+                    (OrthTab) orthDirection.getOppositeTab(space), orthTabMap, orthDirection);
             if (newEmptySpace == null)
                 return false;
             neighbours.remove(0);
@@ -203,8 +208,8 @@ public class LambdaTransformation {
         }
         EmptySpace lastNeighbour = neighbours.get(neighbours.size() - 1);
         if (orthDirection.getTab(lastNeighbour) != orthDirection.getTab(space)) {
-            EmptySpace newEmptySpace = split(lastNeighbour, (OrthTab)orthDirection.getTab(space), orthTabMap,
-                    orthDirection);
+            EmptySpace newEmptySpace = AlgebraOperations.split(algebraData, lastNeighbour,
+                    (OrthTab) orthDirection.getTab(space), orthTabMap, orthDirection);
             if (newEmptySpace == null)
                 return false;
             // the neighbours list stays valid because the newEmptySpace is no neighbour anymore
@@ -230,7 +235,8 @@ public class LambdaTransformation {
         for (EmptySpace neighbour : neighbours) {
             if (direction.getTab(neighbour) == minDistanceTab)
                 continue;
-            EmptySpace newEmptySpace = split(neighbour, minDistanceTab, tabMap, direction);
+            EmptySpace newEmptySpace = AlgebraOperations.split(algebraData, neighbour, minDistanceTab, tabMap,
+                    direction);
             if (newEmptySpace == null)
                 return false;
         }
@@ -241,70 +247,11 @@ public class LambdaTransformation {
         while (line.size() > 1) {
             EmptySpace area1 = line.get(0);
             EmptySpace area2 = line.get(1);
-            if (!merge(area1, area2, direction))
+            if (!AlgebraOperations.merge(algebraData, area1, area2, direction))
                 return false;
             line.remove(area2);
         }
         return true;
-    }
-
-    /**
-     * Merge area2 into area1.
-     *
-     * @param area1
-     * @param area2
-     * @param direction must point from area1 to area2
-     * @return
-     */
-    private boolean merge(EmptySpace area1, EmptySpace area2, IDirection direction) {
-        assert (direction.getTab(area1) == direction.getOppositeTab(area2));
-
-        if (direction.getOrthogonalTab1(area1) != direction.getOrthogonalTab1(area2))
-            return false;
-        if (direction.getOrthogonalTab2(area1) != direction.getOrthogonalTab2(area2))
-            return false;
-
-        layoutStructure.removeArea(area2);
-        layoutStructure.removeArea(area1);
-        direction.setTab(area1, direction.getTab(area2));
-        layoutStructure.addArea(area1);
-        return true;
-    }
-
-    /**
-     * Splits an existing EmptySpace. The new EmptySpace is added in direction of direction.
-     *
-     * @param space
-     * @param splitTab
-     * @param tabMap
-     * @param direction
-     * @param <Tab>
-     * @return
-     */
-    private <Tab extends Variable> EmptySpace split(EmptySpace space, Tab splitTab, Map<Tab, Edge> tabMap,
-                                                 IDirection direction) {
-        Tab spaceTab = (Tab)direction.getTab(space);
-        Tab oppositeSpaceTab = (Tab)direction.getOppositeTab(space);
-        if (Edge.isInChain(spaceTab, splitTab, tabMap, direction))
-            return null;
-        if (Edge.isInChain(oppositeSpaceTab, splitTab, tabMap, direction.getOppositeDirection()))
-            return null;
-
-        layoutStructure.removeArea(space);
-
-        direction.setTab(space, splitTab);
-
-        EmptySpace newEmptySpace = new EmptySpace();
-        direction.setOppositeTab(newEmptySpace, splitTab);
-        direction.setTab(newEmptySpace, spaceTab);
-        direction.setOrthogonalTab1(newEmptySpace, direction.getOrthogonalTab1(space));
-        direction.setOrthogonalTab2(newEmptySpace, direction.getOrthogonalTab2(space));
-
-        // update the layout structure
-        layoutStructure.addArea(space);
-        layoutStructure.addArea(newEmptySpace);
-
-        return newEmptySpace;
     }
 
     private int emptyElementChainSort(List<IArea> areas, EmptySpace start, IDirection direction) {
@@ -325,7 +272,7 @@ public class LambdaTransformation {
     }
 
     private EmptySpace findEmptySpaceAtCorner(XTab xTab, YTab yTab, IDirection hDirection, IDirection vDirection) {
-        Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
+        Map<XTab, Edge> xTabEdgeMap = algebraData.getXTabEdges();
 
         Edge xEdge = xTabEdgeMap.get(xTab);
         if (xEdge == null)
