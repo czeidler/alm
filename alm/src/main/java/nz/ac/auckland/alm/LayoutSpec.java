@@ -182,6 +182,14 @@ public class LayoutSpec {
         return tab;
     }
 
+    static public <Tab extends Variable> boolean fuzzyEquals(Tab tab1, Tab tab2) {
+        return fuzzyEquals(tab1.getValue(), tab2.getValue());
+    }
+
+    static public boolean fuzzyEquals(double tab1, double tab2) {
+        return Math.abs(tab1 - tab2) < Constraint.GUI_TOLERANCE;
+    }
+
     public void release() {
         clear();
 
