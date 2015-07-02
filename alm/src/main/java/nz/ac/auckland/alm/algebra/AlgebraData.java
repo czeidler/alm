@@ -13,7 +13,7 @@ import nz.ac.auckland.linsolve.Variable;
 import java.util.*;
 
 
-public class LayoutStructure {
+public class AlgebraData {
   final XTab left;
   final YTab top;
   final XTab right;
@@ -32,7 +32,7 @@ public class LayoutStructure {
     }
   };
 
-  public LayoutStructure(XTab left, YTab top, XTab right, YTab bottom) {
+  public AlgebraData(XTab left, YTab top, XTab right, YTab bottom) {
     this.left = left;
     this.top = top;
     this.right = right;
@@ -46,7 +46,7 @@ public class LayoutStructure {
 
   }
 
-  public LayoutStructure(LayoutSpec layoutSpec, Area removedArea) {
+  public AlgebraData(LayoutSpec layoutSpec, Area removedArea) {
     this.left = layoutSpec.getLeft();
     this.top = layoutSpec.getTop();
     this.right = layoutSpec.getRight();
@@ -108,23 +108,6 @@ public class LayoutStructure {
       emptySpaces.remove(area);
 
     invalidateTabs();
-  }
-
-  public void addAreaAtEmptySpace(Area area, EmptySpace emptySpace) {
-    if (emptySpace == null)
-      return;
-    removeArea(emptySpace);
-    area.setTo(emptySpace.getLeft(), emptySpace.getTop(), emptySpace.getRight(), emptySpace.getBottom());
-    addArea(area);
-  }
-
-  public EmptySpace makeAreaEmpty(Area area) {
-    if (!getAreas().contains(area))
-      return null;
-    removeArea(area);
-    EmptySpace space = new EmptySpace(area.getLeft(), area.getTop(), area.getRight(), area.getBottom());
-    addArea(space);
-    return space;
   }
 
   public Iterable<IArea> getAllAreas() {

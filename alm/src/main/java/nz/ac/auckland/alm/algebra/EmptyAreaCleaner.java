@@ -22,12 +22,12 @@ import java.util.Map;
  * Merge EmptyAreas that only refer to other EmptyAreas.
  */
 public class EmptyAreaCleaner {
-    final LayoutStructure layoutStructure;
+    final AlgebraData algebraData;
     final LambdaTransformation trafo;
 
-    public EmptyAreaCleaner(LayoutStructure layoutStructure) {
-        this.layoutStructure = layoutStructure;
-        this.trafo = new LambdaTransformation(layoutStructure);
+    public EmptyAreaCleaner(AlgebraData algebraData) {
+        this.algebraData = algebraData;
+        this.trafo = new LambdaTransformation(algebraData);
     }
 
     private boolean hasOnlyEmptySpaces(List<IArea> list) {
@@ -43,8 +43,8 @@ public class EmptyAreaCleaner {
         // copy the list because we will change the original list
         List<Tab> tabs = new ArrayList<Tab>(map.keySet());
         for (Tab tab : tabs) {
-            if (tab == layoutStructure.getLeft() || tab == layoutStructure.getRight()
-                    || tab == layoutStructure.getTop() || tab == layoutStructure.getBottom())
+            if (tab == algebraData.getLeft() || tab == algebraData.getRight()
+                    || tab == algebraData.getTop() || tab == algebraData.getBottom())
                 continue;
             Edge edge = map.get(tab);
             if (!hasOnlyEmptySpaces(edge.areas1) || !hasOnlyEmptySpaces(edge.areas2))
@@ -60,8 +60,8 @@ public class EmptyAreaCleaner {
         return true;
     }
     public boolean clean() {
-        Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
-        Map<YTab, Edge> yTabEdgeMap = layoutStructure.getYTabEdges();
+        Map<XTab, Edge> xTabEdgeMap = algebraData.getXTabEdges();
+        Map<YTab, Edge> yTabEdgeMap = algebraData.getYTabEdges();
         if (!clean(new RightDirection(), xTabEdgeMap, new BottomDirection(), yTabEdgeMap))
             return false;
         if (!clean(new BottomDirection(), yTabEdgeMap, new RightDirection(), xTabEdgeMap))

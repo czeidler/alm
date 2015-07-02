@@ -42,11 +42,11 @@ public class LayoutItemPathTest extends BaseAlgebraTestCase {
 
         assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
 
-        List<Area> group = LayoutItemPath.detect(seed, layoutStructure.getXTabEdges(), layoutStructure.getYTabEdges());
+        List<Area> group = LayoutItemPath.detect(seed, algebraData.getXTabEdges(), algebraData.getYTabEdges());
         assertEquals(5, group.size());
     }
 }

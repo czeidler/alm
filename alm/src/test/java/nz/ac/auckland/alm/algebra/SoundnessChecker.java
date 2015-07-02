@@ -30,8 +30,8 @@ public class SoundnessChecker extends BaseAlgebraTestCase {
         layoutSpec.addArea(new EmptySpace(x1, y2, right, y3));
         layoutSpec.addArea(new EmptySpace(x1, y3, right, bottom));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
     }
 
     public void testOverlap() {
@@ -53,8 +53,8 @@ public class SoundnessChecker extends BaseAlgebraTestCase {
         layoutSpec.addArea(new EmptySpace(left, y2, right, y3));
         layoutSpec.addArea(new EmptySpace(x1, y3, right, bottom));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertFalse(OverlapChecker.isNonOverlapping(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertFalse(OverlapChecker.isNonOverlapping(algebraData));
     }
 
     public void testDenseness() {
@@ -82,9 +82,9 @@ public class SoundnessChecker extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x1, y2, x2, bottom));
         layoutSpec.addArea(new Area(x2, y2, right, bottom));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
     }
 
     public void testGap() {
@@ -111,9 +111,9 @@ public class SoundnessChecker extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x1, y2, x2, bottom));
         layoutSpec.addArea(new Area(x2, y2, right, bottom));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertFalse(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertFalse(DensenessChecker.isDense(algebraData));
     }
 
     public void testDenseness2() {
@@ -138,9 +138,9 @@ public class SoundnessChecker extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x2, y2, x4, bottom));
         layoutSpec.addArea(new Area(x4, top, right, bottom));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
     }
 
     public void testGap2() {
@@ -164,7 +164,7 @@ public class SoundnessChecker extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x2, y2, x4, bottom));
         layoutSpec.addArea(new Area(x4, top, right, bottom));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertFalse(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertFalse(DensenessChecker.isDense(algebraData));
     }
 }

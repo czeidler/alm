@@ -33,11 +33,11 @@ public class EmptyAreaCleanerTest extends BaseAlgebraTestCase {
         // middle
         layoutSpec.addArea(new EmptySpace(x1, y1, x2, y2));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        EmptyAreaCleaner cleaner = new EmptyAreaCleaner(layoutStructure);
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        EmptyAreaCleaner cleaner = new EmptyAreaCleaner(algebraData);
 
         assertTrue(cleaner.clean());
 
-        assertEquals(1, layoutStructure.getEmptySpaces().size());
+        assertEquals(1, algebraData.getEmptySpaces().size());
     }
 }

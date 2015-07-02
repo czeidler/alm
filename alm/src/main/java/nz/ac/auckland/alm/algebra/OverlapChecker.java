@@ -17,17 +17,17 @@ import java.util.Map;
 
 
 public class OverlapChecker {
-    static public boolean isNonOverlapping(LayoutStructure layoutStructure) {
-        int numberOfAreas = layoutStructure.getAreas().size() + layoutStructure.getEmptySpaces().size();
+    static public boolean isNonOverlapping(AlgebraData algebraData) {
+        int numberOfAreas = algebraData.getAreas().size() + algebraData.getEmptySpaces().size();
 
         IDirection left = new LeftDirection();
         IDirection top = new TopDirection();
         IDirection right = new RightDirection();
         IDirection bottom = new BottomDirection();
 
-        Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
-        Map<YTab, Edge> yTabEdgeMap = layoutStructure.getYTabEdges();
-        for (IArea area : layoutStructure.getAllAreas()) {
+        Map<XTab, Edge> xTabEdgeMap = algebraData.getXTabEdges();
+        Map<YTab, Edge> yTabEdgeMap = algebraData.getYTabEdges();
+        for (IArea area : algebraData.getAllAreas()) {
             List<IArea> connections = new ArrayList<IArea>();
             Edge.collectAreasInChain(left.getEdge(area, xTabEdgeMap), xTabEdgeMap, left, connections);
             Edge.collectAreasInChain(right.getEdge(area, xTabEdgeMap), xTabEdgeMap, right, connections);

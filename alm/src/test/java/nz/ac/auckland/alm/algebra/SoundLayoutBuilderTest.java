@@ -31,11 +31,11 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
 
         assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
 
-        assertEquals(0, layoutStructure.getEmptySpaces().size());
+        assertEquals(0, algebraData.getEmptySpaces().size());
     }
 
     public void testTwoButtonsAndGap() {
@@ -54,11 +54,11 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
 
         assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
 
-        assertEquals(1, layoutStructure.getEmptySpaces().size());
+        assertEquals(1, algebraData.getEmptySpaces().size());
     }
 
     public void testPinWheel() {
@@ -86,11 +86,11 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
 
         assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
 
-        assertEquals(0, layoutStructure.getEmptySpaces().size());
+        assertEquals(0, algebraData.getEmptySpaces().size());
     }
 
     public void testPinWheelMiddleGap() {
@@ -116,11 +116,11 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
 
         assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
 
-        assertEquals(1, layoutStructure.getEmptySpaces().size());
+        assertEquals(1, algebraData.getEmptySpaces().size());
     }
 
     public void testLayout1() {
@@ -151,8 +151,8 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
 
         assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
 
-        LayoutStructure layoutStructure = new LayoutStructure(layoutSpec, null);
-        assertTrue(OverlapChecker.isNonOverlapping(layoutStructure));
-        assertTrue(DensenessChecker.isDense(layoutStructure));
+        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        assertTrue(OverlapChecker.isNonOverlapping(algebraData));
+        assertTrue(DensenessChecker.isDense(algebraData));
     }
 }
