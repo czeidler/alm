@@ -76,7 +76,7 @@ public class SoundLayoutBuilder {
             if (emptySpace == null)
                 return false;
 
-            AlgebraOperations.placeAreaInEmptySpace(algebraData, area, emptySpace);
+            TilingAlgebra.placeAreaInEmptySpace(algebraData, area, emptySpace);
         }
 
         algebraData.applyToLayoutSpec(layoutSpec);

@@ -16,7 +16,7 @@ import nz.ac.auckland.linsolve.Variable;
 
 import java.util.Map;
 
-public class AlgebraOperations {
+public class TilingAlgebra {
     /**
      * Merge area2 into area1.
      *

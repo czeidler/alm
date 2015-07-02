@@ -38,15 +38,15 @@ public class LambdaTransformation {
                     EmptySpace orgSpace = space;
 
                     if (space.getLeft() != left) {
-                        space = AlgebraOperations.split(algebraData, space, left, xTabEdgeMap, rightDirection);
+                        space = TilingAlgebra.split(algebraData, space, left, xTabEdgeMap, rightDirection);
                         if (space == null)
                             continue;
                     }
                     if (space.getTop() != top) {
-                        emptySpace = AlgebraOperations.split(algebraData, space, top, yTabEdgeMap,
+                        emptySpace = TilingAlgebra.split(algebraData, space, top, yTabEdgeMap,
                                 new BottomDirection());
                         if (emptySpace == null && orgSpace != space) {
-                            AlgebraOperations.merge(algebraData, orgSpace, space, new RightDirection());
+                            TilingAlgebra.merge(algebraData, orgSpace, space, new RightDirection());
                         } else
                             break;
                     } else {
@@ -81,7 +81,7 @@ public class LambdaTransformation {
         while (currentXTab != targetTab) {
             // are we already too large?
             if (compareFactor * (currentXTab.getValue() - targetTab.getValue()) >= 0) {
-                if (AlgebraOperations.split(algebraData, space, targetTab, tabMap, direction) == null)
+                if (TilingAlgebra.split(algebraData, space, targetTab, tabMap, direction) == null)
                     return false;
                 else
                     return true;
@@ -114,7 +114,7 @@ public class LambdaTransformation {
             return false;
         if (!mergeLine(neighbours, orthDirection))
             return false;
-        if (!AlgebraOperations.merge(algebraData, space, neighbours.get(0), direction))
+        if (!TilingAlgebra.merge(algebraData, space, neighbours.get(0), direction))
             return false;
         return true;
     }
@@ -199,7 +199,7 @@ public class LambdaTransformation {
         // cut both ends
         EmptySpace firstNeighbour = neighbours.get(0);
         if (orthDirection.getOppositeTab(firstNeighbour) != orthDirection.getOppositeTab(space)) {
-            EmptySpace newEmptySpace = AlgebraOperations.split(algebraData, firstNeighbour,
+            EmptySpace newEmptySpace = TilingAlgebra.split(algebraData, firstNeighbour,
                     (OrthTab) orthDirection.getOppositeTab(space), orthTabMap, orthDirection);
             if (newEmptySpace == null)
                 return false;
@@ -208,7 +208,7 @@ public class LambdaTransformation {
         }
         EmptySpace lastNeighbour = neighbours.get(neighbours.size() - 1);
         if (orthDirection.getTab(lastNeighbour) != orthDirection.getTab(space)) {
-            EmptySpace newEmptySpace = AlgebraOperations.split(algebraData, lastNeighbour,
+            EmptySpace newEmptySpace = TilingAlgebra.split(algebraData, lastNeighbour,
                     (OrthTab) orthDirection.getTab(space), orthTabMap, orthDirection);
             if (newEmptySpace == null)
                 return false;
@@ -235,7 +235,7 @@ public class LambdaTransformation {
         for (EmptySpace neighbour : neighbours) {
             if (direction.getTab(neighbour) == minDistanceTab)
                 continue;
-            EmptySpace newEmptySpace = AlgebraOperations.split(algebraData, neighbour, minDistanceTab, tabMap,
+            EmptySpace newEmptySpace = TilingAlgebra.split(algebraData, neighbour, minDistanceTab, tabMap,
                     direction);
             if (newEmptySpace == null)
                 return false;
@@ -247,7 +247,7 @@ public class LambdaTransformation {
         while (line.size() > 1) {
             EmptySpace area1 = line.get(0);
             EmptySpace area2 = line.get(1);
-            if (!AlgebraOperations.merge(algebraData, area1, area2, direction))
+            if (!TilingAlgebra.merge(algebraData, area1, area2, direction))
                 return false;
             line.remove(area2);
         }
