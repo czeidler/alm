@@ -77,6 +77,16 @@ abstract public class AbstractHorizontalDirection implements IDirection<XTab, YT
   }
 
   @Override
+  public Map<XTab, Edge> getTabEdgeMap(AlgebraData data) {
+    return data.getXTabEdges();
+  }
+
+  @Override
+  public Map<YTab, Edge> getOrthTabEdgeMap(AlgebraData data) {
+    return data.getYTabEdges();
+  }
+
+  @Override
   public IDirection getOrthogonalDirection1() {
     return new TopDirection();
   }

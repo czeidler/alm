@@ -78,6 +78,16 @@ abstract class AbstractVerticalDirection implements IDirection<YTab, XTab> {
   }
 
   @Override
+  public Map<YTab, Edge> getTabEdgeMap(AlgebraData data) {
+    return data.getYTabEdges();
+  }
+
+  @Override
+  public Map<XTab, Edge> getOrthTabEdgeMap(AlgebraData data) {
+    return data.getXTabEdges();
+  }
+
+  @Override
   public IDirection getOrthogonalDirection1() {
     return new LeftDirection();
   }

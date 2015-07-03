@@ -39,6 +39,9 @@ public interface IDirection<Tab extends Variable, OrthTab extends Variable> {
   Tab createTab();
   OrthTab createOrthogonalTab();
 
+  Map<Tab, Edge> getTabEdgeMap(AlgebraData data);
+  Map<OrthTab, Edge> getOrthTabEdgeMap(AlgebraData data);
+
   void setTab(IArea area, Tab tab);
   void setOppositeTab(IArea area, Tab tab);
   void setOrthogonalTab1(IArea area, OrthTab tab);
