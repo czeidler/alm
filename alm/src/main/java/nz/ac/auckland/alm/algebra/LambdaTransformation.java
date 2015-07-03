@@ -7,7 +7,6 @@
  */
 package nz.ac.auckland.alm.algebra;
 
-
 import nz.ac.auckland.alm.*;
 import nz.ac.auckland.linsolve.Variable;
 
@@ -15,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class LambdaTransformation {
+
+class LambdaTransformation {
     AlgebraData algebraData;
 
     public LambdaTransformation(AlgebraData algebraData) {
