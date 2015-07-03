@@ -228,20 +228,6 @@ public class LambdaTransformationTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new EmptySpace(x2, top, x0, y5));
         layoutSpec.addArea(new EmptySpace(x0, top, right, y5));
         layoutSpec.addArea(new EmptySpace(x0, y5, x1, bottom));
-/*
-
-Make space for: AreaCandidate(left (-0.004274022636394648), top (0.0), right (1195.9999999923093), Y5 (621.993867640258))
-Area(left (-0.004274022636394648),y0 (621.9946225682406),X2 (181.99358896604542),bottom (718.0)),
-Area(X2 (181.99358896604542),Y5 (621.993867640258),x0 (408.9935889660454),bottom (718.0)),
-Area(x1 (968.9999999923093),Y5 (621.993867640258),right (1195.9999999923093),bottom (718.0))]
-
-EmptySpace(left (-0.004274022636394648),top (0.0),X2 (181.99358896604542),y0 (621.9946225682406)),
-EmptySpace(X2 (181.99358896604542),top (0.0),x0 (408.9935889660454),Y5 (621.993867640258)),
-EmptySpace(x0 (408.9935889660454),top (0.0),right (1195.9999999923093),Y5 (621.993867640258)),
-EmptySpace(x0 (408.9935889660454),Y5 (621.993867640258),x1 (968.9999999923093),bottom (718.0))]
-
-
-*/
 
         AlgebraData algebraData = new AlgebraData(layoutSpec, null);
         LambdaTransformation trafo = new LambdaTransformation(algebraData);

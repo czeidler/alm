@@ -59,10 +59,19 @@ public class LambdaTransformation {
                 return null;
         }
 
-        if (!resize(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
-            return null;
-        if (!resize(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
-            return null;
+        if (LayoutSpec.fuzzyEquals(emptySpace.getBottom(), bottom)) {
+            // In this case resizing to the right first can fix emptySpace.getBottom above bottom. This can be avoided
+            // by resizing first to the bottom. See testError2 for an example.
+            if (!resize(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
+                return null;
+            if (!resize(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
+                return null;
+        } else {
+            if (!resize(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
+                return null;
+            if (!resize(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
+                return null;
+        }
 
         return emptySpace;
     }
