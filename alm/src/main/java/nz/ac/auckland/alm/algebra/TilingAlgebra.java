@@ -50,7 +50,7 @@ public class TilingAlgebra {
      * @param <Tab>
      * @return
      */
-    static public  <Tab extends Variable> EmptySpace split(AlgebraData algebraData, EmptySpace space,
+    static public <Tab extends Variable> EmptySpace split(AlgebraData algebraData, EmptySpace space,
                                                            Tab splitTab, Map<Tab, Edge> tabMap, IDirection direction) {
         Tab spaceTab = (Tab)direction.getTab(space);
         Tab oppositeSpaceTab = (Tab)direction.getOppositeTab(space);
@@ -122,5 +122,19 @@ public class TilingAlgebra {
         EmptySpace space = new EmptySpace(area.getLeft(), area.getTop(), area.getRight(), area.getBottom());
         algebraData.addArea(space);
         return space;
+    }
+
+    static public <Tab extends Variable, OrthTab extends Variable>
+    boolean resize(AlgebraData algebraData, EmptySpace space, Tab target, IDirection<Tab, OrthTab> direction,
+                   IDirection<OrthTab, Tab> orthDirection) {
+        LambdaTransformation trafo = new LambdaTransformation(algebraData);
+        return trafo.resize(space, target, direction, orthDirection);
+    }
+
+    static public <Tab extends Variable, OrthTab extends Variable>
+    boolean extend(AlgebraData algebraData, EmptySpace space, IDirection direction, IDirection orthDirection) {
+        LambdaTransformation trafo = new LambdaTransformation(algebraData);
+        return trafo.extend(space, direction, direction.getTabEdgeMap(algebraData), orthDirection,
+                orthDirection.getTabEdgeMap(algebraData));
     }
 }

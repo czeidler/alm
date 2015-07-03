@@ -62,31 +62,32 @@ public class LambdaTransformation {
         if (LayoutSpec.fuzzyEquals(emptySpace.getBottom(), bottom)) {
             // In this case resizing to the right first can fix emptySpace.getBottom above bottom. This can be avoided
             // by resizing first to the bottom. See testError2 for an example.
-            if (!resize(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
+            if (!resize(emptySpace, bottom, bottomDirection, rightDirection))
                 return null;
-            if (!resize(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
+            if (!resize(emptySpace, right, rightDirection, bottomDirection))
                 return null;
         } else {
-            if (!resize(emptySpace, right, rightDirection, xTabEdgeMap, bottomDirection, yTabEdgeMap))
+            if (!resize(emptySpace, right, rightDirection, bottomDirection))
                 return null;
-            if (!resize(emptySpace, bottom, bottomDirection, yTabEdgeMap, rightDirection, xTabEdgeMap))
+            if (!resize(emptySpace, bottom, bottomDirection, rightDirection))
                 return null;
         }
 
         return emptySpace;
     }
 
-    private <Tab extends Variable, OrthTab extends Variable> boolean resize(EmptySpace space, Tab targetTab,
-                                                                            IDirection direction,
-                                                                            Map<Tab, Edge> tabMap,
-                                                                            IDirection orthDirection,
-                                                                            Map<OrthTab, Edge> orthTabMap) {
+    public <Tab extends Variable, OrthTab extends Variable> boolean resize(EmptySpace space, Tab targetTab,
+                                                                            IDirection<Tab, OrthTab> direction,
+                                                                            IDirection orthDirection) {
+        Map<Tab, Edge> tabMap = direction.getTabEdgeMap(algebraData);
+        Map<OrthTab, Edge> orthTabMap = orthDirection.getTabEdgeMap(algebraData);
+
         if (direction.getTab(space) == targetTab)
             return true;
         int compareFactor = 1;
         if (direction instanceof LeftDirection || direction instanceof TopDirection)
             compareFactor = -1;
-        Tab currentXTab = (Tab)direction.getTab(space);
+        Tab currentXTab = direction.getTab(space);
         while (currentXTab != targetTab) {
             // are we already too large?
             if (compareFactor * (currentXTab.getValue() - targetTab.getValue()) >= 0) {
@@ -97,7 +98,7 @@ public class LambdaTransformation {
             }
             if (!extend(space, direction, tabMap, orthDirection, orthTabMap))
                 return false;
-            currentXTab = (Tab)direction.getTab(space);
+            currentXTab = direction.getTab(space);
         }
         return true;
     }
