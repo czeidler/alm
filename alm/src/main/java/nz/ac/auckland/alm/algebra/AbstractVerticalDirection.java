@@ -88,12 +88,12 @@ abstract class AbstractVerticalDirection implements IDirection<YTab, XTab> {
   }
 
   @Override
-  public IDirection getOrthogonalDirection1() {
+  public IDirection<XTab, YTab> getOrthogonalDirection1() {
     return new LeftDirection();
   }
 
   @Override
-  public IDirection getOrthogonalDirection2() {
+  public IDirection<XTab, YTab> getOrthogonalDirection2() {
     return new RightDirection();
   }
 }

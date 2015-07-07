@@ -29,9 +29,9 @@ public interface IDirection<Tab extends Variable, OrthTab extends Variable> {
   List<IArea> getAreas(Edge edge);
   List<IArea> getOppositeAreas(Edge edge);
 
-  IDirection getOppositeDirection();
-  IDirection getOrthogonalDirection1();
-  IDirection getOrthogonalDirection2();
+  IDirection<Tab, OrthTab> getOppositeDirection();
+  IDirection<OrthTab, Tab> getOrthogonalDirection1();
+  IDirection<OrthTab, Tab> getOrthogonalDirection2();
 
   double getExtent(Area.Size size);
   double getOrthogonalExtent(Area.Size size);
@@ -41,6 +41,7 @@ public interface IDirection<Tab extends Variable, OrthTab extends Variable> {
 
   Map<Tab, Edge> getTabEdgeMap(AlgebraData data);
   Map<OrthTab, Edge> getOrthTabEdgeMap(AlgebraData data);
+  Tab getTab(AlgebraData data);
 
   void setTab(IArea area, Tab tab);
   void setOppositeTab(IArea area, Tab tab);

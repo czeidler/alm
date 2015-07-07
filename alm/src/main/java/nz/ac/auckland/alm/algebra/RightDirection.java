@@ -39,8 +39,13 @@ public class RightDirection extends AbstractHorizontalDirection {
   }
 
   @Override
-  public IDirection getOppositeDirection() {
+  public IDirection<XTab, YTab> getOppositeDirection() {
     return new LeftDirection();
+  }
+
+  @Override
+  public XTab getTab(AlgebraData data) {
+    return data.getRight();
   }
 
   @Override

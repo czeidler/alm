@@ -39,8 +39,13 @@ public class BottomDirection extends AbstractVerticalDirection {
   }
 
   @Override
-  public IDirection getOppositeDirection() {
+  public IDirection<YTab, XTab> getOppositeDirection() {
     return new TopDirection();
+  }
+
+  @Override
+  public YTab getTab(AlgebraData data) {
+    return data.getBottom();
   }
 
   @Override

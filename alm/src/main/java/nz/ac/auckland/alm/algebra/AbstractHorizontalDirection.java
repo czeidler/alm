@@ -87,12 +87,12 @@ abstract public class AbstractHorizontalDirection implements IDirection<XTab, YT
   }
 
   @Override
-  public IDirection getOrthogonalDirection1() {
+  public IDirection<YTab, XTab> getOrthogonalDirection1() {
     return new TopDirection();
   }
 
   @Override
-  public IDirection getOrthogonalDirection2() {
+  public IDirection<YTab, XTab> getOrthogonalDirection2() {
     return new BottomDirection();
   }
 }
