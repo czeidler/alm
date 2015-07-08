@@ -266,16 +266,19 @@ class LambdaTransformation {
 
     private int emptyElementChainSort(List<IArea> areas, EmptySpace start, IDirection direction) {
         int chainLength = 1;
+        EmptySpace current = start;
         for (int i = 0; i < areas.size(); i++) {
             IArea area = areas.get(i);
-            if (area == start)
+            if (area == start || area == current)
                 continue;
             if (!isEmptySpace(area))
                 continue;
-            if (direction.getTab(start) == direction.getOppositeTab(area)) {
+            if (direction.getTab(current) == direction.getOppositeTab(area)) {
                 areas.remove(i);
-                areas.add(areas.indexOf(start) + 1, area);
-                chainLength += emptyElementChainSort(areas, (EmptySpace)area, direction);
+                areas.add(areas.indexOf(current) + 1, area);
+                chainLength ++;
+                current = (EmptySpace)area;
+                i = 0;
             }
         }
         return chainLength;
