@@ -97,6 +97,8 @@ public class LambdaTransformationTest extends BaseAlgebraTestCase {
         YTab top = layoutSpec.getTop();
         XTab right = layoutSpec.getRight();
         YTab bottom = layoutSpec.getBottom();
+
+        // (A /_1 L1 /_4 L2) | ((L3 | L4) /_2 (L5 | L6) /_3 (L7 | L8))
         layoutSpec.addArea(new Area(left, top, x1, y1));
         layoutSpec.addArea(new EmptySpace(left, y1, x1, y4));
         layoutSpec.addArea(new EmptySpace(left, y4, x1, bottom));
