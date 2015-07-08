@@ -278,7 +278,7 @@ class LambdaTransformation {
                 areas.add(areas.indexOf(current) + 1, area);
                 chainLength ++;
                 current = (EmptySpace)area;
-                i = 0;
+                i = -1;
             }
         }
         return chainLength;
