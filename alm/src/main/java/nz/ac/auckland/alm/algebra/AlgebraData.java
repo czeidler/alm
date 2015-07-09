@@ -99,6 +99,32 @@ public class AlgebraData {
     invalidateTabs();
   }
 
+  public <Tab extends Variable, OrthTab extends Variable>
+  void mergeTabs(Tab tab, Tab goneTab, IDirection<Tab, OrthTab> direction) {
+    assert tab != goneTab;
+
+    Map<Tab, Edge> map = direction.getTabEdgeMap(this);
+    Edge edge = map.get(tab);
+    Edge goneEdge = map.get(goneTab);
+    map.remove(goneEdge);
+
+    List<IArea> goneAreas = direction.getAreas(goneEdge);
+    List<IArea> areas = direction.getAreas(edge);
+    for (IArea area : goneAreas) {
+      direction.setOppositeTab(area, tab);
+      areas.add(area);
+    }
+    IDirection<Tab, OrthTab> oppositeDirection = direction.getOppositeDirection();
+    goneAreas = oppositeDirection.getAreas(goneEdge);
+    areas = oppositeDirection.getAreas(edge);
+    for (IArea area : goneAreas) {
+      oppositeDirection.setOppositeTab(area, tab);
+      areas.add(area);
+    }
+
+    invalidateTabs();
+  }
+
   public void removeArea(IArea area) {
     Edge.removeArea(area, xTabEdgeMap, yTabEdgeMap);
 
