@@ -106,7 +106,7 @@ public class AlgebraData {
     Map<Tab, Edge> map = direction.getTabEdgeMap(this);
     Edge edge = map.get(tab);
     Edge goneEdge = map.get(goneTab);
-    map.remove(goneEdge);
+    map.remove(goneTab);
 
     List<IArea> goneAreas = direction.getAreas(goneEdge);
     List<IArea> areas = direction.getAreas(edge);
