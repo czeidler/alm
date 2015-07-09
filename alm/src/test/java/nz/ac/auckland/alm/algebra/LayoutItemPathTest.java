@@ -40,9 +40,7 @@ public class LayoutItemPathTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x1, y0, x2, y1));
         layoutSpec.addArea(new Area(x1, y1, x2, y2));
 
-        assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
-
-        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        AlgebraData algebraData = SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec);
         assertTrue(OverlapChecker.isNonOverlapping(algebraData));
         assertTrue(DensenessChecker.isDense(algebraData));
 

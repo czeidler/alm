@@ -41,7 +41,13 @@ public class SoundLayoutBuilder {
         return closestTab;
     }
 
-    static public boolean fillWithEmptySpaces(LayoutSpec layoutSpec) {
+    /**
+     * Tries to create a dense AlgebraData from a LayoutSpec.
+     *
+     * @param layoutSpec
+     * @return null if the specs can't be filled
+     */
+    static public AlgebraData fillWithEmptySpaces(LayoutSpec layoutSpec) {
         List<Area> areas = new ArrayList<Area>();
         for (IArea area : layoutSpec.getAreas()) {
             if (area instanceof Area)
@@ -74,12 +80,13 @@ public class SoundLayoutBuilder {
 
             EmptySpace emptySpace = trafo.makeSpace(leftLarge, topLarge, rightLarge, bottomLarge);
             if (emptySpace == null)
-                return false;
+                return null;
 
             TilingAlgebra.placeAreaInEmptySpace(algebraData, area, emptySpace);
         }
 
-        algebraData.applyToLayoutSpec(layoutSpec);
-        return true;
+        EmptyAreaCleaner.clean(algebraData);
+
+        return algebraData;
     }
 }

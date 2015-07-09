@@ -29,9 +29,8 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x1, top, x2, bottom));
         layoutSpec.addArea(new Area(x2, top, right, bottom));
 
-        assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
-
-        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        AlgebraData algebraData = SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec);
+        assertTrue(algebraData != null);
         assertTrue(OverlapChecker.isNonOverlapping(algebraData));
         assertTrue(DensenessChecker.isDense(algebraData));
 
@@ -52,9 +51,8 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(left, top, x1, bottom));
         layoutSpec.addArea(new Area(x2, top, right, bottom));
 
-        assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
-
-        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        AlgebraData algebraData = SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec);
+        assertTrue(algebraData != null);
         assertTrue(OverlapChecker.isNonOverlapping(algebraData));
         assertTrue(DensenessChecker.isDense(algebraData));
 
@@ -84,9 +82,8 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x1, y1, x2, y2));
 
 
-        assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
-
-        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        AlgebraData algebraData = SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec);
+        assertTrue(algebraData != null);
         assertTrue(OverlapChecker.isNonOverlapping(algebraData));
         assertTrue(DensenessChecker.isDense(algebraData));
 
@@ -114,9 +111,8 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(left, y1, x1, bottom));
 
 
-        assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
-
-        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
+        AlgebraData algebraData = SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec);
+        assertTrue(algebraData != null);
         assertTrue(OverlapChecker.isNonOverlapping(algebraData));
         assertTrue(DensenessChecker.isDense(algebraData));
 
@@ -149,9 +145,11 @@ public class SoundLayoutBuilderTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(left, y0, right, y3));
         layoutSpec.addArea(new Area(x2, y3, x4, bottom));
 
-        assertTrue(SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec));
+        AlgebraData algebraData = SoundLayoutBuilder.fillWithEmptySpaces(layoutSpec);
+        assertTrue(algebraData != null);
+        algebraData.applyToLayoutSpec(layoutSpec);
+        algebraData = new AlgebraData(layoutSpec, null);
 
-        AlgebraData algebraData = new AlgebraData(layoutSpec, null);
         assertTrue(OverlapChecker.isNonOverlapping(algebraData));
         assertTrue(DensenessChecker.isDense(algebraData));
     }
