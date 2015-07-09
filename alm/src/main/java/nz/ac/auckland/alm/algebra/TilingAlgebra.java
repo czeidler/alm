@@ -8,10 +8,7 @@
 package nz.ac.auckland.alm.algebra;
 
 
-import nz.ac.auckland.alm.Area;
-import nz.ac.auckland.alm.EmptySpace;
-import nz.ac.auckland.alm.XTab;
-import nz.ac.auckland.alm.YTab;
+import nz.ac.auckland.alm.*;
 import nz.ac.auckland.linsolve.Variable;
 
 import java.util.Map;
@@ -132,9 +129,18 @@ public class TilingAlgebra {
     }
 
     static public <Tab extends Variable, OrthTab extends Variable>
-    boolean extend(AlgebraData algebraData, EmptySpace space, IDirection direction, IDirection orthDirection) {
+    boolean extend(AlgebraData algebraData, EmptySpace space, IDirection direction) {
+        IDirection orthDirection = direction.getOrthogonalDirection2();
         LambdaTransformation trafo = new LambdaTransformation(algebraData);
         return trafo.extend(space, direction, direction.getTabEdgeMap(algebraData), orthDirection,
+                orthDirection.getTabEdgeMap(algebraData));
+    }
+
+    static public <Tab extends Variable, OrthTab extends Variable>
+    EmptySpace makeSpace(AlgebraData algebraData, IArea area, IDirection direction) {
+        IDirection orthDirection = direction.getOrthogonalDirection2();
+        LambdaTransformation trafo = new LambdaTransformation(algebraData);
+        return trafo.makeSpace(area, direction, direction.getTabEdgeMap(algebraData), orthDirection,
                 orthDirection.getTabEdgeMap(algebraData));
     }
 }

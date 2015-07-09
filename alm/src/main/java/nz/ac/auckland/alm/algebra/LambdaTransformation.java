@@ -107,26 +107,35 @@ class LambdaTransformation {
                                                                             Map<Tab, Edge> tabMap,
                                                                             IDirection orthDirection,
                                                                             Map<OrthTab, Edge> orthTabMap) {
-        // Example: extend the empty space to the right (orthogonal direction is bottom):
+        EmptySpace neighbour = makeSpace(space, direction, tabMap, orthDirection, orthTabMap);
+        if (neighbour == null)
+            return false;
+        if (!TilingAlgebra.merge(algebraData, space, neighbour, direction))
+            return false;
+        return true;
+    }
+
+    public <Tab extends Variable, OrthTab extends Variable>
+    EmptySpace makeSpace(IArea area, IDirection direction, Map<Tab, Edge> tabMap, IDirection orthDirection,
+                         Map<OrthTab, Edge> orthTabMap) {
+        // Example: make space to the right (orthogonal direction is bottom):
         // 1) get intersecting, direct neighbours to the right
         // 2) align top and bottom neighbours with the initial empty space area
         // 3) align the right of all neighbours
         // 4) 2 and 3 results in an aligned, rectangular box of empty spaces, merge this box into a single empty space
-        // 5) merge the initial empty space with the right neighbour
 
-        List<EmptySpace> neighbours = collectIntersectingNeighbours(space, direction, tabMap, orthDirection,
+        List<EmptySpace> neighbours = collectIntersectingNeighbours(area, direction, tabMap, orthDirection,
                 orthTabMap);
         if (neighbours == null)
-            return false;
-        if (!alignNeighboursEnds(space, neighbours, orthDirection, orthTabMap))
-            return false;
+            return null;
+        if (!alignNeighboursEnds(area, neighbours, orthDirection, orthTabMap))
+            return null;
         if (!alignNeighbours(neighbours, direction, tabMap))
-            return false;
+            return null;
         if (!mergeLine(neighbours, orthDirection))
-            return false;
-        if (!TilingAlgebra.merge(algebraData, space, neighbours.get(0), direction))
-            return false;
-        return true;
+            return null;
+        assert neighbours.size() == 1;
+        return neighbours.get(0);
     }
 
     /**
@@ -203,7 +212,7 @@ class LambdaTransformation {
         return outList;
     }
 
-    private <OrthTab extends Variable> boolean alignNeighboursEnds(EmptySpace space, List<EmptySpace> neighbours,
+    private <OrthTab extends Variable> boolean alignNeighboursEnds(IArea space, List<EmptySpace> neighbours,
                                                                    IDirection orthDirection,
                                                                    Map<OrthTab, Edge> orthTabMap) {
         // cut both ends
