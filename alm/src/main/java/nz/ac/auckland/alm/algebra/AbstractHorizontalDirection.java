@@ -57,13 +57,13 @@ abstract public class AbstractHorizontalDirection implements IDirection<XTab, YT
   }
 
   @Override
-  public double getExtent(Area.Size size) {
-    return size.getWidth();
+  public double getExtent(IArea area) {
+    return area.getRight().getValue() - area.getLeft().getValue();
   }
 
   @Override
-  public double getOrthogonalExtent(Area.Size size) {
-    return size.getHeight();
+  public double getExtent(Area.Size size) {
+    return size.getWidth();
   }
 
   @Override

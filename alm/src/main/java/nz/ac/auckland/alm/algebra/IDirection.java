@@ -33,8 +33,8 @@ public interface IDirection<Tab extends Variable, OrthTab extends Variable> {
   IDirection<OrthTab, Tab> getOrthogonalDirection1();
   IDirection<OrthTab, Tab> getOrthogonalDirection2();
 
+  double getExtent(IArea area);
   double getExtent(Area.Size size);
-  double getOrthogonalExtent(Area.Size size);
 
   Tab createTab();
   OrthTab createOrthogonalTab();

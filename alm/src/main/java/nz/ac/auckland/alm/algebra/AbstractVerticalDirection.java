@@ -58,13 +58,13 @@ abstract class AbstractVerticalDirection implements IDirection<YTab, XTab> {
   }
 
   @Override
-  public double getExtent(Area.Size size) {
-    return size.getHeight();
+  public double getExtent(IArea area) {
+    return area.getBottom().getValue() - area.getTop().getValue();
   }
 
   @Override
-  public double getOrthogonalExtent(Area.Size size) {
-    return size.getWidth();
+  public double getExtent(Area.Size size) {
+    return size.getHeight();
   }
 
   @Override
