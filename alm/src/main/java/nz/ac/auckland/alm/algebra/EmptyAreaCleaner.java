@@ -78,35 +78,48 @@ public class EmptyAreaCleaner {
      */
     static public <Tab extends Variable, OrthTab extends Variable>
     void simplify(AlgebraData data, IDirection<Tab, OrthTab> direction) {
-        IDirection<Tab, OrthTab> oppositeDirection = direction.getOppositeDirection();
-        IDirection<OrthTab, Tab> orth1Direction = direction.getOrthogonalDirection1();
-        IDirection<OrthTab, Tab> orth2Direction = direction.getOrthogonalDirection2();
         List<EmptySpace> emptySpaces = data.getEmptySpaces();
         for (int i = 0; i < emptySpaces.size(); i++) {
             EmptySpace emptySpace = emptySpaces.get(i);
-            Tab tab = direction.getTab(emptySpace);
-            Tab oppositeTab = oppositeDirection.getTab(emptySpace);
-            OrthTab orthTab1 = orth1Direction.getTab(emptySpace);
-            OrthTab orthTab2 = orth2Direction.getTab(emptySpace);
-            for (int a = 0; a < emptySpaces.size(); a++) {
-                EmptySpace candidate = emptySpaces.get(a);
-                if (emptySpace == candidate)
-                    continue;
-                if (orthTab1 != orth1Direction.getTab(candidate) || orthTab2 != orth2Direction.getTab(candidate))
-                    continue;
-                if (tab == oppositeDirection.getTab(candidate)) {
-                    if (!TilingAlgebra.merge(data, emptySpace, candidate, direction))
-                        throw new RuntimeException();
-                    i = 0;
-                    break;
-                }
-                if (oppositeTab == direction.getTab(candidate)) {
-                    if (!TilingAlgebra.merge(data, emptySpace, candidate, oppositeDirection))
-                        throw new RuntimeException();
-                    i = 0;
-                    break;
-                }
+            if (simplifyOnce(data, emptySpace, direction))
+                i = -1;
+        }
+    }
+
+    static private <Tab extends Variable, OrthTab extends Variable>
+    boolean simplifyOnce(AlgebraData data, EmptySpace emptySpace, IDirection<Tab, OrthTab> direction) {
+        IDirection<Tab, OrthTab> oppositeDirection = direction.getOppositeDirection();
+        IDirection<OrthTab, Tab> orth1Direction = direction.getOrthogonalDirection1();
+        IDirection<OrthTab, Tab> orth2Direction = direction.getOrthogonalDirection2();
+
+        Tab tab = direction.getTab(emptySpace);
+        Tab oppositeTab = oppositeDirection.getTab(emptySpace);
+        OrthTab orthTab1 = orth1Direction.getTab(emptySpace);
+        OrthTab orthTab2 = orth2Direction.getTab(emptySpace);
+        List<EmptySpace> emptySpaces = data.getEmptySpaces();
+        for (int a = 0; a < emptySpaces.size(); a++) {
+            EmptySpace candidate = emptySpaces.get(a);
+            if (emptySpace == candidate)
+                continue;
+            if (orthTab1 != orth1Direction.getTab(candidate) || orthTab2 != orth2Direction.getTab(candidate))
+                continue;
+            if (tab == oppositeDirection.getTab(candidate)) {
+                if (!TilingAlgebra.merge(data, emptySpace, candidate, direction))
+                    throw new RuntimeException();
+                return true;
+            }
+            if (oppositeTab == direction.getTab(candidate)) {
+                if (!TilingAlgebra.merge(data, emptySpace, candidate, oppositeDirection))
+                    throw new RuntimeException();
+                return true;
             }
         }
+        return false;
+    }
+
+    static public  <Tab extends Variable, OrthTab extends Variable>
+    void simplify(AlgebraData data, EmptySpace emptySpace, IDirection<Tab, OrthTab> direction) {
+        while (simplifyOnce(data, emptySpace, direction))
+            continue;
     }
 }
