@@ -7,13 +7,13 @@
  */
 package nz.ac.auckland.alm;
 
-
 import nz.ac.auckland.linsolve.Constraint;
 
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class AbstractArea implements IArea {
+
+abstract class AbstractLayoutSpecArea extends TabArea implements ILayoutSpecArea {
     /**
      * The layout specification this area belongs to.
      */
@@ -50,11 +50,5 @@ abstract class AbstractArea implements IArea {
         for (Constraint c : constraints)
             c.remove();
         this.layoutSpec = null;
-    }
-
-    @Override
-    public Area.Rect getRect() {
-        return new Area.Rect((float)getLeft().getValue(), (float)getTop().getValue(), (float)getRight().getValue(),
-                (float)getBottom().getValue());
     }
 }

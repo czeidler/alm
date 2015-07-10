@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Layout specification.
  */
@@ -15,7 +16,7 @@ public class LayoutSpec {
     /**
      * The areas that were added to the specification.
      */
-    final List<IArea> areas = new ArrayList<IArea>();
+    final List<ILayoutSpecArea> areas = new ArrayList<ILayoutSpecArea>();
 
     /**
      * X-tab for the left of the GUI.
@@ -96,7 +97,7 @@ public class LayoutSpec {
         return clone(getAreas(), customConstraints, getLeft(), getTop(), getRight(), getBottom());
     }
 
-    static public LayoutSpec clone(List<IArea> areas, List<Constraint> customConstraints, XTab left, YTab top,
+    static public LayoutSpec clone(List<ILayoutSpecArea> areas, List<Constraint> customConstraints, XTab left, YTab top,
                                    XTab right, YTab bottom) {
         LayoutSpec layoutSpec = new LayoutSpec();
 
@@ -128,13 +129,13 @@ public class LayoutSpec {
             }
         };
 
-        for (IArea area : areas) {
+        for (ILayoutSpecArea area : areas) {
             XTab clonedLeft = getClonedTab(oldToCloneXTabs, area.getLeft(), xTabCreator);
             YTab clonedTop = getClonedTab(oldToCloneYTabs, area.getTop(), yTabCreator);
             XTab clonedRight = getClonedTab(oldToCloneXTabs, area.getRight(), xTabCreator);
             YTab clonedBottom = getClonedTab(oldToCloneYTabs, area.getBottom(), yTabCreator);
 
-            IArea clone = area.clone(clonedLeft, clonedTop, clonedRight, clonedBottom);
+            ILayoutSpecArea clone = area.clone(clonedLeft, clonedTop, clonedRight, clonedBottom);
             layoutSpec.addArea(clone);
         }
 
@@ -488,13 +489,13 @@ public class LayoutSpec {
         return area;
     }
 
-    public void addArea(IArea area) {
+    public void addArea(ILayoutSpecArea area) {
         invalidateLayout();
         areas.add(area);
         area.attachedToLayoutSpec(this);
     }
 
-    public void removeArea(IArea area) {
+    public void removeArea(ILayoutSpecArea area) {
         getAreas().remove(area);
         area.detachedFromLinearSpec(this);
     }
@@ -516,7 +517,7 @@ public class LayoutSpec {
      *
      * @return the areas that were added to the specification.
      */
-    public List<IArea> getAreas() {
+    public List<ILayoutSpecArea> getAreas() {
         return areas;
     }
 

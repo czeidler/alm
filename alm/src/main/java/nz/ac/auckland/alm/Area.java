@@ -6,7 +6,7 @@ import nz.ac.auckland.linsolve.OperatorType;
 /**
  * Rectangular area in the GUI, defined by a tab on each side.
  */
-public class Area extends AbstractArea {
+public class Area extends AbstractLayoutSpecArea {
 	public static class Size {
 		double width;
 		double height;
@@ -100,13 +100,6 @@ public class Area extends AbstractArea {
 	 */
 	static final Size UNDEFINED_SIZE = new Size(Size.UNDEFINED, Size.UNDEFINED);
 
-
-	// the boundaries (tabs) of the area
-	XTab left;
-	XTab right;
-	YTab top;
-	YTab bottom;
-
 	// size constraint for the content
 	Constraint minWidthConstraint;
 	Constraint maxWidthConstraint;
@@ -134,41 +127,13 @@ public class Area extends AbstractArea {
 	Constraint aspectRatioConstraint;
 
 	@Override
-	public IArea clone(XTab clonedLeft, YTab clonedTop, XTab clonedRight, YTab clonedBottom) {
+	public ILayoutSpecArea clone(XTab clonedLeft, YTab clonedTop, XTab clonedRight, YTab clonedBottom) {
 		Area clone = new Area(clonedLeft, clonedTop, clonedRight, clonedBottom);
 		clone.setAlignment(getHorizontalAlignment(), getVerticalAlignment());
 		clone.setMinSize(getMinSize());
 		clone.setPreferredSize(getPreferredSize());
 		clone.setMaxSize(getMaxSize());
 		return clone;
-	}
-
-	/**
-	 * Left tab of the area.
-	 */
-	public XTab getLeft() {
-		return left;
-	}
-
-	/**
-	 * Top tab of the area.
-	 */
-	public YTab getTop() {
-		return top;
-	}
-
-	/**
-	 * Right tab of the area.
-	 */
-	public XTab getRight() {
-		return right;
-	}
-
-	/**
-	 * Bottom tab of the area.
-	 */
-	public YTab getBottom() {
-		return bottom;
 	}
 
 	private void updateHorizontalConstraintVars() {
@@ -203,7 +168,7 @@ public class Area extends AbstractArea {
 	* @param value The tab specification to be used.
 	*/
 	public void setLeft(XTab value) {
-		left = value;
+		super.setLeft(value);
 		updateHorizontalConstraintVars();
 	}
 
@@ -212,7 +177,7 @@ public class Area extends AbstractArea {
 	* @param value The tab specification to be used.
 	*/
 	public void setRight(XTab value) {
-		right = value;
+		super.setRight(value);
 		updateHorizontalConstraintVars();
 	}
 
@@ -221,7 +186,7 @@ public class Area extends AbstractArea {
 	* @param value the tab specification to be used.
 	*/
 	public void setTop(YTab value) {
-		top = value;
+		super.setTop(value);
 		updateVerticalConstraintVars();
 	}
 
@@ -230,7 +195,7 @@ public class Area extends AbstractArea {
 	* @param value the tab specification to be used.
 	*/
 	public void setBottom(YTab value) {
-		bottom = value;
+		super.setBottom(value);
 		updateVerticalConstraintVars();
 	}
 
@@ -240,14 +205,12 @@ public class Area extends AbstractArea {
 	}
 
 	public void setLeftRight(XTab left, XTab right) {
-		this.left = left;
-		this.right = right;
+		super.setLeftRight(left, right);
 		updateHorizontalConstraintVars();
 	}
 
 	public void setTopBottom(YTab top, YTab bottom) {
-		this.top = top;
-		this.bottom = bottom;
+		super.setTopBottom(top, bottom);
 		updateVerticalConstraintVars();
 	}
 
