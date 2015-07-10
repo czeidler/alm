@@ -5,7 +5,7 @@
  * Authors:
  *      Clemens Zeidler <czei002@aucklanduni.ac.nz>
  */
-package nz.ac.auckland.alm.test;
+package nz.ac.auckland.linsolve;
 
 import junit.framework.TestCase;
 import nz.ac.auckland.linsolve.Constraint;
@@ -14,7 +14,7 @@ import nz.ac.auckland.linsolve.OperatorType;
 import nz.ac.auckland.linsolve.Variable;
 
 
-public class LinSolve extends TestCase {
+public class LinSolveTest extends TestCase {
     public void testInternal() {
         LinearSpec linearSpec = new LinearSpec();
 
