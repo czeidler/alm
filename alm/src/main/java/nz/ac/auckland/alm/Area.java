@@ -624,6 +624,10 @@ public class Area extends AbstractLayoutSpecArea {
 				+ right.toString() + "," + bottom.toString() + ")";
 	}
 
+	public Area() {
+		this(null, null, null, null);
+	}
+
 	/**
 	* Construct the area based on the given tabs
 	* @param left the left vertical grid line
