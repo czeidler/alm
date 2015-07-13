@@ -48,7 +48,7 @@ public class AlgebraSpec {
         yEdgeMap = new HashMap<YTab, Edge>(data.getYTabEdges());
     }
 
-    public List<Term> getTerms() {
+    public List<IArea> getTerms() {
         if (horizontalTerms == null) {
             horizontalTerms = new ArrayList<Term>();
             verticalTerms = new ArrayList<Term>();
@@ -69,7 +69,7 @@ public class AlgebraSpec {
                 }
             }
         }
-        ArrayList<Term> out = new ArrayList<Term>();
+        ArrayList<IArea> out = new ArrayList<IArea>();
         out.addAll(horizontalTerms);
         out.addAll(verticalTerms);
         out.addAll(singleTerms);

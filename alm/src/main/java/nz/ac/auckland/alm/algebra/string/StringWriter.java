@@ -19,12 +19,12 @@ import java.util.Map;
 public class StringWriter {
     int areaCount = 0;
     int emptyCount = 0;
-    final Iterable<Term> terms;
+    final Iterable<IArea> terms;
     final Map<IArea, String> areaNames = new HashMap<IArea, String>();
     final List<XTab> multipleXTabs = new ArrayList<XTab>();
     final List<YTab> multipleYTabs = new ArrayList<YTab>();
 
-    public StringWriter(Iterable<Term> terms) {
+    public StringWriter(Iterable<IArea> terms) {
         this.terms = terms;
     }
 
@@ -33,7 +33,7 @@ public class StringWriter {
         return writer.write();
     }
 
-    static public String write(Iterable<Term> terms) {
+    static public String write(Iterable<IArea> terms) {
         StringWriter writer = new StringWriter(terms);
         return writer.write();
     }
@@ -46,10 +46,13 @@ public class StringWriter {
         processTabNames();
 
         String string = "";
-        for (Term term : terms) {
+        for (IArea area : terms) {
             if (!string.equals(""))
                 string += " * ";
-            string += writeTerm(term);
+            if (area instanceof Term)
+                string += writeTerm((Term) area);
+            else
+                string += getName(area);
         }
         return string;
     }
@@ -59,7 +62,7 @@ public class StringWriter {
         multipleYTabs.clear();
 
         Map<Variable, Integer> tabCount = new HashMap<Variable, Integer>();
-        for (Term term : terms)
+        for (IArea term : terms)
             countTabs(term, tabCount);
 
         for (Map.Entry<Variable, Integer> entry : tabCount.entrySet()) {
@@ -73,11 +76,14 @@ public class StringWriter {
         }
     }
 
-    private void countTabs(Term term, Map<Variable, Integer> tabCount) {
+    private void countTabs(IArea termArea, Map<Variable, Integer> tabCount) {
+        if (!(termArea instanceof Term))
+            return;
+        Term term = (Term) termArea;
         for (int i = 0; i < term.getItems().size(); i++) {
             IArea area = (IArea) term.getItems().get(i);
             if (area instanceof Term) {
-                countTabs((Term) area, tabCount);
+                countTabs(area, tabCount);
                 continue;
             }
             if (i == term.getItems().size() - 1)
