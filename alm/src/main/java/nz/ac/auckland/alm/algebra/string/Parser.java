@@ -139,16 +139,16 @@ class TabNameParser<Tab extends Variable> implements Parser.IState {
             direction.setTab(lastArea, tab);
             return this;
         } else {
-            ContainerItemParser containerItemParser = new ContainerItemParser(container);
-            return containerItemParser.parse(parser, token);
+            ContainerAtomParser containerAtomParser = new ContainerAtomParser(container);
+            return containerAtomParser.parse(parser, token);
         }
     }
 }
 
-class ContainerItemParser<Tab extends Variable> implements Parser.IState {
+class ContainerAtomParser<Tab extends Variable> implements Parser.IState {
     final TermContainerParser container;
 
-    ContainerItemParser(TermContainerParser container) {
+    ContainerAtomParser(TermContainerParser container) {
         this.container = container;
     }
 
@@ -162,10 +162,11 @@ class ContainerItemParser<Tab extends Variable> implements Parser.IState {
 
         if (token.type == Lexer.Token.ATOM) {
             if (existingTab == null) {
-                Tab tab = (Tab) direction.createTab();
-                direction.setTab(lastArea, tab);
+                existingTab = (Tab) direction.createTab();
+                direction.setTab(lastArea, existingTab);
             }
             IArea area = parser.getArea(token.value);
+            direction.setOppositeTab(area, existingTab);
             term.add(area);
             return container;
         }
