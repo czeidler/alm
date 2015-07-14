@@ -39,7 +39,6 @@ class TabParser implements Parser.IState {
             }
             term.setHorizontalDirection();
             setTab(parser, parser.namedXTabs);
-            return termParser;
         } else if (token.type == Lexer.Token.SLASH) {
             if (term.direction != null && term.direction != Term.verticalDirection) {
                 parser.error("Tab direction miss match", token);
@@ -47,11 +46,11 @@ class TabParser implements Parser.IState {
             }
             term.setVerticalDirection();
             setTab(parser, parser.namedYTabs);
-            return termParser;
+        } else {
+            parser.error("Internal error: Tiling operator expected", token);
+            return null;
         }
-
-        parser.error("Tiling operator expected", token);
-        return null;
+        return termParser;
     }
 
     public <Tab extends Variable> void setTab(Parser parser, Map<String, Tab> namedTabs) {
@@ -87,7 +86,7 @@ class CloseTermByBracketParser implements Parser.IState {
     public Parser.IState parse(Parser parser) {
         Lexer.Token token = parser.next();
         if (token.type != Lexer.Token.TERM_END) {
-            parser.error("Internal error: ) expected", token);
+            parser.error("Internal error: closing bracket expected", token);
             return null;
         }
         if (termParser.parent == null) {
