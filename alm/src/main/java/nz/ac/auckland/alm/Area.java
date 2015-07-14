@@ -620,8 +620,28 @@ public class Area extends AbstractLayoutSpecArea {
 	* @return string identifies the area's layout specification
 	*/
 	public String toString() {
-		return "Area(" + left.toString() + "," + top.toString() + ","
-				+ right.toString() + "," + bottom.toString() + ")";
+		String string = "Area(";
+		if (left != null)
+			string += left.toString();
+		else
+			string += "NULL";
+		string += ",";
+		if (top != null)
+			string += top.toString();
+		else
+			string += "NULL";
+		string += ",";
+		if (right != null)
+			string += right.toString();
+		else
+			string += "NULL";
+		string += ",";
+		if (bottom != null)
+			string += bottom.toString();
+		else
+			string += "NULL";
+		string += ")";
+		return string;
 	}
 
 	public Area() {
