@@ -25,5 +25,10 @@ public class ParserTest extends TestCase {
         assertStringParsed("AD2 |{2} B * (A | {  2 } B) ");
         assertStringParsed("(A|B|C)/ (D|E|((r/b)) ) / A  *m");
         assertStringParsed("((m))");
+        assertStringParsed("A");
+
+        List<IArea> items = StringReader.read("");
+        assertTrue(items != null);
+        assertEquals(0, items.size());
     }
 }
