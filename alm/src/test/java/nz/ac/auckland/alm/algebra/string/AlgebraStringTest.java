@@ -11,8 +11,6 @@ import nz.ac.auckland.alm.*;
 import nz.ac.auckland.alm.algebra.AlgebraData;
 import nz.ac.auckland.alm.algebra.BaseAlgebraTestCase;
 
-import java.util.ArrayList;
-
 
 public class AlgebraStringTest extends BaseAlgebraTestCase {
     public void testPinWheel() {
@@ -46,7 +44,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         System.out.println("Pin Wheel:");
         System.out.println(StringWriter.write(algebraSpec));
 
-        assertEquals(2, algebraSpec.getTerms().size());
+        assertEquals(2, algebraSpec.getFragments().size());
     }
 
     public void testPinWheelExtension() {
@@ -121,7 +119,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         System.out.println("Grid:");
         System.out.println(StringWriter.write(algebraSpec));
 
-        assertEquals(1, algebraSpec.getTerms().size());
+        assertEquals(1, algebraSpec.getFragments().size());
     }
 
     public void testGroupLayout() {
@@ -160,6 +158,6 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         System.out.println("Group Layout:");
         System.out.println(StringWriter.write(algebraSpec));
 
-        assertEquals(1, algebraSpec.getTerms().size());
+        assertEquals(1, algebraSpec.getFragments().size());
     }
 }

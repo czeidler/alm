@@ -25,21 +25,21 @@ public class AlgebraSpec {
     List<Fragment> verticalFragments = null;
     List<Fragment> singleFragments = null;
 
-    interface ITermFactory {
+    interface IFragmentFactory {
         Fragment create(IArea area1, IArea area2);
     }
 
-    class HorizontalTermFactory implements ITermFactory {
+    class HorizontalFragmentFactory implements IFragmentFactory {
         @Override
         public Fragment create(IArea area1, IArea area2) {
-            return Fragment.horizontalTerm(area1, area2);
+            return Fragment.horizontalFragment(area1, area2);
         }
     }
 
-    class VerticalTermFactory implements ITermFactory {
+    class VerticalFragmentFactory implements IFragmentFactory {
         @Override
         public Fragment create(IArea area1, IArea area2) {
-            return Fragment.verticalTerm(area1, area2);
+            return Fragment.verticalFragment(area1, area2);
         }
     }
 
@@ -48,19 +48,19 @@ public class AlgebraSpec {
         yEdgeMap = new HashMap<YTab, Edge>(data.getYTabEdges());
     }
 
-    public List<IArea> getTerms() {
+    public List<IArea> getFragments() {
         if (horizontalFragments == null) {
             horizontalFragments = new ArrayList<Fragment>();
             verticalFragments = new ArrayList<Fragment>();
             singleFragments = new ArrayList<Fragment>();
-            addTerms(xEdgeMap, horizontalFragments, new HorizontalTermFactory());
-            addTerms(yEdgeMap, verticalFragments, new VerticalTermFactory());
+            addFragments(xEdgeMap, horizontalFragments, new HorizontalFragmentFactory());
+            addFragments(yEdgeMap, verticalFragments, new VerticalFragmentFactory());
 
-            // clean up single terms
+            // clean up single fragment
             for (int i = 0; i < singleFragments.size(); i++) {
                 Fragment singleFragment = singleFragments.get(i);
                 for (Fragment fragment : new JoinedList<Fragment>(verticalFragments, horizontalFragments)) {
-                    if (fragment == singleFragment || fragment.hasSubTerm(singleFragment) || (singleFragment.getItems().size() == 1
+                    if (fragment == singleFragment || fragment.hasSubFragment(singleFragment) || (singleFragment.getItems().size() == 1
                             && fragment.hasAtom((IArea) singleFragment.getItems().get(0)))) {
                         singleFragments.remove(i);
                         i--;
@@ -76,14 +76,14 @@ public class AlgebraSpec {
         return out;
     }
 
-    private void invalidateTerms() {
+    private void invalidateFragments() {
         horizontalFragments = null;
         verticalFragments = null;
         singleFragments = null;
     }
 
-    private <Tab extends Variable> void addTerms(Map<Tab, Edge> edgeMap, List<Fragment> fragments,
-                                                                           ITermFactory termFactory) {
+    private <Tab extends Variable> void addFragments(Map<Tab, Edge> edgeMap, List<Fragment> fragments,
+                                                     IFragmentFactory fragmentFactory) {
         for (Map.Entry<Tab, Edge> entry : edgeMap.entrySet()) {
             Edge edge = entry.getValue();
             for (IArea area1 : edge.areas1) {
@@ -92,10 +92,10 @@ public class AlgebraSpec {
                         if (!singleFragments.contains(area1))
                             singleFragments.add((Fragment) area1);
                     } else
-                        singleFragments.add(termFactory.create(area1, null));
+                        singleFragments.add(fragmentFactory.create(area1, null));
                 }
                 for (IArea area2 : edge.areas2)
-                    fragments.add(termFactory.create(area1, area2));
+                    fragments.add(fragmentFactory.create(area1, area2));
             }
         }
     }
@@ -109,8 +109,8 @@ public class AlgebraSpec {
      * Merge stuff like A|B => C
      */
     private void singleMerge() {
-        ITermFactory vFactory = new VerticalTermFactory();
-        ITermFactory hFactory = new HorizontalTermFactory();
+        IFragmentFactory vFactory = new VerticalFragmentFactory();
+        IFragmentFactory hFactory = new HorizontalFragmentFactory();
         boolean merged = true;
         while (merged) {
             merged = false;
@@ -130,9 +130,9 @@ public class AlgebraSpec {
     }
 
     private <Tab extends Variable, OrthTab extends Variable>
-    boolean singleMergeOnEdgeAll(Edge edge, IDirection<Tab, OrthTab> direction, ITermFactory termFactory) {
+    boolean singleMergeOnEdgeAll(Edge edge, IDirection<Tab, OrthTab> direction, IFragmentFactory fragmentFactory) {
         boolean merged = false;
-        while (singleMergeOnEdge(edge, direction, termFactory)) {
+        while (singleMergeOnEdge(edge, direction, fragmentFactory)) {
             merged = true;
             continue;
         }
@@ -140,7 +140,7 @@ public class AlgebraSpec {
     }
 
     private <Tab extends Variable, OrthTab extends Variable>
-    boolean singleMergeOnEdge(Edge edge, IDirection<Tab, OrthTab> direction, ITermFactory termFactory) {
+    boolean singleMergeOnEdge(Edge edge, IDirection<Tab, OrthTab> direction, IFragmentFactory fragmentFactory) {
         List<IArea> areas = direction.getAreas(edge);
         for (int i = 0; i < areas.size(); i++) {
             IArea area1 = areas.get(i);
@@ -150,9 +150,9 @@ public class AlgebraSpec {
                     continue;
                 Fragment fragment = null;
                 if (direction.getOrthogonalTab1(area1) == direction.getOrthogonalTab2(area2))
-                    fragment = termFactory.create(area2, area1);
+                    fragment = fragmentFactory.create(area2, area1);
                 else if (direction.getOrthogonalTab2(area1) == direction.getOrthogonalTab1(area2))
-                    fragment = termFactory.create(area1, area2);
+                    fragment = fragmentFactory.create(area1, area2);
 
                 if (fragment == null)
                     continue;
@@ -191,8 +191,8 @@ public class AlgebraSpec {
      * Merge stuff like: A | (B / C) => A | D with right of B != right of C
      */
     private void multiMerge() {
-        ITermFactory vFactory = new VerticalTermFactory();
-        ITermFactory hFactory = new HorizontalTermFactory();
+        IFragmentFactory vFactory = new VerticalFragmentFactory();
+        IFragmentFactory hFactory = new HorizontalFragmentFactory();
         boolean merged = true;
         while (merged) {
             merged = false;
@@ -225,7 +225,7 @@ public class AlgebraSpec {
 
     private <Tab extends Variable, OrthTab extends Variable>
     boolean multiMergeOnEdge(Edge edge, IDirection<Tab, OrthTab> direction, Map<Tab, Edge> map,
-                             Map<OrthTab, Edge> orthMap, ITermFactory factory, ITermFactory orthFactory) {
+                             Map<OrthTab, Edge> orthMap, IFragmentFactory factory, IFragmentFactory orthFactory) {
         IDirection<Tab, OrthTab> oppositeDirection = direction.getOppositeDirection();
         IDirection<OrthTab, Tab> orthDirection1 = direction.getOrthogonalDirection1();
         IDirection<OrthTab, Tab> orthDirection2 = direction.getOrthogonalDirection2();
@@ -275,17 +275,6 @@ public class AlgebraSpec {
     Tab getTab(IArea area, IDirection<Tab, OrthTab> direction, IDirection<OrthTab, Tab> orthDirection) {
         Tab tab = direction.getTab(area);
         return tab;
-        /*if (tab != null)
-            return tab;
-
-        // it must be a term
-        Term term = (Term) area;
-        IArea atom;
-        if (orthDirection instanceof BottomDirection || orthDirection instanceof RightDirection)
-            atom = term.getLastAtom();
-        else
-            atom = term.getFirstAtom();
-        return direction.getTab(atom);*/
     }
 
     private <Tab extends Variable, OrthTab extends Variable>

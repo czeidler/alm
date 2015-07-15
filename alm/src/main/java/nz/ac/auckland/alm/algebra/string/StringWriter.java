@@ -19,22 +19,22 @@ import java.util.Map;
 public class StringWriter {
     int areaCount = 0;
     int emptyCount = 0;
-    final Iterable<IArea> terms;
+    final Iterable<IArea> fragments;
     final Map<IArea, String> areaNames = new HashMap<IArea, String>();
     final List<XTab> multipleXTabs = new ArrayList<XTab>();
     final List<YTab> multipleYTabs = new ArrayList<YTab>();
 
-    public StringWriter(Iterable<IArea> terms) {
-        this.terms = terms;
+    public StringWriter(Iterable<IArea> fragments) {
+        this.fragments = fragments;
     }
 
     static public String write(AlgebraSpec spec) {
-        StringWriter writer = new StringWriter(spec.getTerms());
+        StringWriter writer = new StringWriter(spec.getFragments());
         return writer.write();
     }
 
-    static public String write(Iterable<IArea> terms) {
-        StringWriter writer = new StringWriter(terms);
+    static public String write(Iterable<IArea> fragments) {
+        StringWriter writer = new StringWriter(fragments);
         return writer.write();
     }
 
@@ -46,11 +46,11 @@ public class StringWriter {
         processTabNames();
 
         String string = "";
-        for (IArea area : terms) {
+        for (IArea area : fragments) {
             if (!string.equals(""))
                 string += " * ";
             if (area instanceof Fragment)
-                string += writeTerm((Fragment) area);
+                string += writeFragment((Fragment) area);
             else
                 string += getName(area);
         }
@@ -62,8 +62,8 @@ public class StringWriter {
         multipleYTabs.clear();
 
         Map<Variable, Integer> tabCount = new HashMap<Variable, Integer>();
-        for (IArea term : terms)
-            countTabs(term, tabCount);
+        for (IArea fragment : fragments)
+            countTabs(fragment, tabCount);
 
         for (Map.Entry<Variable, Integer> entry : tabCount.entrySet()) {
             if (entry.getValue() <= 1)
@@ -76,10 +76,10 @@ public class StringWriter {
         }
     }
 
-    private void countTabs(IArea termArea, Map<Variable, Integer> tabCount) {
-        if (!(termArea instanceof Fragment))
+    private void countTabs(IArea fragmentArea, Map<Variable, Integer> tabCount) {
+        if (!(fragmentArea instanceof Fragment))
             return;
-        Fragment fragment = (Fragment) termArea;
+        Fragment fragment = (Fragment) fragmentArea;
         for (int i = 0; i < fragment.getItems().size(); i++) {
             IArea area = (IArea) fragment.getItems().get(i);
             if (area instanceof Fragment) {
@@ -128,7 +128,7 @@ public class StringWriter {
         return null;
     }
 
-    private <Tab extends Variable, OrthTab extends Variable> String writeTerm(Fragment<Tab, OrthTab> fragment) {
+    private <Tab extends Variable, OrthTab extends Variable> String writeFragment(Fragment<Tab, OrthTab> fragment) {
         String operator = "/";
         if (fragment.direction instanceof RightDirection)
             operator = "|";
@@ -147,7 +147,7 @@ public class StringWriter {
                 Fragment subFragment = (Fragment) area;
                 if (subFragment.direction != fragment.direction)
                     string += "(";
-                string += writeTerm(subFragment);
+                string += writeFragment(subFragment);
                 if (subFragment.direction != fragment.direction)
                     string += ")";
             } else

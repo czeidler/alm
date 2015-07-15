@@ -22,15 +22,15 @@ import java.util.Map;
 
 
 class TabParser implements Parser.IState {
-    final TermParser termParser;
+    final FragmentParser fragmentParser;
 
-    public TabParser(TermParser termParser) {
-        this.termParser = termParser;
+    public TabParser(FragmentParser fragmentParser) {
+        this.fragmentParser = fragmentParser;
     }
 
     @Override
     public Parser.IState parse(Parser parser) {
-        Fragment fragment = termParser.fragment;
+        Fragment fragment = fragmentParser.fragment;
         Lexer.Token token = parser.next();
         if (token.type == Lexer.Token.PIPE) {
             if (fragment.direction != null && fragment.direction != Fragment.horizontalDirection) {
@@ -50,11 +50,11 @@ class TabParser implements Parser.IState {
             parser.error("Internal error: Tiling operator expected", token);
             return null;
         }
-        return termParser;
+        return fragmentParser;
     }
 
     public <Tab extends Variable> void setTab(Parser parser, Map<String, Tab> namedTabs) {
-        Fragment fragment = termParser.fragment;
+        Fragment fragment = fragmentParser.fragment;
         IDirection direction = fragment.direction;
         List<IArea> items = fragment.getItems();
         IArea lastArea = items.get(items.size() - 1);
@@ -75,11 +75,11 @@ class TabParser implements Parser.IState {
     }
 }
 
-class CloseTermByBracketParser implements Parser.IState {
-    final TermParser termParser;
+class CloseFragmentByBracketParser implements Parser.IState {
+    final FragmentParser fragmentParser;
 
-    public CloseTermByBracketParser(TermParser parent) {
-        this.termParser = parent;
+    public CloseFragmentByBracketParser(FragmentParser parent) {
+        this.fragmentParser = parent;
     }
 
     @Override
@@ -89,19 +89,19 @@ class CloseTermByBracketParser implements Parser.IState {
             parser.error("Internal error: closing bracket expected", token);
             return null;
         }
-        if (termParser.parent == null) {
+        if (fragmentParser.parent == null) {
             parser.error("Unexpected closing bracket", token);
             return null;
         }
-        return termParser.parent.addItem(parser, termParser.fragment);
+        return fragmentParser.parent.addItem(parser, fragmentParser.fragment);
     }
 }
 
-class CloseTermByStarParser implements Parser.IState {
-    final TermParser termParser;
+class CloseFragmentByStarParser implements Parser.IState {
+    final FragmentParser fragmentParser;
 
-    public CloseTermByStarParser(TermParser parent) {
-        this.termParser = parent;
+    public CloseFragmentByStarParser(FragmentParser parent) {
+        this.fragmentParser = parent;
     }
 
     @Override
@@ -112,21 +112,21 @@ class CloseTermByStarParser implements Parser.IState {
             return null;
         }
 
-        if (termParser.parent != null) {
+        if (fragmentParser.parent != null) {
             parser.error("Closing bracket expected", token);
             return null;
         }
 
-        parser.addTerm(termParser.fragment);
-        return new TermParser(null);
+        parser.addTerm(fragmentParser.fragment);
+        return new FragmentParser(null);
     }
 }
 
-class TermParser implements Parser.IState {
+class FragmentParser implements Parser.IState {
     final Fragment fragment = new Fragment();
-    final TermParser parent;
+    final FragmentParser parent;
 
-    public TermParser(TermParser parent) {
+    public FragmentParser(FragmentParser parent) {
         this.parent = parent;
     }
 
@@ -146,7 +146,7 @@ class TermParser implements Parser.IState {
             return addItem(parser, area);
         }
         if (token.type == Lexer.Token.TERM_START)
-            return new TermParser(this);
+            return new FragmentParser(this);
 
         parser.error("Unexpected token", token);
         return null;
@@ -174,9 +174,9 @@ class TermParser implements Parser.IState {
 
         Lexer.Token peek = parser.peek();
         if (peek.type == Lexer.Token.TERM_END)
-            return new CloseTermByBracketParser(this);
+            return new CloseFragmentByBracketParser(this);
         if (peek.type == Lexer.Token.STAR)
-            return new CloseTermByStarParser(this);
+            return new CloseFragmentByStarParser(this);
         if (peek.type == Lexer.Token.SLASH || peek.type == Lexer.Token.PIPE)
             return new TabParser(this);
         // we handle the EOF
@@ -201,7 +201,7 @@ public class Parser implements Lexer.IListener {
         void onError(String error, Lexer.Token token);
     }
 
-    IState state = new TermParser(null);
+    IState state = new FragmentParser(null);
     final List<IArea> terms = new ArrayList<IArea>();
     final IListener listener;
 

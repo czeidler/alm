@@ -26,11 +26,11 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     static final public IDirection horizontalDirection = new RightDirection();
     static final public IDirection verticalDirection = new BottomDirection();
 
-    static public Fragment horizontalTerm(IArea area1, IArea area2) {
+    static public Fragment horizontalFragment(IArea area1, IArea area2) {
         return new Fragment(area1, area2, horizontalDirection);
     }
 
-    static public Fragment verticalTerm(IArea area1, IArea area2) {
+    static public Fragment verticalFragment(IArea area1, IArea area2) {
         return new Fragment(area1, area2, verticalDirection);
     }
 
@@ -58,14 +58,14 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
             setFirstItem(items.get(0));
     }
 
-    public boolean hasSubTerm(Fragment subFragment) {
+    public boolean hasSubFragment(Fragment subFragment) {
         for (IArea area : items) {
             if (!(area instanceof Fragment))
                 continue;
             Fragment fragment = (Fragment) area;
             if (fragment == subFragment)
                 return true;
-            if (fragment.hasSubTerm(subFragment))
+            if (fragment.hasSubFragment(subFragment))
                 return true;
         }
         return false;
