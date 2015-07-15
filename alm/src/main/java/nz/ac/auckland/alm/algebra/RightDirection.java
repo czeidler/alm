@@ -8,25 +8,23 @@
 package nz.ac.auckland.alm.algebra;
 
 import nz.ac.auckland.alm.*;
-import nz.ac.auckland.linsolve.Variable;
 
 import java.util.List;
-import java.util.Map;
 
 
 public class RightDirection extends AbstractHorizontalDirection {
   @Override
-  public Variable getTab(IArea area) {
+  public XTab getTab(IArea area) {
     return area.getRight();
   }
 
   @Override
-  public Variable getOppositeTab(IArea area) {
+  public XTab getOppositeTab(IArea area) {
     return area.getLeft();
   }
 
   @Override
-  public Variable getTab(LayoutSpec layoutSpec) {
+  public XTab getTab(LayoutSpec layoutSpec) {
     return layoutSpec.getRight();
   }
 
@@ -41,23 +39,28 @@ public class RightDirection extends AbstractHorizontalDirection {
   }
 
   @Override
-  public IDirection getOppositeDirection() {
+  public IDirection<XTab, YTab> getOppositeDirection() {
     return new LeftDirection();
   }
 
   @Override
-  public void setTab(IArea area, Variable tab) {
-    area.setLeftRight(area.getLeft(), (XTab)tab);
+  public XTab getTab(AlgebraData data) {
+    return data.getRight();
   }
 
   @Override
-  public void setOppositeTab(IArea area, Variable tab) {
-    area.setLeftRight((XTab)tab, area.getRight());
+  public void setTab(IArea area, XTab tab) {
+    area.setLeftRight(area.getLeft(), tab);
   }
 
   @Override
-  public void setTabs(IArea area, Variable tab, Variable orthTab1, Variable oppositeTab, Variable orthTab2) {
-    area.setLeftRight((XTab)oppositeTab, (XTab)tab);
-    area.setTopBottom((YTab)orthTab1, (YTab)orthTab2);
+  public void setOppositeTab(IArea area, XTab tab) {
+    area.setLeftRight(tab, area.getRight());
+  }
+
+  @Override
+  public void setTabs(IArea area, XTab tab, YTab orthTab1, XTab oppositeTab, YTab orthTab2) {
+    area.setLeftRight(oppositeTab, tab);
+    area.setTopBottom(orthTab1, orthTab2);
   }
 }

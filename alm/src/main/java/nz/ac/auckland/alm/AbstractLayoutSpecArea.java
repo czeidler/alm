@@ -7,13 +7,13 @@
  */
 package nz.ac.auckland.alm;
 
-
 import nz.ac.auckland.linsolve.Constraint;
 
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class AbstractArea implements IArea {
+
+abstract class AbstractLayoutSpecArea extends TabArea implements ILayoutSpecArea {
     /**
      * The layout specification this area belongs to.
      */

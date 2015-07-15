@@ -13,7 +13,7 @@ import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
 
 
-abstract class BaseAlgebraTestCase extends TestCase {
+abstract public class BaseAlgebraTestCase extends TestCase {
     protected LayoutSpec getLayoutSpec(int width, int height) {
         LayoutSpec layoutSpec = new LayoutSpec();
         layoutSpec.getLeft().setValue(0);

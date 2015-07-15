@@ -22,15 +22,7 @@ import java.util.Map;
  * Merge EmptyAreas that only refer to other EmptyAreas.
  */
 public class EmptyAreaCleaner {
-    final LayoutStructure layoutStructure;
-    final LambdaTransformation trafo;
-
-    public EmptyAreaCleaner(LayoutStructure layoutStructure) {
-        this.layoutStructure = layoutStructure;
-        this.trafo = new LambdaTransformation(layoutStructure);
-    }
-
-    private boolean hasOnlyEmptySpaces(List<IArea> list) {
+    static private boolean hasOnlyEmptySpaces(List<IArea> list) {
         for (IArea area : list) {
             if (!(area instanceof EmptySpace))
                 return false;
@@ -38,13 +30,15 @@ public class EmptyAreaCleaner {
         return true;
     }
 
-    private <Tab extends Variable, OrthTab extends Variable>
-    boolean clean(IDirection direction, Map<Tab, Edge> map,  IDirection orthDirection, Map<OrthTab, Edge> orthMap) {
+    static private <Tab extends Variable, OrthTab extends Variable>
+    boolean clean(AlgebraData algebraData, IDirection direction, Map<Tab, Edge> map,  IDirection orthDirection,
+                  Map<OrthTab, Edge> orthMap) {
+        LambdaTransformation trafo = new LambdaTransformation(algebraData);
         // copy the list because we will change the original list
         List<Tab> tabs = new ArrayList<Tab>(map.keySet());
         for (Tab tab : tabs) {
-            if (tab == layoutStructure.getLeft() || tab == layoutStructure.getRight()
-                    || tab == layoutStructure.getTop() || tab == layoutStructure.getBottom())
+            if (tab == algebraData.getLeft() || tab == algebraData.getRight()
+                    || tab == algebraData.getTop() || tab == algebraData.getBottom())
                 continue;
             Edge edge = map.get(tab);
             if (!hasOnlyEmptySpaces(edge.areas1) || !hasOnlyEmptySpaces(edge.areas2))
@@ -59,14 +53,73 @@ public class EmptyAreaCleaner {
 
         return true;
     }
-    public boolean clean() {
-        Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
-        Map<YTab, Edge> yTabEdgeMap = layoutStructure.getYTabEdges();
-        if (!clean(new RightDirection(), xTabEdgeMap, new BottomDirection(), yTabEdgeMap))
+
+    static public boolean clean(AlgebraData algebraData) {
+        Map<XTab, Edge> xTabEdgeMap = algebraData.getXTabEdges();
+        Map<YTab, Edge> yTabEdgeMap = algebraData.getYTabEdges();
+        if (!clean(algebraData, new RightDirection(), xTabEdgeMap, new BottomDirection(), yTabEdgeMap))
             return false;
-        if (!clean(new BottomDirection(), yTabEdgeMap, new RightDirection(), xTabEdgeMap))
+        if (!clean(algebraData, new BottomDirection(), yTabEdgeMap, new RightDirection(), xTabEdgeMap))
             return false;
 
+        simplify(algebraData, new LeftDirection());
+        simplify(algebraData, new TopDirection());
         return true;
+    }
+
+    /**
+     * Try to merge adjacent empty areas.
+     *
+     * @param data
+     * @param direction horizontal or vertical direction
+     * @param <Tab>
+     * @param <OrthTab>
+     * @return
+     */
+    static public <Tab extends Variable, OrthTab extends Variable>
+    void simplify(AlgebraData data, IDirection<Tab, OrthTab> direction) {
+        List<EmptySpace> emptySpaces = data.getEmptySpaces();
+        for (int i = 0; i < emptySpaces.size(); i++) {
+            EmptySpace emptySpace = emptySpaces.get(i);
+            if (simplifyOnce(data, emptySpace, direction))
+                i = -1;
+        }
+    }
+
+    static private <Tab extends Variable, OrthTab extends Variable>
+    boolean simplifyOnce(AlgebraData data, EmptySpace emptySpace, IDirection<Tab, OrthTab> direction) {
+        IDirection<Tab, OrthTab> oppositeDirection = direction.getOppositeDirection();
+        IDirection<OrthTab, Tab> orth1Direction = direction.getOrthogonalDirection1();
+        IDirection<OrthTab, Tab> orth2Direction = direction.getOrthogonalDirection2();
+
+        Tab tab = direction.getTab(emptySpace);
+        Tab oppositeTab = oppositeDirection.getTab(emptySpace);
+        OrthTab orthTab1 = orth1Direction.getTab(emptySpace);
+        OrthTab orthTab2 = orth2Direction.getTab(emptySpace);
+        List<EmptySpace> emptySpaces = data.getEmptySpaces();
+        for (int a = 0; a < emptySpaces.size(); a++) {
+            EmptySpace candidate = emptySpaces.get(a);
+            if (emptySpace == candidate)
+                continue;
+            if (orthTab1 != orth1Direction.getTab(candidate) || orthTab2 != orth2Direction.getTab(candidate))
+                continue;
+            if (tab == oppositeDirection.getTab(candidate)) {
+                if (!TilingAlgebra.merge(data, emptySpace, candidate, direction))
+                    throw new RuntimeException();
+                return true;
+            }
+            if (oppositeTab == direction.getTab(candidate)) {
+                if (!TilingAlgebra.merge(data, emptySpace, candidate, oppositeDirection))
+                    throw new RuntimeException();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static public  <Tab extends Variable, OrthTab extends Variable>
+    void simplify(AlgebraData data, EmptySpace emptySpace, IDirection<Tab, OrthTab> direction) {
+        while (simplifyOnce(data, emptySpace, direction))
+            continue;
     }
 }

@@ -16,32 +16,36 @@ import java.util.List;
 import java.util.Map;
 
 
-public interface IDirection {
-  <Tab> Edge getEdge(IArea area, Map<Tab, Edge> map);
-  <Tab> Edge getOppositeEdge(IArea area, Map<Tab, Edge> map);
-  <Tab> Edge getOrthogonalEdge1(IArea area, Map<Tab, Edge> map);
-  <Tab> Edge getOrthogonalEdge2(IArea area, Map<Tab, Edge> map);
-  Variable getTab(IArea area);
-  Variable getOppositeTab(IArea area);
-  Variable getOrthogonalTab1(IArea area);
-  Variable getOrthogonalTab2(IArea area);
-  Variable getTab(LayoutSpec layoutSpec);
+public interface IDirection<Tab extends Variable, OrthTab extends Variable> {
+  Edge getEdge(IArea area, Map<Tab, Edge> map);
+  Edge getOppositeEdge(IArea area, Map<Tab, Edge> map);
+  Edge getOrthogonalEdge1(IArea area, Map<OrthTab, Edge> map);
+  Edge getOrthogonalEdge2(IArea area, Map<OrthTab, Edge> map);
+  Tab getTab(IArea area);
+  Tab getOppositeTab(IArea area);
+  OrthTab getOrthogonalTab1(IArea area);
+  OrthTab getOrthogonalTab2(IArea area);
+  Tab getTab(LayoutSpec layoutSpec);
   List<IArea> getAreas(Edge edge);
   List<IArea> getOppositeAreas(Edge edge);
 
-  IDirection getOppositeDirection();
-  IDirection getOrthogonalDirection1();
-  IDirection getOrthogonalDirection2();
+  IDirection<Tab, OrthTab> getOppositeDirection();
+  IDirection<OrthTab, Tab> getOrthogonalDirection1();
+  IDirection<OrthTab, Tab> getOrthogonalDirection2();
 
+  double getExtent(IArea area);
   double getExtent(Area.Size size);
-  double getOrthogonalExtent(Area.Size size);
 
-  Variable createTab();
-  Variable createOrthogonalTab();
+  Tab createTab();
+  OrthTab createOrthogonalTab();
 
-  void setTab(IArea area, Variable tab);
-  void setOppositeTab(IArea area, Variable tab);
-  void setOrthogonalTab1(IArea area, Variable tab);
-  void setOrthogonalTab2(IArea area, Variable tab);
-  void setTabs(IArea area, Variable tab, Variable orthTab1, Variable oppositeTab, Variable orthTab2);
+  Map<Tab, Edge> getTabEdgeMap(AlgebraData data);
+  Map<OrthTab, Edge> getOrthTabEdgeMap(AlgebraData data);
+  Tab getTab(AlgebraData data);
+
+  void setTab(IArea area, Tab tab);
+  void setOppositeTab(IArea area, Tab tab);
+  void setOrthogonalTab1(IArea area, OrthTab tab);
+  void setOrthogonalTab2(IArea area, OrthTab tab);
+  void setTabs(IArea area, Tab tab, OrthTab orthTab1, Tab oppositeTab, OrthTab orthTab2);
 }

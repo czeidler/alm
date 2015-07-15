@@ -11,12 +11,7 @@ package nz.ac.auckland.alm;
 import nz.ac.auckland.linsolve.Constraint;
 import nz.ac.auckland.linsolve.OperatorType;
 
-public class EmptySpace extends AbstractArea {
-    private XTab left;
-    private YTab top;
-    private XTab right;
-    private YTab bottom;
-
+public class EmptySpace extends AbstractLayoutSpecArea {
     Constraint minWidthConstraint;
     Constraint minHeightConstraint;
 
@@ -30,65 +25,43 @@ public class EmptySpace extends AbstractArea {
     }
 
     @Override
-    public IArea clone(XTab clonedLeft, YTab clonedTop, XTab clonedRight, YTab clonedBottom) {
+    public ILayoutSpecArea clone(XTab clonedLeft, YTab clonedTop, XTab clonedRight, YTab clonedBottom) {
         return new EmptySpace(clonedLeft, clonedTop, clonedRight, clonedBottom);
     }
 
     @Override
-    public XTab getLeft() {
-        return left;
-    }
-
-    @Override
-    public YTab getTop() {
-        return top;
-    }
-
-    @Override
-    public XTab getRight() {
-        return right;
-    }
-
-    @Override
-    public YTab getBottom() {
-        return bottom;
-    }
-
-    @Override
     public void setLeft(XTab value) {
-        left = value;
+        super.setLeft(value);
         updateHorizontalConstraintVars();
     }
 
     @Override
     public void setRight(XTab value) {
-        right = value;
+        super.setRight(value);
         updateHorizontalConstraintVars();
     }
 
     @Override
     public void setTop(YTab value) {
-        top = value;
+        super.setTop(value);
         updateVerticalConstraintVars();
     }
 
     @Override
     public void setBottom(YTab value) {
-        bottom = value;
+        super.setBottom(value);
         updateVerticalConstraintVars();
     }
 
     @Override
     public void setLeftRight(XTab left, XTab right) {
-        this.left = left;
-        this.right = right;
+        super.setLeftRight(left, right);
         updateHorizontalConstraintVars();
     }
 
     @Override
     public void setTopBottom(YTab top, YTab bottom) {
-        this.top = top;
-        this.bottom = bottom;
+        super.setTopBottom(top, bottom);
         updateVerticalConstraintVars();
     }
 

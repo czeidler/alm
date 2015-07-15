@@ -14,6 +14,7 @@ public class Constraint implements Cloneable {
     public static final double PREFERRED_SIZE_PENALTY = 0.5;
     public static final double MAX_PENALTY = 1.0;
 
+    // TODO: tolerance does not belong into the Constaint class but into the solver or LinearSpec!
     /**
      * The standard tolerance should be close to the maximum precision of double
      * here it is set to 12 decimal digits

@@ -120,7 +120,7 @@ public class DensenessChecker {
         return false;
     }
 
-    static public boolean isDense(LayoutStructure layoutStructure) {
+    static public boolean isDense(AlgebraData algebraData) {
         Map<Edge, List<EdgeChain>> xEdgeChainMap = new HashMap<Edge, List<EdgeChain>>();
         Map<Edge, List<EdgeChain>> yEdgeChainMap = new HashMap<Edge, List<EdgeChain>>();
         IDirection left = new LeftDirection();
@@ -128,32 +128,32 @@ public class DensenessChecker {
         IDirection right = new RightDirection();
         IDirection bottom = new BottomDirection();
 
-        Map<XTab, Edge> xTabEdgeMap = new HashMap<XTab, Edge>(layoutStructure.getXTabEdges());
-        xTabEdgeMap.remove(layoutStructure.getLeft());
-        xTabEdgeMap.remove(layoutStructure.getRight());
-        Map<YTab, Edge> yTabEdgeMap = new HashMap<YTab, Edge>(layoutStructure.getYTabEdges());
-        yTabEdgeMap.remove(layoutStructure.getTop());
-        yTabEdgeMap.remove(layoutStructure.getBottom());
+        Map<XTab, Edge> xTabEdgeMap = new HashMap<XTab, Edge>(algebraData.getXTabEdges());
+        xTabEdgeMap.remove(algebraData.getLeft());
+        xTabEdgeMap.remove(algebraData.getRight());
+        Map<YTab, Edge> yTabEdgeMap = new HashMap<YTab, Edge>(algebraData.getYTabEdges());
+        yTabEdgeMap.remove(algebraData.getTop());
+        yTabEdgeMap.remove(algebraData.getBottom());
         if (!fillEdgeChains(xTabEdgeMap.values(), xEdgeChainMap, right))
             return false;
         if (!fillEdgeChains(yTabEdgeMap.values(), yEdgeChainMap, bottom))
             return false;
 
-        for (IArea area : layoutStructure.getAllAreas()) {
-            if (area.getLeft() != layoutStructure.getLeft()
-                && !checkEdge(area, left, layoutStructure.getXTabEdges(), layoutStructure.getYTabEdges(),
+        for (IArea area : algebraData.getAllAreas()) {
+            if (area.getLeft() != algebraData.getLeft()
+                && !checkEdge(area, left, algebraData.getXTabEdges(), algebraData.getYTabEdges(),
                     xEdgeChainMap))
                 return false;
-            if (area.getRight() != layoutStructure.getRight()
-                    && !checkEdge(area, right, layoutStructure.getXTabEdges(), layoutStructure.getYTabEdges(),
+            if (area.getRight() != algebraData.getRight()
+                    && !checkEdge(area, right, algebraData.getXTabEdges(), algebraData.getYTabEdges(),
                     xEdgeChainMap))
                 return false;
-            if (area.getTop() != layoutStructure.getTop()
-                    && !checkEdge(area, top, layoutStructure.getYTabEdges(), layoutStructure.getXTabEdges(),
+            if (area.getTop() != algebraData.getTop()
+                    && !checkEdge(area, top, algebraData.getYTabEdges(), algebraData.getXTabEdges(),
                     yEdgeChainMap))
                 return false;
-            if (area.getBottom() != layoutStructure.getBottom()
-                    && !checkEdge(area, bottom, layoutStructure.getYTabEdges(), layoutStructure.getXTabEdges(),
+            if (area.getBottom() != algebraData.getBottom()
+                    && !checkEdge(area, bottom, algebraData.getYTabEdges(), algebraData.getXTabEdges(),
                     yEdgeChainMap))
                 return false;
         }

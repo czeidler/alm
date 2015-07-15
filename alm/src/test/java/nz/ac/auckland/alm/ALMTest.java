@@ -5,19 +5,14 @@
  * Authors:
  *      Clemens Zeidler <czei002@aucklanduni.ac.nz>
  */
-package nz.ac.auckland.alm.test;
+package nz.ac.auckland.alm;
 
-import nz.ac.auckland.alm.Area;
-import nz.ac.auckland.alm.LayoutSpec;
-
-import nz.ac.auckland.alm.XTab;
-import nz.ac.auckland.alm.YTab;
 import junit.framework.TestCase;
 import nz.ac.auckland.linsolve.Constraint;
 import nz.ac.auckland.linsolve.Summand;
 
 
-public class ALM extends TestCase {
+public class ALMTest extends TestCase {
     void assertFuzzyEqual(double expected, double value) throws Exception {
         if (Math.abs(expected - value) < 0.01)
             return;

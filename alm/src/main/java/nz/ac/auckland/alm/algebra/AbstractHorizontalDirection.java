@@ -11,40 +11,54 @@ import nz.ac.auckland.alm.Area;
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
-import nz.ac.auckland.linsolve.Variable;
 
 import java.util.Map;
 
 
-abstract public class AbstractHorizontalDirection implements IDirection {
+abstract public class AbstractHorizontalDirection implements IDirection<XTab, YTab> {
   @Override
-  public <Tab> Edge getEdge(IArea area, Map<Tab, Edge> map) {
+  public Edge getEdge(IArea area, Map<XTab, Edge> map) {
     return map.get(getTab(area));
   }
 
   @Override
-  public <Tab> Edge getOppositeEdge(IArea area, Map<Tab, Edge> map) {
+  public Edge getOppositeEdge(IArea area, Map<XTab, Edge> map) {
     return map.get(getOppositeTab(area));
   }
 
   @Override
-  public Variable getOrthogonalTab1(IArea area) {
+  public Edge getOrthogonalEdge1(IArea area, Map<YTab, Edge> map) {
+    return map.get(getOrthogonalTab1(area));
+  }
+
+  @Override
+  public Edge getOrthogonalEdge2(IArea area, Map<YTab, Edge> map) {
+    return map.get(getOrthogonalTab2(area));
+  }
+
+  @Override
+  public YTab getOrthogonalTab1(IArea area) {
     return area.getTop();
   }
 
   @Override
-  public Variable getOrthogonalTab2(IArea area) {
+  public YTab getOrthogonalTab2(IArea area) {
     return area.getBottom();
   }
 
   @Override
-  public void setOrthogonalTab1(IArea area, Variable tab) {
-    area.setTopBottom((YTab)tab, area.getBottom());
+  public void setOrthogonalTab1(IArea area, YTab tab) {
+    area.setTopBottom(tab, area.getBottom());
   }
 
   @Override
-  public void setOrthogonalTab2(IArea area, Variable tab) {
-    area.setTopBottom(area.getTop(), (YTab)tab);
+  public void setOrthogonalTab2(IArea area, YTab tab) {
+    area.setTopBottom(area.getTop(), tab);
+  }
+
+  @Override
+  public double getExtent(IArea area) {
+    return area.getRight().getValue() - area.getLeft().getValue();
   }
 
   @Override
@@ -53,37 +67,32 @@ abstract public class AbstractHorizontalDirection implements IDirection {
   }
 
   @Override
-  public double getOrthogonalExtent(Area.Size size) {
-    return size.getHeight();
-  }
-
-  @Override
-  public Variable createTab() {
+  public XTab createTab() {
     return new XTab();
   }
 
   @Override
-  public Variable createOrthogonalTab() {
+  public YTab createOrthogonalTab() {
     return new YTab();
   }
 
   @Override
-  public <Tab> Edge getOrthogonalEdge1(IArea area, Map<Tab, Edge> map) {
-    return map.get(getOrthogonalTab1(area));
+  public Map<XTab, Edge> getTabEdgeMap(AlgebraData data) {
+    return data.getXTabEdges();
   }
 
   @Override
-  public <Tab> Edge getOrthogonalEdge2(IArea area, Map<Tab, Edge> map) {
-    return map.get(getOrthogonalTab2(area));
+  public Map<YTab, Edge> getOrthTabEdgeMap(AlgebraData data) {
+    return data.getYTabEdges();
   }
 
   @Override
-  public IDirection getOrthogonalDirection1() {
+  public IDirection<YTab, XTab> getOrthogonalDirection1() {
     return new TopDirection();
   }
 
   @Override
-  public IDirection getOrthogonalDirection2() {
+  public IDirection<YTab, XTab> getOrthogonalDirection2() {
     return new BottomDirection();
   }
 }

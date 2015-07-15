@@ -41,7 +41,13 @@ public class SoundLayoutBuilder {
         return closestTab;
     }
 
-    static public boolean fillWithEmptySpaces(LayoutSpec layoutSpec) {
+    /**
+     * Tries to create a dense AlgebraData from a LayoutSpec.
+     *
+     * @param layoutSpec
+     * @return null if the specs can't be filled
+     */
+    static public AlgebraData fillWithEmptySpaces(LayoutSpec layoutSpec) {
         List<Area> areas = new ArrayList<Area>();
         for (IArea area : layoutSpec.getAreas()) {
             if (area instanceof Area)
@@ -58,49 +64,29 @@ public class SoundLayoutBuilder {
         XTab right = layoutSpec.getRight();
         YTab bottom = layoutSpec.getBottom();
 
-        LayoutStructure layoutStructure = new LayoutStructure(left, top, right, bottom);
+        AlgebraData algebraData = new AlgebraData(left, top, right, bottom);
         // add first empty element
-        layoutStructure.addArea(new EmptySpace(left, top, right, bottom));
+        algebraData.addArea(new EmptySpace(left, top, right, bottom));
 
-        LambdaTransformation trafo = new LambdaTransformation(layoutStructure);
+        LambdaTransformation trafo = new LambdaTransformation(algebraData);
 
-        Map<XTab, Edge> xTabEdgeMap = layoutStructure.getXTabEdges();
-        Map<YTab, Edge> yTabEdgeMap = layoutStructure.getYTabEdges();
+        Map<XTab, Edge> xTabEdgeMap = algebraData.getXTabEdges();
+        Map<YTab, Edge> yTabEdgeMap = algebraData.getYTabEdges();
         for (Area area : areas) {
-            XTab leftLarge = findEmptySpaceTap(area, xTabEdgeMap, leftDirection, layoutStructure.getEmptySpaces());
-            YTab topLarge = findEmptySpaceTap(area, yTabEdgeMap, topDirection, layoutStructure.getEmptySpaces());
-            XTab rightLarge = findEmptySpaceTap(area, xTabEdgeMap, rightDirection, layoutStructure.getEmptySpaces());
-            YTab bottomLarge = findEmptySpaceTap(area, yTabEdgeMap, bottomDirection, layoutStructure.getEmptySpaces());
+            XTab leftLarge = findEmptySpaceTap(area, xTabEdgeMap, leftDirection, algebraData.getEmptySpaces());
+            YTab topLarge = findEmptySpaceTap(area, yTabEdgeMap, topDirection, algebraData.getEmptySpaces());
+            XTab rightLarge = findEmptySpaceTap(area, xTabEdgeMap, rightDirection, algebraData.getEmptySpaces());
+            YTab bottomLarge = findEmptySpaceTap(area, yTabEdgeMap, bottomDirection, algebraData.getEmptySpaces());
 
             EmptySpace emptySpace = trafo.makeSpace(leftLarge, topLarge, rightLarge, bottomLarge);
             if (emptySpace == null)
-                return false;
-            // remove empty space and replace it
-            layoutStructure.removeArea(emptySpace);
-            layoutStructure.addArea(area);
+                return null;
 
-            // add possible other empty spaces
-            if (leftLarge != area.getLeft()) {
-                EmptySpace gap = new EmptySpace(leftLarge, topLarge, area.getLeft(), bottomLarge);
-                layoutStructure.addArea(gap);
-                leftLarge = area.getLeft();
-            }
-            if (rightLarge != area.getRight()) {
-                EmptySpace gap = new EmptySpace(area.getRight(), topLarge, rightLarge, bottomLarge);
-                layoutStructure.addArea(gap);
-                rightLarge = area.getRight();
-            }
-            if (topLarge != area.getTop()) {
-                EmptySpace gap = new EmptySpace(leftLarge, topLarge, rightLarge, area.getTop());
-                layoutStructure.addArea(gap);
-            }
-            if (bottomLarge != area.getBottom()) {
-                EmptySpace gap = new EmptySpace(leftLarge, area.getBottom(), rightLarge, bottomLarge);
-                layoutStructure.addArea(gap);
-            }
+            TilingAlgebra.placeAreaInEmptySpace(algebraData, area, emptySpace);
         }
 
-        layoutStructure.applyToLayoutSpec(layoutSpec);
-        return true;
+        EmptyAreaCleaner.clean(algebraData);
+
+        return algebraData;
     }
 }

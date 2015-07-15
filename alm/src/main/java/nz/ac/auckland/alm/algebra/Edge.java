@@ -28,8 +28,8 @@ public class Edge {
         return edge;
     }
 
-    static public <Tab extends Variable> boolean isInChain(Variable startTab, Variable tab, Map<Tab, Edge> edges,
-                                                          IDirection direction) {
+    static public <Tab extends Variable, OrthTab extends Variable>
+    boolean isInChain(Variable startTab, Variable tab, Map<Tab, Edge> edges, IDirection<Tab, OrthTab> direction) {
         if (startTab == tab)
             return true;
         Edge edge = edges.get(startTab);
@@ -95,7 +95,36 @@ public class Edge {
         bottomEdge.areas1.add(area);
     }
 
-    static private <Tab> void removeArea(IArea area, IDirection direction, Map<Tab, Edge> map) {
+    static public void addAreaChecked(IArea area, Map<XTab, Edge> xMap, Map<YTab, Edge> yMap) {
+        if (area.getLeft() != null) {
+            Edge leftEdge = getEdge(area.getLeft(), xMap);
+            leftEdge.areas2.add(area);
+        }
+        if (area.getTop() != null) {
+            Edge topEdge = getEdge(area.getTop(), yMap);
+            topEdge.areas2.add(area);
+        }
+        if (area.getRight() != null) {
+            Edge rightEdge = getEdge(area.getRight(), xMap);
+            rightEdge.areas1.add(area);
+        }
+        if (area.getBottom() != null) {
+            Edge bottomEdge = getEdge(area.getBottom(), yMap);
+            bottomEdge.areas1.add(area);
+        }
+    }
+
+    /**
+     * Only remove the area only from the Edge in direction of the area.
+     *
+     * @param area
+     * @param direction
+     * @param map
+     * @param <Tab>
+     * @param <OrthTab>
+     */
+    static public <Tab extends Variable, OrthTab extends Variable>
+    void removeArea(IArea area, IDirection<Tab, OrthTab> direction, Map<Tab, Edge> map) {
         Edge edge = direction.getEdge(area, map);
         direction.getOppositeAreas(edge).remove(area);
         if (edge.areas1.size() == 0 && edge.areas2.size() == 0)
@@ -107,5 +136,16 @@ public class Edge {
         removeArea(area, new RightDirection(), xMap);
         removeArea(area, new TopDirection(), yMap);
         removeArea(area, new BottomDirection(), yMap);
+    }
+
+    static public void removeAreaChecked(IArea area, Map<XTab, Edge> xMap, Map<YTab, Edge> yMap) {
+        if (area.getLeft() != null)
+            removeArea(area, new LeftDirection(), xMap);
+        if (area.getRight() != null)
+            removeArea(area, new RightDirection(), xMap);
+        if (area.getTop() != null)
+            removeArea(area, new TopDirection(), yMap);
+        if (area.getBottom() != null)
+            removeArea(area, new BottomDirection(), yMap);
     }
 }
