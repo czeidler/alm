@@ -19,26 +19,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Term<Tab extends Variable, OrthTab extends Variable> extends TabArea {
+public class Fragment<Tab extends Variable, OrthTab extends Variable> extends TabArea {
     final List<IArea> items = new ArrayList<IArea>();
     IDirection<Tab, OrthTab> direction;
 
     static final public IDirection horizontalDirection = new RightDirection();
     static final public IDirection verticalDirection = new BottomDirection();
 
-    static public Term horizontalTerm(IArea area1, IArea area2) {
-        return new Term(area1, area2, horizontalDirection);
+    static public Fragment horizontalTerm(IArea area1, IArea area2) {
+        return new Fragment(area1, area2, horizontalDirection);
     }
 
-    static public Term verticalTerm(IArea area1, IArea area2) {
-        return new Term(area1, area2, verticalDirection);
+    static public Fragment verticalTerm(IArea area1, IArea area2) {
+        return new Fragment(area1, area2, verticalDirection);
     }
 
-    public Term() {
+    public Fragment() {
 
     }
 
-    private Term(IArea area1, IArea area2, IDirection<Tab, OrthTab> direction1) {
+    private Fragment(IArea area1, IArea area2, IDirection<Tab, OrthTab> direction1) {
         this.direction = direction1;
 
         add(area1);
@@ -58,14 +58,14 @@ public class Term<Tab extends Variable, OrthTab extends Variable> extends TabAre
             setFirstItem(items.get(0));
     }
 
-    public boolean hasSubTerm(Term subTerm) {
+    public boolean hasSubTerm(Fragment subFragment) {
         for (IArea area : items) {
-            if (!(area instanceof Term))
+            if (!(area instanceof Fragment))
                 continue;
-            Term term = (Term) area;
-            if (term == subTerm)
+            Fragment fragment = (Fragment) area;
+            if (fragment == subFragment)
                 return true;
-            if (term.hasSubTerm(subTerm))
+            if (fragment.hasSubTerm(subFragment))
                 return true;
         }
         return false;
@@ -73,12 +73,12 @@ public class Term<Tab extends Variable, OrthTab extends Variable> extends TabAre
 
     public boolean hasAtom(IArea atom) {
         for (IArea area : items) {
-            if (!(area instanceof Term)) {
+            if (!(area instanceof Fragment)) {
                 if (area == atom)
                     return true;
             } else {
-                Term term = (Term) area;
-                if (term.hasAtom(atom))
+                Fragment fragment = (Fragment) area;
+                if (fragment.hasAtom(atom))
                     return true;
             }
         }
@@ -101,10 +101,10 @@ public class Term<Tab extends Variable, OrthTab extends Variable> extends TabAre
         if (items.size() == 0)
             setFirstItem(item);
 
-        if (item instanceof Term) {
-            Term term = (Term) item;
-            if (term.direction == null || term.direction == direction) {
-                for (Object subItem : term.getItems())
+        if (item instanceof Fragment) {
+            Fragment fragment = (Fragment) item;
+            if (fragment.direction == null || fragment.direction == direction) {
+                for (Object subItem : fragment.getItems())
                     add((IArea)subItem);
                 return;
             }
@@ -122,8 +122,8 @@ public class Term<Tab extends Variable, OrthTab extends Variable> extends TabAre
     public int countAtoms() {
         int count = 0;
         for (IArea item : items) {
-            if (item instanceof Term)
-                count += ((Term) item).countAtoms();
+            if (item instanceof Fragment)
+                count += ((Fragment) item).countAtoms();
             else
                 count++;
         }

@@ -49,8 +49,8 @@ public class StringWriter {
         for (IArea area : terms) {
             if (!string.equals(""))
                 string += " * ";
-            if (area instanceof Term)
-                string += writeTerm((Term) area);
+            if (area instanceof Fragment)
+                string += writeTerm((Fragment) area);
             else
                 string += getName(area);
         }
@@ -77,18 +77,18 @@ public class StringWriter {
     }
 
     private void countTabs(IArea termArea, Map<Variable, Integer> tabCount) {
-        if (!(termArea instanceof Term))
+        if (!(termArea instanceof Fragment))
             return;
-        Term term = (Term) termArea;
-        for (int i = 0; i < term.getItems().size(); i++) {
-            IArea area = (IArea) term.getItems().get(i);
-            if (area instanceof Term) {
+        Fragment fragment = (Fragment) termArea;
+        for (int i = 0; i < fragment.getItems().size(); i++) {
+            IArea area = (IArea) fragment.getItems().get(i);
+            if (area instanceof Fragment) {
                 countTabs(area, tabCount);
                 continue;
             }
-            if (i == term.getItems().size() - 1)
+            if (i == fragment.getItems().size() - 1)
                 continue;
-            Variable tab = term.direction.getTab(area);
+            Variable tab = fragment.direction.getTab(area);
             Integer count = tabCount.get(tab);
             if (count == null)
                 count = 1;
@@ -128,27 +128,27 @@ public class StringWriter {
         return null;
     }
 
-    private <Tab extends Variable, OrthTab extends Variable> String writeTerm(Term<Tab, OrthTab> term) {
+    private <Tab extends Variable, OrthTab extends Variable> String writeTerm(Fragment<Tab, OrthTab> fragment) {
         String operator = "/";
-        if (term.direction instanceof RightDirection)
+        if (fragment.direction instanceof RightDirection)
             operator = "|";
 
         String string = "";
         IArea prevArea = null;
-        for (IArea area : term.getItems()) {
+        for (IArea area : fragment.getItems()) {
             if (prevArea != null) {
                 string += operator;
-                String tabName = getName(term.direction.getTab(prevArea));
+                String tabName = getName(fragment.direction.getTab(prevArea));
                 if (tabName != null)
                     string += "{" + tabName + "}";
             }
             prevArea = area;
-            if (area instanceof Term) {
-                Term subTerm = (Term) area;
-                if (subTerm.direction != term.direction)
+            if (area instanceof Fragment) {
+                Fragment subFragment = (Fragment) area;
+                if (subFragment.direction != fragment.direction)
                     string += "(";
-                string += writeTerm(subTerm);
-                if (subTerm.direction != term.direction)
+                string += writeTerm(subFragment);
+                if (subFragment.direction != fragment.direction)
                     string += ")";
             } else
                 string += getName(area);

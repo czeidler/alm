@@ -30,21 +30,21 @@ class TabParser implements Parser.IState {
 
     @Override
     public Parser.IState parse(Parser parser) {
-        Term term = termParser.term;
+        Fragment fragment = termParser.fragment;
         Lexer.Token token = parser.next();
         if (token.type == Lexer.Token.PIPE) {
-            if (term.direction != null && term.direction != Term.horizontalDirection) {
+            if (fragment.direction != null && fragment.direction != Fragment.horizontalDirection) {
                 parser.error("Tab direction miss match", token);
                 return null;
             }
-            term.setHorizontalDirection();
+            fragment.setHorizontalDirection();
             setTab(parser, parser.namedXTabs);
         } else if (token.type == Lexer.Token.SLASH) {
-            if (term.direction != null && term.direction != Term.verticalDirection) {
+            if (fragment.direction != null && fragment.direction != Fragment.verticalDirection) {
                 parser.error("Tab direction miss match", token);
                 return null;
             }
-            term.setVerticalDirection();
+            fragment.setVerticalDirection();
             setTab(parser, parser.namedYTabs);
         } else {
             parser.error("Internal error: Tiling operator expected", token);
@@ -54,9 +54,9 @@ class TabParser implements Parser.IState {
     }
 
     public <Tab extends Variable> void setTab(Parser parser, Map<String, Tab> namedTabs) {
-        Term term = termParser.term;
-        IDirection direction = term.direction;
-        List<IArea> items = term.getItems();
+        Fragment fragment = termParser.fragment;
+        IDirection direction = fragment.direction;
+        List<IArea> items = fragment.getItems();
         IArea lastArea = items.get(items.size() - 1);
         Tab tab;
         Lexer.Token token = parser.peek();
@@ -93,7 +93,7 @@ class CloseTermByBracketParser implements Parser.IState {
             parser.error("Unexpected closing bracket", token);
             return null;
         }
-        return termParser.parent.addItem(parser, termParser.term);
+        return termParser.parent.addItem(parser, termParser.fragment);
     }
 }
 
@@ -117,13 +117,13 @@ class CloseTermByStarParser implements Parser.IState {
             return null;
         }
 
-        parser.addTerm(termParser.term);
+        parser.addTerm(termParser.fragment);
         return new TermParser(null);
     }
 }
 
 class TermParser implements Parser.IState {
-    final Term term = new Term();
+    final Fragment fragment = new Fragment();
     final TermParser parent;
 
     public TermParser(TermParser parent) {
@@ -138,7 +138,7 @@ class TermParser implements Parser.IState {
                 parser.error("Closing bracket expected", token);
                 return null;
             }
-            parser.addTerm(term);
+            parser.addTerm(fragment);
             return null;
         }
         if (token.type == Lexer.Token.ATOM) {
@@ -154,23 +154,23 @@ class TermParser implements Parser.IState {
 
     protected Parser.IState addItem(Parser parser, IArea item) {
         // empty terms with a single item
-        if (item instanceof Term) {
-            Term term = (Term) item;
-            if (term.getItems().size() == 1)
-                item = (IArea)term.getItems().get(0);
+        if (item instanceof Fragment) {
+            Fragment fragment = (Fragment) item;
+            if (fragment.getItems().size() == 1)
+                item = (IArea) fragment.getItems().get(0);
         }
 
         // set tab
-        if (term.getItems().size() > 0) {
-            IDirection direction = term.direction;
-            List<IArea> items = term.getItems();
+        if (fragment.getItems().size() > 0) {
+            IDirection direction = fragment.direction;
+            List<IArea> items = fragment.getItems();
             IArea lastArea = items.get(items.size() - 1);
             Variable existingTab = direction.getTab(lastArea);
             assert (existingTab != null);
             direction.setOppositeTab(item, existingTab);
         }
 
-        term.add(item);
+        fragment.add(item);
 
         Lexer.Token peek = parser.peek();
         if (peek.type == Lexer.Token.TERM_END)
@@ -249,13 +249,13 @@ public class Parser implements Lexer.IListener {
         return area;
     }
 
-    public void addTerm(Term term) {
-        if (term.getItems().size() == 0)
+    public void addTerm(Fragment fragment) {
+        if (fragment.getItems().size() == 0)
             return;
-        if (term.getItems().size() == 1)
-            terms.add((IArea)term.getItems().get(0));
+        if (fragment.getItems().size() == 1)
+            terms.add((IArea) fragment.getItems().get(0));
         else
-            terms.add(term);
+            terms.add(fragment);
     }
 
     public List<IArea> getTerms() {
