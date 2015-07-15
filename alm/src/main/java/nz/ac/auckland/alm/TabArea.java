@@ -9,11 +9,23 @@ package nz.ac.auckland.alm;
 
 
 public class TabArea implements IArea {
+    String id;
+
     // the boundaries (tabs) of the area
     XTab left;
     XTab right;
     YTab top;
     YTab bottom;
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
 
     @Override
     public XTab getLeft() {

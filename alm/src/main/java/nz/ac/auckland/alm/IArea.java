@@ -9,6 +9,9 @@ package nz.ac.auckland.alm;
 
 
 public interface IArea {
+    void setId(String id);
+    String getId();
+
     XTab getLeft();
     YTab getTop();
     XTab getRight();
