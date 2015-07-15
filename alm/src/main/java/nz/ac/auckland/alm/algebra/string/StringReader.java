@@ -29,6 +29,8 @@ public class StringReader {
         Lexer lexer = new Lexer(input, parser);
         lexer.run();
 
+        if (parser.hasError())
+            return null;
         return parser.getTerms();
     }
 }

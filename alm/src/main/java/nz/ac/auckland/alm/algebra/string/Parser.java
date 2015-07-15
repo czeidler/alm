@@ -204,6 +204,7 @@ public class Parser implements Lexer.IListener {
     IState state = new FragmentParser(null);
     final List<IArea> terms = new ArrayList<IArea>();
     final IListener listener;
+    boolean hasError = false;
 
     final static int MIN_QUEUE_SIZE = 2;
     List<Lexer.Token> tokenQueue = new ArrayList<Lexer.Token>(MIN_QUEUE_SIZE);
@@ -235,8 +236,13 @@ public class Parser implements Lexer.IListener {
     }
 
     public void error(String error, Lexer.Token token) {
+        hasError = true;
         if (listener != null)
             listener.onError(error, token);
+    }
+
+    public boolean hasError() {
+        return hasError;
     }
 
     public IArea getArea(String name) {
