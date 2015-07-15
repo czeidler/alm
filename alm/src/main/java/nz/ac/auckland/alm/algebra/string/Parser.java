@@ -197,13 +197,20 @@ public class Parser implements Lexer.IListener {
         IState parse(Parser parser);
     }
 
+    public interface IListener {
+        void onError(String error, Lexer.Token token);
+    }
+
     IState state = new TermParser(null);
     final List<IArea> terms = new ArrayList<IArea>();
-    String error = "";
-    Lexer.Token errorToken = null;
+    final IListener listener;
 
     final static int MIN_QUEUE_SIZE = 2;
     List<Lexer.Token> tokenQueue = new ArrayList<Lexer.Token>(MIN_QUEUE_SIZE);
+
+    public Parser(IListener listener) {
+        this.listener = listener;
+    }
 
     @Override
     public void onNewToken(Lexer.Token token) {
@@ -228,16 +235,8 @@ public class Parser implements Lexer.IListener {
     }
 
     public void error(String error, Lexer.Token token) {
-        this.error = error;
-        this.errorToken = token;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public Lexer.Token getErrorToken() {
-        return errorToken;
+        if (listener != null)
+            listener.onError(error, token);
     }
 
     public IArea getArea(String name) {

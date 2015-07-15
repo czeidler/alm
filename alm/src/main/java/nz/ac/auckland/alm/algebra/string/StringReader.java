@@ -13,22 +13,22 @@ import java.util.List;
 
 
 public class StringReader {
-    static public List<IArea> read(String input) {
-        Parser parser = new Parser();
+    static public List<IArea> read(final String input) {
+        Parser parser = new Parser(new Parser.IListener() {
+            @Override
+            public void onError(String error, Lexer.Token token) {
+                System.out.println(input);
+                String errorIndicator = "";
+                for (int i = 0; i < token.position; i++)
+                    errorIndicator += " ";
+                errorIndicator += "^";
+                System.out.println(errorIndicator);
+                System.out.println("Parser error at " + token.position + ": " + error);
+            }
+        });
         Lexer lexer = new Lexer(input, parser);
         lexer.run();
 
-        if (parser.getErrorToken() != null) {
-            Lexer.Token token = parser.getErrorToken();
-            System.out.println(input);
-            String errorIndicator = "";
-            for (int i = 0; i < token.position; i++)
-                errorIndicator += " ";
-            errorIndicator += "^";
-            System.out.println(errorIndicator);
-            System.out.println("Parser error at " + token.position + ": " + parser.getError());
-            return null;
-        }
         return parser.getTerms();
     }
 }
