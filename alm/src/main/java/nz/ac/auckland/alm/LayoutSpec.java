@@ -16,7 +16,7 @@ public class LayoutSpec {
     /**
      * The areas that were added to the specification.
      */
-    final List<ILayoutSpecArea> areas = new ArrayList<ILayoutSpecArea>();
+    final List<IArea> areas = new ArrayList<IArea>();
 
     /**
      * X-tab for the left of the GUI.
@@ -97,7 +97,7 @@ public class LayoutSpec {
         return clone(getAreas(), customConstraints, getLeft(), getTop(), getRight(), getBottom());
     }
 
-    static public LayoutSpec clone(List<ILayoutSpecArea> areas, List<Constraint> customConstraints, XTab left, YTab top,
+    static public LayoutSpec clone(List<IArea> areas, List<Constraint> customConstraints, XTab left, YTab top,
                                    XTab right, YTab bottom) {
         LayoutSpec layoutSpec = new LayoutSpec();
 
@@ -129,13 +129,13 @@ public class LayoutSpec {
             }
         };
 
-        for (ILayoutSpecArea area : areas) {
+        for (IArea area : areas) {
             XTab clonedLeft = getClonedTab(oldToCloneXTabs, area.getLeft(), xTabCreator);
             YTab clonedTop = getClonedTab(oldToCloneYTabs, area.getTop(), yTabCreator);
             XTab clonedRight = getClonedTab(oldToCloneXTabs, area.getRight(), xTabCreator);
             YTab clonedBottom = getClonedTab(oldToCloneYTabs, area.getBottom(), yTabCreator);
 
-            ILayoutSpecArea clone = area.clone(clonedLeft, clonedTop, clonedRight, clonedBottom);
+            ILayoutSpecArea clone = ((ILayoutSpecArea)area).clone(clonedLeft, clonedTop, clonedRight, clonedBottom);
             layoutSpec.addArea(clone);
         }
 
@@ -509,7 +509,7 @@ public class LayoutSpec {
         customConstraints.clear();
 
         while (areas.size() > 0)
-            removeArea(areas.get(0));
+            removeArea((ILayoutSpecArea)areas.get(0));
     }
 
     /**
@@ -517,7 +517,7 @@ public class LayoutSpec {
      *
      * @return the areas that were added to the specification.
      */
-    public List<ILayoutSpecArea> getAreas() {
+    public List<IArea> getAreas() {
         return areas;
     }
 
