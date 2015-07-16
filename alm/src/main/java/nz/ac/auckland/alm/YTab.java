@@ -24,8 +24,14 @@ public class YTab extends Variable {
 	*/
 	public String toString() {
 		String value = getName();
-		if (getName() == null)
-			value = "Y" + (this.getIndex() - 2); // there are two border tab stops
+		if (getName() == null) {
+			value = "Y";
+			int index = this.getIndex();
+			if (index > 0)
+				value += index - 2; // there are two border tab stops
+			else
+				value += "0x" + Integer.toHexString(hashCode());
+		}
 
 		value += " (" + getValue() + ")";
 		return value;
