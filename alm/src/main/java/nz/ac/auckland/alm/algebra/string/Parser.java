@@ -58,17 +58,23 @@ class TabParser implements Parser.IState {
         IDirection direction = fragment.direction;
         List<IArea> items = fragment.getItems();
         IArea lastArea = items.get(items.size() - 1);
+        Tab existingTab = (Tab)direction.getTab(lastArea);
         Tab tab;
         Lexer.Token token = parser.peek();
         if (token.type == Lexer.Token.TAB_NAME) {
             // get the token
             token = parser.next();
             tab = namedTabs.get(token.value);
+            if (existingTab != null && existingTab != tab)
+                parser.error("Area is already assigned to a different tabstop", token);
+
             if (tab == null) {
                 tab = (Tab) direction.createTab();
                 namedTabs.put(token.value, tab);
             }
-        } else
+        } else if (existingTab != null)
+            tab = existingTab;
+        else
             tab = (Tab)direction.createTab();
 
         direction.setTab(lastArea, tab);
