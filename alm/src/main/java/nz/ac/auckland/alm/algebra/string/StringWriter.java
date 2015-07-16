@@ -99,7 +99,10 @@ public class StringWriter {
     }
 
     private String getName(IArea area) {
-        String name = areaNames.get(area);
+        String name = area.getId();
+        if (name != null)
+            return name;
+        name = areaNames.get(area);
         if (name != null)
             return name;
         if (area instanceof Area) {
