@@ -181,16 +181,4 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
                 area.setBottom(value);
         }
     }
-
-    @Override
-    public void setLeftRight(XTab left, XTab right) {
-        setLeft(left);
-        setRight(right);
-    }
-
-    @Override
-    public void setTopBottom(YTab top, YTab bottom) {
-        setTop(top);
-        setBottom(bottom);
-    }
 }

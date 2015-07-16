@@ -204,13 +204,15 @@ public class Area extends AbstractLayoutSpecArea {
 		setTopBottom(top, bottom);
 	}
 
-	public void setLeftRight(XTab left, XTab right) {
-		super.setLeftRight(left, right);
+	private void setLeftRight(XTab left, XTab right) {
+		super.setLeft(left);
+		super.setRight(right);
 		updateHorizontalConstraintVars();
 	}
 
-	public void setTopBottom(YTab top, YTab bottom) {
-		super.setTopBottom(top, bottom);
+	private void setTopBottom(YTab top, YTab bottom) {
+		super.setTop(top);
+		super.setBottom(bottom);
 		updateVerticalConstraintVars();
 	}
 
@@ -620,7 +622,12 @@ public class Area extends AbstractLayoutSpecArea {
 	* @return string identifies the area's layout specification
 	*/
 	public String toString() {
-		String string = "Area(";
+		String string = "";
+		if (getId() != null)
+			string += getId();
+		else
+			string += "Area";
+		string += "(";
 		if (left != null)
 			string += left.toString();
 		else
@@ -651,9 +658,9 @@ public class Area extends AbstractLayoutSpecArea {
 	/**
 	* Construct the area based on the given tabs
 	* @param left the left vertical grid line
-	* @param top the top horziontal grid line
+	* @param top the top horizontal grid line
 	* @param right the right vertical grid line
-	* @param bottom the bottom horziontal grid line
+	* @param bottom the bottom horizontal grid line
 	*/
 	public Area(XTab left, YTab top, XTab right, YTab bottom) {
 		this.left = left;

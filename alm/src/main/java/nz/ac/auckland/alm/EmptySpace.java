@@ -20,8 +20,10 @@ public class EmptySpace extends AbstractLayoutSpecArea {
     }
 
     public EmptySpace(XTab left, YTab top, XTab right, YTab bottom) {
-        setLeftRight(left, right);
-        setTopBottom(top, bottom);
+        setLeft(left);
+        setRight(right);
+        setTop(top);
+        setBottom(bottom);
     }
 
     @Override
@@ -50,18 +52,6 @@ public class EmptySpace extends AbstractLayoutSpecArea {
     @Override
     public void setBottom(YTab value) {
         super.setBottom(value);
-        updateVerticalConstraintVars();
-    }
-
-    @Override
-    public void setLeftRight(XTab left, XTab right) {
-        super.setLeftRight(left, right);
-        updateHorizontalConstraintVars();
-    }
-
-    @Override
-    public void setTopBottom(YTab top, YTab bottom) {
-        super.setTopBottom(top, bottom);
         updateVerticalConstraintVars();
     }
 

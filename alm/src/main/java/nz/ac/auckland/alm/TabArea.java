@@ -68,18 +68,6 @@ public class TabArea implements IArea {
     }
 
     @Override
-    public void setLeftRight(XTab left, XTab right) {
-        this.left = left;
-        this.right = right;
-    }
-
-    @Override
-    public void setTopBottom(YTab top, YTab bottom) {
-        this.top = top;
-        this.bottom = bottom;
-    }
-
-    @Override
     public Area.Rect getRect() {
         return new Area.Rect((float)getLeft().getValue(), (float)getTop().getValue(), (float)getRight().getValue(),
                 (float)getBottom().getValue());

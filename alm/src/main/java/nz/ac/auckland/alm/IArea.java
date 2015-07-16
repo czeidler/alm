@@ -21,8 +21,6 @@ public interface IArea {
     void setRight(XTab value);
     void setTop(YTab value);
     void setBottom(YTab value);
-    void setLeftRight(XTab left, XTab right);
-    void setTopBottom(YTab top, YTab bottom);
 
     Area.Rect getRect();
 }

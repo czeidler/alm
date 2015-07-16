@@ -50,17 +50,19 @@ public class RightDirection extends AbstractHorizontalDirection {
 
   @Override
   public void setTab(IArea area, XTab tab) {
-    area.setLeftRight(area.getLeft(), tab);
+    area.setRight(tab);
   }
 
   @Override
   public void setOppositeTab(IArea area, XTab tab) {
-    area.setLeftRight(tab, area.getRight());
+    area.setLeft(tab);
   }
 
   @Override
   public void setTabs(IArea area, XTab tab, YTab orthTab1, XTab oppositeTab, YTab orthTab2) {
-    area.setLeftRight(oppositeTab, tab);
-    area.setTopBottom(orthTab1, orthTab2);
+    area.setLeft(oppositeTab);
+    area.setRight(tab);
+    area.setTop(orthTab1);
+    area.setBottom(orthTab2);
   }
 }

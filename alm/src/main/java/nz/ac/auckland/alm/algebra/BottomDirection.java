@@ -50,17 +50,19 @@ public class BottomDirection extends AbstractVerticalDirection {
 
   @Override
   public void setTab(IArea area, YTab tab) {
-    area.setTopBottom(area.getTop(), tab);
+    area.setBottom(tab);
   }
 
   @Override
   public void setOppositeTab(IArea area, YTab tab) {
-    area.setTopBottom(tab, area.getBottom());
+    area.setTop(tab);
   }
 
   @Override
   public void setTabs(IArea area, YTab tab, XTab orthTab1, YTab oppositeTab, XTab orthTab2) {
-    area.setLeftRight(orthTab1, orthTab2);
-    area.setTopBottom(oppositeTab, tab);
+    area.setLeft(orthTab1);
+    area.setRight(orthTab2);
+    area.setTop(oppositeTab);
+    area.setBottom(tab);
   }
 }
