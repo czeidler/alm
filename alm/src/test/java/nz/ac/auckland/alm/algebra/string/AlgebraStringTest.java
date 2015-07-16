@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class AlgebraStringTest extends BaseAlgebraTestCase {
     private void assertStringNotParsed(String string) {
-        System.out.println("Parse bad string: " + string);
+        System.out.println("Test parsing of a bad string: " + string);
         List<IArea> items = StringReader.readRawFragments(string, null);
         assertTrue(items == null);
     }
@@ -43,6 +43,8 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         assertStringNotParsed("(A |");
         assertStringNotParsed("(A | }");
         assertStringNotParsed("(A: | }");
+        assertStringNotParsed("(A |  / (C | D)");
+        assertStringNotParsed("(A |{0} B) / (A |{1} D)");
 
         List<IArea> items = StringReader.readRawFragments("", null);
         assertTrue(items != null);
@@ -51,15 +53,21 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
 
     private void assignAreaIds(List<IArea> areas) {
         int areaCount = 0;
+        int emptyCount = 0;
         for (IArea area : areas) {
-            final String areaNames = "ABCDEFGHIJKMNOPQRSTUVWXYZ";
-            int letter = areaCount % areaNames.length();
-            int index = areaCount / areaNames.length();
-            String name = "" + areaNames.charAt(letter);
-            if (index > 0)
-                name += index;
-            area.setId(name);
-            areaCount++;
+            if (area instanceof Area) {
+                final String areaNames = "ABCDEFGHIJKMNOPQRSTUVWXYZ";
+                int letter = areaCount % areaNames.length();
+                int index = areaCount / areaNames.length();
+                String name = "" + areaNames.charAt(letter);
+                if (index > 0)
+                    name += index;
+                area.setId(name);
+                areaCount++;
+            } else {
+                area.setId("L" + emptyCount);
+                emptyCount++;
+            }
         }
     }
 
@@ -217,13 +225,21 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x3, top, x4, bottom));
         layoutSpec.addArea(new Area(x4, top, right, bottom));
 
+        assignAreaIds(layoutSpec.getAreas());
+
         AlgebraData data = new AlgebraData(layoutSpec, null);
 
         AlgebraSpec algebraSpec = new AlgebraSpec(data);
         algebraSpec.compress();
 
         System.out.println("Pin Wheel extension:");
-        System.out.println(StringWriter.write(algebraSpec));
+        String algebraString = StringWriter.write(algebraSpec);
+        System.out.println(algebraString);
+
+        AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
+                Parser.getDefaultAreaFactory());
+        assertTrue(readAlgebraData != null);
+        assertEquals(true, isEquivalent(data, readAlgebraData, true));
     }
 
     public void testGrid() {
@@ -253,6 +269,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         layoutSpec.addArea(new Area(x0, y1, x1, bottom));
         layoutSpec.addArea(new Area(x1, y1, right, bottom));
 
+        assignAreaIds(layoutSpec.getAreas());
 
         AlgebraData data = new AlgebraData(layoutSpec, null);
 
@@ -260,9 +277,15 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         algebraSpec.compress();
 
         System.out.println("Grid:");
-        System.out.println(StringWriter.write(algebraSpec));
+        String algebraString = StringWriter.write(algebraSpec);
+        System.out.println(algebraString);
 
         assertEquals(1, algebraSpec.getFragments().size());
+
+        AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
+                Parser.getDefaultAreaFactory());
+        assertTrue(readAlgebraData != null);
+        assertEquals(true, isEquivalent(data, readAlgebraData, true));
     }
 
     public void testGroupLayout() {
@@ -293,14 +316,22 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         // bottom
         layoutSpec.addArea(new Area(left, y1, right, bottom));
 
+        assignAreaIds(layoutSpec.getAreas());
+
         AlgebraData data = new AlgebraData(layoutSpec, null);
 
         AlgebraSpec algebraSpec = new AlgebraSpec(data);
         algebraSpec.compress();
 
         System.out.println("Group Layout:");
-        System.out.println(StringWriter.write(algebraSpec));
+        String algebraString = StringWriter.write(algebraSpec);
+        System.out.println(algebraString);
 
         assertEquals(1, algebraSpec.getFragments().size());
+
+        AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
+                Parser.getDefaultAreaFactory());
+        assertTrue(readAlgebraData != null);
+        assertEquals(true, isEquivalent(data, readAlgebraData, true));
     }
 }
