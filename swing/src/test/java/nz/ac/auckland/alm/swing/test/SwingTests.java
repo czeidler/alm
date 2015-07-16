@@ -60,14 +60,21 @@ public class SwingTests {
         dialog.add(button2, new ALMLayout.LayoutParams(x1, top, x2, bottom));
         dialog.add(button3, new ALMLayout.LayoutParams(x2, top, right, bottom));
 
-        almLayout.areaOf(button1).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
-        almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
-        almLayout.areaOf(button3).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
-
         dialog.setMinimumSize(almLayout.minimumLayoutSize(dialog));
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
+
+        // test remove all and re-add
+        dialog.getContentPane().removeAll();
+
+        dialog.add(button1, new ALMLayout.LayoutParams(left, top, x1, bottom));
+        dialog.add(button2, new ALMLayout.LayoutParams(x1, top, x2, bottom));
+        dialog.add(button3, new ALMLayout.LayoutParams(x2, top, right, bottom));
+
+        almLayout.areaOf(button1).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+        almLayout.areaOf(button2).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
+        almLayout.areaOf(button3).setAlignment(HorizontalAlignment.FILL, VerticalAlignment.FILL);
     }
 
     public void testPinWheel() {
