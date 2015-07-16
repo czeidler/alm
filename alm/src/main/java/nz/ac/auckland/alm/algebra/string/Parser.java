@@ -85,7 +85,7 @@ class CloseFragmentByBracketParser implements Parser.IState {
     @Override
     public Parser.IState parse(Parser parser) {
         Lexer.Token token = parser.next();
-        if (token.type != Lexer.Token.TERM_END) {
+        if (token.type != Lexer.Token.CLOSE_BRACKET) {
             parser.error("Internal error: closing bracket expected", token);
             return null;
         }
@@ -145,7 +145,7 @@ class FragmentParser implements Parser.IState {
             IArea area = parser.getArea(token.value);
             return addItem(parser, area);
         }
-        if (token.type == Lexer.Token.TERM_START)
+        if (token.type == Lexer.Token.OPEN_BRACKET)
             return new FragmentParser(this);
 
         parser.error("Unexpected token", token);
@@ -173,7 +173,7 @@ class FragmentParser implements Parser.IState {
         fragment.add(item);
 
         Lexer.Token peek = parser.peek();
-        if (peek.type == Lexer.Token.TERM_END)
+        if (peek.type == Lexer.Token.CLOSE_BRACKET)
             return new CloseFragmentByBracketParser(this);
         if (peek.type == Lexer.Token.STAR)
             return new CloseFragmentByStarParser(this);
@@ -189,7 +189,6 @@ class FragmentParser implements Parser.IState {
 }
 
 public class Parser implements Lexer.IListener {
-    final Map<String, IArea> areaMap = new HashMap<String, IArea>();
     final Map<String, XTab> namedXTabs = new HashMap<String, XTab>();
     final Map<String, YTab> namedYTabs = new HashMap<String, YTab>();
 
@@ -197,12 +196,34 @@ public class Parser implements Lexer.IListener {
         IState parse(Parser parser);
     }
 
+    public interface IAreaFactory {
+        IArea getArea(String areaId);
+    }
+
     public interface IListener {
         void onError(String error, Lexer.Token token);
     }
 
+    static public IAreaFactory getDefaultAreaFactory() {
+        return new IAreaFactory() {
+            final Map<String, IArea> areaMap = new HashMap<String, IArea>();
+
+            @Override
+            public IArea getArea(String areaId) {
+                IArea area = areaMap.get(areaId);
+                if (area == null) {
+                    area = new Area();
+                    areaMap.put(areaId, area);
+                    area.setId(areaId);
+                }
+                return area;
+            }
+        };
+    }
+
     IState state = new FragmentParser(null);
     final List<IArea> terms = new ArrayList<IArea>();
+    final IAreaFactory areaFactory;
     final IListener listener;
     boolean hasError = false;
 
@@ -210,6 +231,14 @@ public class Parser implements Lexer.IListener {
     List<Lexer.Token> tokenQueue = new ArrayList<Lexer.Token>(MIN_QUEUE_SIZE);
 
     public Parser(IListener listener) {
+        this(null, listener);
+    }
+
+    public Parser(IAreaFactory areaFactory, IListener listener) {
+        if (areaFactory == null)
+            this.areaFactory = getDefaultAreaFactory();
+        else
+            this.areaFactory = areaFactory;
         this.listener = listener;
     }
 
@@ -245,13 +274,8 @@ public class Parser implements Lexer.IListener {
         return hasError;
     }
 
-    public IArea getArea(String name) {
-        IArea area = areaMap.get(name);
-        if (area == null) {
-            area = new Area();
-            areaMap.put(name, area);
-        }
-        return area;
+    public IArea getArea(String areaId) {
+        return areaFactory.getArea(areaId);
     }
 
     public void addTerm(Fragment fragment) {
