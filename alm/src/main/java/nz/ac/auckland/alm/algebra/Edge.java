@@ -139,13 +139,13 @@ public class Edge {
     }
 
     static public void removeAreaChecked(IArea area, Map<XTab, Edge> xMap, Map<YTab, Edge> yMap) {
-        if (area.getLeft() != null)
+        if (xMap.get(area.getLeft()) != null)
             removeArea(area, new LeftDirection(), xMap);
-        if (area.getRight() != null)
+        if (xMap.get(area.getRight()) != null)
             removeArea(area, new RightDirection(), xMap);
-        if (area.getTop() != null)
+        if (yMap.get(area.getTop()) != null)
             removeArea(area, new TopDirection(), yMap);
-        if (area.getBottom() != null)
+        if (yMap.get(area.getBottom()) != null)
             removeArea(area, new BottomDirection(), yMap);
     }
 }
