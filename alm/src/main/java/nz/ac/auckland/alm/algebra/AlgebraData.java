@@ -80,7 +80,7 @@ public class AlgebraData {
     assert bottom == layoutSpec.getBottom();
 
     while (layoutSpec.getAreas().size() > 0)
-      layoutSpec.removeArea(layoutSpec.getAreas().get(0));
+      layoutSpec.removeArea((ILayoutSpecArea)layoutSpec.getAreas().get(0));
 
     for (Area area : areas)
       layoutSpec.addArea(area);
@@ -88,7 +88,18 @@ public class AlgebraData {
       layoutSpec.addArea(space);
   }
 
+  public boolean containsArea(IArea area) {
+    if (areas.contains(area))
+      return true;
+    if (emptySpaces.contains(area))
+      return true;
+    return false;
+  }
+
   public void addArea(IArea area) {
+    if (containsArea(area))
+      throw new RuntimeException();
+
     Edge.addArea(area, xTabEdgeMap, yTabEdgeMap);
 
     if (area instanceof Area)
@@ -138,6 +149,12 @@ public class AlgebraData {
 
   public Iterable<IArea> getAllAreas() {
     return new JoinedList<IArea>(areas, emptySpaces);
+  }
+
+  public List<IArea> getAllAreasList() {
+    List<IArea> list = new ArrayList<IArea>(areas);
+    list.addAll(emptySpaces);
+    return list;
   }
 
   public List<Area> getAreas() {
