@@ -49,12 +49,12 @@ abstract class AbstractVerticalDirection implements IDirection<YTab, XTab> {
 
   @Override
   public void setOrthogonalTab1(IArea area, XTab tab) {
-    area.setLeftRight(tab, area.getRight());
+    area.setLeft(tab);
   }
 
   @Override
   public void setOrthogonalTab2(IArea area, XTab tab) {
-    area.setLeftRight(area.getLeft(), tab);
+    area.setRight(tab);
   }
 
   @Override

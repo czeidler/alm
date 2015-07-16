@@ -48,12 +48,12 @@ abstract public class AbstractHorizontalDirection implements IDirection<XTab, YT
 
   @Override
   public void setOrthogonalTab1(IArea area, YTab tab) {
-    area.setTopBottom(tab, area.getBottom());
+    area.setTop(tab);
   }
 
   @Override
   public void setOrthogonalTab2(IArea area, YTab tab) {
-    area.setTopBottom(area.getTop(), tab);
+    area.setBottom(tab);
   }
 
   @Override
