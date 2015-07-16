@@ -156,7 +156,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
                 Parser.getDefaultAreaFactory());
         assertTrue(readAlgebraData != null);
-        assertEquals(true, isEquivalent(data, readAlgebraData, true));
+        assertTrue(isEquivalent(data, readAlgebraData, true));
     }
 
     public void testPinWheel() {
@@ -195,7 +195,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
                 Parser.getDefaultAreaFactory());
         assertTrue(readAlgebraData != null);
-        assertEquals(true, isEquivalent(data, readAlgebraData, true));
+        assertTrue(isEquivalent(data, readAlgebraData, true));
     }
 
     public void testPinWheelExtension() {
@@ -239,7 +239,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
                 Parser.getDefaultAreaFactory());
         assertTrue(readAlgebraData != null);
-        assertEquals(true, isEquivalent(data, readAlgebraData, true));
+        assertTrue(isEquivalent(data, readAlgebraData, true));
     }
 
     public void testGrid() {
@@ -285,7 +285,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
                 Parser.getDefaultAreaFactory());
         assertTrue(readAlgebraData != null);
-        assertEquals(true, isEquivalent(data, readAlgebraData, true));
+        assertTrue(isEquivalent(data, readAlgebraData, true));
     }
 
     public void testGroupLayout() {
@@ -332,6 +332,6 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
                 Parser.getDefaultAreaFactory());
         assertTrue(readAlgebraData != null);
-        assertEquals(true, isEquivalent(data, readAlgebraData, true));
+        assertTrue(isEquivalent(data, readAlgebraData, true));
     }
 }
