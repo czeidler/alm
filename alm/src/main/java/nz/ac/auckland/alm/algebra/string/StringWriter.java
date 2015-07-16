@@ -108,7 +108,7 @@ public class StringWriter {
             int index = areaCount / areaNames.length();
             name = "" + areaNames.charAt(letter);
             if (index > 0)
-                name += areaCount;
+                name += index;
             areaCount++;
         }
         if (area instanceof EmptySpace) {
