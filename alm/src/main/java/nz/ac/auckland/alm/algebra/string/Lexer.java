@@ -21,19 +21,19 @@ class MainLexer implements Lexer.IState {
                 case ' ':
                     lexer.ignore();
                     break;
-                case '(':
-                    lexer.emit(Lexer.Token.TERM_START);
+                case Lexer.OPEN_BRACKET:
+                    lexer.emit(Lexer.Token.OPEN_BRACKET);
                     break;
-                case ')':
-                    lexer.emit(Lexer.Token.TERM_END);
+                case Lexer.CLOSE_BRACKET:
+                    lexer.emit(Lexer.Token.CLOSE_BRACKET);
                     break;
-                case '*':
+                case Lexer.TERM_OPERATOR:
                     lexer.emit(Lexer.Token.STAR);
                     break;
-                case '|':
+                case Lexer.PIPE:
                     lexer.emit(Lexer.Token.PIPE);
                     return new TabNameStartLexer();
-                case '/':
+                case Lexer.SLASH:
                     lexer.emit(Lexer.Token.SLASH);
                     return new TabNameStartLexer();
                 default:
@@ -43,8 +43,6 @@ class MainLexer implements Lexer.IState {
             }
         }
     }
-
-
 }
 
 class AtomParser implements Lexer.IState {
@@ -73,7 +71,7 @@ class TabNameStartLexer implements Lexer.IState {
     public Lexer.IState lex(Lexer lexer) {
         lexer.ignoreAll(' ');
         while (true) {
-            if (lexer.next() == '{') {
+            if (lexer.next() == Lexer.TAB_NAME_OPEN_BRACKET) {
                 lexer.ignore();
                 return new TabNameLexer();
             } else {
@@ -112,7 +110,7 @@ class TabNameEndLexer implements Lexer.IState {
     public Lexer.IState lex(Lexer lexer) {
         lexer.ignoreAll(' ');
         while (true) {
-            if (lexer.next() == '}') {
+            if (lexer.next() == Lexer.TAB_NAME_CLOSE_BRACKET) {
                 lexer.ignore();
                 return new MainLexer();
             } else {
@@ -125,11 +123,19 @@ class TabNameEndLexer implements Lexer.IState {
 }
 
 public class Lexer {
+    final static char TAB_NAME_OPEN_BRACKET = '{';
+    final static char TAB_NAME_CLOSE_BRACKET = '}';
+    final static char OPEN_BRACKET = '(';
+    final static char CLOSE_BRACKET = ')';
+    final static char TERM_OPERATOR = '*';
+    final static char SLASH = '/';
+    final static char PIPE = '|';
+
     static public class Token {
         final static public int ERROR = -2;
         final static public int EOF = -1;
-        final static public int TERM_START = 0;
-        final static public int TERM_END = 1;
+        final static public int OPEN_BRACKET = 0;
+        final static public int CLOSE_BRACKET = 1;
         final static public int ATOM = 2;
         final static public int SLASH = 3;
         final static public int PIPE = 4;
