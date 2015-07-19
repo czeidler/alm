@@ -38,59 +38,39 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     }
 
-    private Fragment(IArea area1, IArea area2, IDirection<Tab, OrthTab> direction1) {
-        this.direction = direction1;
+    public Fragment(IArea area1, IArea area2, IDirection<Tab, OrthTab> direction) {
+        assert direction == horizontalDirection || direction == verticalDirection;
+        this.direction = direction;
 
         add(area1);
         if  (area2 != null)
             add(area2);
     }
 
+    @Override
+    public String toString() {
+        return StringWriter.write(this);
+    }
+
+    public String hash() {
+        String hash = "";
+        if (direction != null)
+            hash += direction.getClass().getSimpleName();
+        for (IArea item : getItems()) {
+            if (item instanceof Fragment)
+                hash += "(" + ((Fragment) item).hash() + ")";
+            else
+                hash += item.hashCode();
+        }
+        return hash;
+    }
+
     public void setHorizontalDirection() {
         this.direction = horizontalDirection;
-        if (items.size() > 0)
-            setFirstItem(items.get(0));
     }
 
     public void setVerticalDirection() {
         this.direction = verticalDirection;
-        if (items.size() > 0)
-            setFirstItem(items.get(0));
-    }
-
-    public boolean hasSubFragment(Fragment subFragment) {
-        for (IArea area : items) {
-            if (!(area instanceof Fragment))
-                continue;
-            Fragment fragment = (Fragment) area;
-            if (fragment == subFragment)
-                return true;
-            if (fragment.hasSubFragment(subFragment))
-                return true;
-        }
-        return false;
-    }
-
-    public boolean hasAtom(IArea atom) {
-        for (IArea area : items) {
-            if (!(area instanceof Fragment)) {
-                if (area == atom)
-                    return true;
-            } else {
-                Fragment fragment = (Fragment) area;
-                if (fragment.hasAtom(atom))
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    private void setFirstItem(IArea item) {
-        if (direction == null)
-            return;
-        direction.setOppositeTab(this, direction.getOppositeTab(item));
-        direction.setOrthogonalTab1(this, direction.getOrthogonalTab1(item));
-        direction.setOrthogonalTab2(this, direction.getOrthogonalTab2(item));
     }
 
     public List<IArea> getItems() {
@@ -98,9 +78,6 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     }
 
     public void add(IArea item) {
-        if (items.size() == 0)
-            setFirstItem(item);
-
         if (item instanceof Fragment) {
             Fragment fragment = (Fragment) item;
             if (fragment.direction == null || fragment.direction == direction) {
@@ -110,13 +87,6 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
             }
         }
         items.add(item);
-        if (items.size() > 1) {
-            direction.setTab(this, direction.getTab(item));
-            if (direction.getOrthogonalTab1(this) != direction.getOrthogonalTab1(item))
-                direction.setOrthogonalTab1(this, null);
-            if (direction.getOrthogonalTab2(this) != direction.getOrthogonalTab2(item))
-                direction.setOrthogonalTab2(this, null);
-        }
     }
 
     public int countAtoms() {
@@ -130,9 +100,72 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
         return count;
     }
 
+    private <Tab extends Variable, OrthTab extends Variable> Tab getTab1(IDirection<Tab, OrthTab> direction) {
+        Tab tab = direction.getTab(items.get(0));
+        if (tab == null)
+            return null;
+        for (int i = 1; i < items.size(); i++) {
+            Tab areaTab = direction.getTab(items.get(i));
+            if (areaTab == null || tab != areaTab)
+                return null;
+        }
+        return tab;
+    }
+
+    private <Tab extends Variable, OrthTab extends Variable> Tab getTab2(IDirection<Tab, OrthTab> direction) {
+        Tab tab = direction.getTab(items.get(items.size() - 1));
+        if (tab == null)
+            return null;
+        for (int i = 0; i < items.size() - 1; i++) {
+            Tab areaTab = direction.getTab(items.get(i));
+            if (areaTab == null || tab != areaTab)
+                return null;
+        }
+        return tab;
+    }
+
+    @Override
+    public XTab getLeft() {
+        if (items.size() == 0)
+            return null;
+
+        if (direction == horizontalDirection)
+            return items.get(0).getLeft();
+        return getTab1(new LeftDirection());
+    }
+
+    @Override
+    public YTab getTop() {
+        if (items.size() == 0)
+            return null;
+
+        if (direction == verticalDirection)
+            return items.get(0).getTop();
+        return getTab1(new TopDirection());
+    }
+
+    @Override
+    public XTab getRight() {
+        if (items.size() == 0)
+            return null;
+
+        if (direction == horizontalDirection)
+            return items.get(items.size() - 1).getRight();
+        return getTab2(new RightDirection());
+    }
+
+    @Override
+    public YTab getBottom() {
+        if (items.size() == 0)
+            return null;
+
+        if (direction == verticalDirection)
+            return items.get(items.size() - 1).getBottom();
+        return getTab2(new BottomDirection());
+    }
+
     @Override
     public void setLeft(XTab value) {
-        super.setLeft(value);
         if (items.size() == 0 || value == null)
             return;
         if (direction == horizontalDirection)
@@ -145,7 +178,6 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     @Override
     public void setRight(XTab value) {
-        super.setRight(value);
         if (items.size() == 0 || value == null)
             return;
         if (direction == horizontalDirection)
@@ -158,7 +190,6 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     @Override
     public void setTop(YTab value) {
-        super.setTop(value);
         if (items.size() == 0 || value == null)
             return;
         if (direction == verticalDirection)
@@ -171,7 +202,6 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     @Override
     public void setBottom(YTab value) {
-        super.setBottom(value);
         if (items.size() == 0 || value == null)
             return;
         if (direction == verticalDirection)
