@@ -228,7 +228,7 @@ public class Parser implements Lexer.IListener {
     }
 
     IState state = new FragmentParser(null);
-    final List<IArea> terms = new ArrayList<IArea>();
+    final List<Fragment> terms = new ArrayList<Fragment>();
     final IAreaFactory areaFactory;
     final IListener listener;
     boolean hasError = false;
@@ -287,13 +287,10 @@ public class Parser implements Lexer.IListener {
     public void addTerm(Fragment fragment) {
         if (fragment.getItems().size() == 0)
             return;
-        if (fragment.getItems().size() == 1)
-            terms.add((IArea) fragment.getItems().get(0));
-        else
-            terms.add(fragment);
+        terms.add(fragment);
     }
 
-    public List<IArea> getTerms() {
+    public List<Fragment> getTerms() {
         return terms;
     }
 }

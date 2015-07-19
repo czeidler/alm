@@ -20,13 +20,13 @@ import java.util.Map;
 public class AlgebraStringTest extends BaseAlgebraTestCase {
     private void assertStringNotParsed(String string) {
         System.out.println("Test parsing of a bad string: " + string);
-        List<IArea> items = StringReader.readRawFragments(string, null);
+        List<Fragment> items = StringReader.readRawFragments(string, null);
         assertTrue(items == null);
     }
 
     private void assertStringParsed(String string) {
         System.out.println("Parse: " + string);
-        List<IArea> items = StringReader.readRawFragments(string, null);
+        List<Fragment> items = StringReader.readRawFragments(string, null);
         assertTrue(items != null);
         System.out.println("Result: " + StringWriter.write(items));
     }
@@ -46,7 +46,7 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         assertStringNotParsed("(A |  / (C | D)");
         assertStringNotParsed("(A |{0} B) / (A |{1} D)");
 
-        List<IArea> items = StringReader.readRawFragments("", null);
+        List<Fragment> items = StringReader.readRawFragments("", null);
         assertTrue(items != null);
         assertEquals(0, items.size());
     }
@@ -78,19 +78,21 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
      * found false is returned.
      *
      * @param algebraData
+     * @param theirAlgebraData
      * @param sameBorders check if the border tabstops are the same
      * @return true if the AlgebraData is equivalent
      */
-    public boolean isEquivalent(AlgebraData algebraData1,  AlgebraData algebraData, boolean sameBorders) {
+    public boolean isEquivalent(AlgebraData algebraData,  AlgebraData theirAlgebraData, boolean sameBorders) {
         if (sameBorders) {
-            if (algebraData1.getLeft() != algebraData.getLeft() || algebraData1.getTop() != algebraData.getTop()
-                    || algebraData1.getRight() != algebraData.getRight()
-                    || algebraData1.getBottom() != algebraData.getBottom())
+            if (algebraData.getLeft() != theirAlgebraData.getLeft()
+                    || algebraData.getTop() != theirAlgebraData.getTop()
+                    || algebraData.getRight() != theirAlgebraData.getRight()
+                    || algebraData.getBottom() != theirAlgebraData.getBottom())
                 return false;
         }
         Map<Variable, Variable> oursToTheirsMap = new HashMap<Variable, Variable>();
-        List<IArea> ourAreas = algebraData1.getAllAreasList();
-        List<IArea> theirAreas = algebraData.getAllAreasList();
+        List<IArea> ourAreas = algebraData.getAllAreasList();
+        List<IArea> theirAreas = theirAlgebraData.getAllAreasList();
         if (ourAreas.size() != theirAreas.size())
             return false;
         for (IArea ourArea : ourAreas) {

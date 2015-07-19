@@ -11,20 +11,17 @@ import nz.ac.auckland.alm.*;
 import nz.ac.auckland.alm.algebra.RightDirection;
 import nz.ac.auckland.linsolve.Variable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StringWriter {
     int areaCount = 0;
     int emptyCount = 0;
-    final Iterable<IArea> fragments;
+    final Collection<Fragment> fragments;
     final Map<IArea, String> areaNames = new HashMap<IArea, String>();
     final List<XTab> multipleXTabs = new ArrayList<XTab>();
     final List<YTab> multipleYTabs = new ArrayList<YTab>();
 
-    public StringWriter(Iterable<IArea> fragments) {
+    public StringWriter(Collection<Fragment> fragments) {
         this.fragments = fragments;
     }
 
@@ -33,9 +30,13 @@ public class StringWriter {
         return writer.write();
     }
 
-    static public String write(Iterable<IArea> fragments) {
+    static public String write(Collection<Fragment> fragments) {
         StringWriter writer = new StringWriter(fragments);
         return writer.write();
+    }
+
+    public static String write(Fragment fragment) {
+        return write(Collections.singletonList(fragment));
     }
 
     public String write() {
@@ -82,10 +83,8 @@ public class StringWriter {
         Fragment fragment = (Fragment) fragmentArea;
         for (int i = 0; i < fragment.getItems().size(); i++) {
             IArea area = (IArea) fragment.getItems().get(i);
-            if (area instanceof Fragment) {
+            if (area instanceof Fragment)
                 countTabs(area, tabCount);
-                continue;
-            }
             if (i == fragment.getItems().size() - 1)
                 continue;
             Variable tab = fragment.direction.getTab(area);

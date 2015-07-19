@@ -17,7 +17,7 @@ import java.util.List;
 
 
 public class StringReader {
-    static public List<IArea> readRawFragments(final String input, Parser.IAreaFactory areaFactory) {
+    static public List<Fragment> readRawFragments(final String input, Parser.IAreaFactory areaFactory) {
         Parser parser = new Parser(areaFactory, new Parser.IListener() {
             @Override
             public void onError(String error, Lexer.Token token) {
@@ -40,7 +40,7 @@ public class StringReader {
 
     static public AlgebraData read(final String input, XTab left, YTab top, XTab right, YTab bottom,
                                    Parser.IAreaFactory areaFactory) {
-        List<IArea> fragments = readRawFragments(input, areaFactory);
+        List<Fragment> fragments = readRawFragments(input, areaFactory);
         if (fragments == null)
             return null;
         List<IArea> atoms = toAtoms(fragments);
@@ -63,20 +63,19 @@ public class StringReader {
         return algebraData;
     }
 
-    static private List<IArea> toAtoms(List<IArea> fragments) {
+    static private List<IArea> toAtoms(List<Fragment> fragments) {
         List<IArea> atoms = new ArrayList<IArea>();
-        for (IArea fragment : fragments)
+        for (Fragment fragment : fragments)
             toAtoms(fragment, atoms);
         return atoms;
     }
 
-    static private void toAtoms(IArea fragment, List<IArea> atoms) {
-        if (!(fragment instanceof Fragment)) {
-            if (!atoms.contains(fragment))
-                atoms.add(fragment);
-            return;
+    static private void toAtoms(Fragment fragment, List<IArea> atoms) {
+        for (IArea child : (List<IArea>)fragment.getItems()) {
+            if (child instanceof Fragment)
+                toAtoms((Fragment)child, atoms);
+            else if (!atoms.contains(child))
+                atoms.add(child);
         }
-        for (IArea child : (List<IArea>)((Fragment) fragment).getItems())
-            toAtoms(child, atoms);
     }
 }
