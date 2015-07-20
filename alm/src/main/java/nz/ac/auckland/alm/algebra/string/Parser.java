@@ -21,113 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 
-class TabParser implements Parser.IState {
-    final FragmentParser fragmentParser;
-
-    public TabParser(FragmentParser fragmentParser) {
-        this.fragmentParser = fragmentParser;
-    }
-
-    @Override
-    public Parser.IState parse(Parser parser) {
-        Fragment fragment = fragmentParser.fragment;
-        Lexer.Token token = parser.next();
-        if (token.type == Lexer.Token.PIPE) {
-            if (fragment.direction != null && fragment.direction != Fragment.horizontalDirection) {
-                parser.error("Tab direction miss match", token);
-                return null;
-            }
-            fragment.setHorizontalDirection();
-            setTab(parser, parser.namedXTabs);
-        } else if (token.type == Lexer.Token.SLASH) {
-            if (fragment.direction != null && fragment.direction != Fragment.verticalDirection) {
-                parser.error("Tab direction miss match", token);
-                return null;
-            }
-            fragment.setVerticalDirection();
-            setTab(parser, parser.namedYTabs);
-        } else {
-            parser.error("Internal error: Tiling operator expected", token);
-            return null;
-        }
-        return fragmentParser;
-    }
-
-    public <Tab extends Variable> void setTab(Parser parser, Map<String, Tab> namedTabs) {
-        Fragment fragment = fragmentParser.fragment;
-        IDirection direction = fragment.direction;
-        List<IArea> items = fragment.getItems();
-        IArea lastArea = items.get(items.size() - 1);
-        Tab existingTab = (Tab)direction.getTab(lastArea);
-        Tab tab;
-        Lexer.Token token = parser.peek();
-        if (token.type == Lexer.Token.TAB_NAME) {
-            // get the token
-            token = parser.next();
-            tab = namedTabs.get(token.value);
-            if (existingTab != null && existingTab != tab)
-                parser.error("Area is already assigned to a different tabstop", token);
-
-            if (tab == null) {
-                tab = (Tab) direction.createTab();
-                namedTabs.put(token.value, tab);
-            }
-        } else if (existingTab != null)
-            tab = existingTab;
-        else
-            tab = (Tab)direction.createTab();
-
-        direction.setTab(lastArea, tab);
-    }
-}
-
-class CloseFragmentByBracketParser implements Parser.IState {
-    final FragmentParser fragmentParser;
-
-    public CloseFragmentByBracketParser(FragmentParser parent) {
-        this.fragmentParser = parent;
-    }
-
-    @Override
-    public Parser.IState parse(Parser parser) {
-        Lexer.Token token = parser.next();
-        if (token.type != Lexer.Token.CLOSE_BRACKET) {
-            parser.error("Internal error: closing bracket expected", token);
-            return null;
-        }
-        if (fragmentParser.parent == null) {
-            parser.error("Unexpected closing bracket", token);
-            return null;
-        }
-        return fragmentParser.parent.addItem(parser, fragmentParser.fragment);
-    }
-}
-
-class CloseFragmentByStarParser implements Parser.IState {
-    final FragmentParser fragmentParser;
-
-    public CloseFragmentByStarParser(FragmentParser parent) {
-        this.fragmentParser = parent;
-    }
-
-    @Override
-    public Parser.IState parse(Parser parser) {
-        Lexer.Token token = parser.next();
-        if (token.type != Lexer.Token.STAR) {
-            parser.error("Internal error: star expected", token);
-            return null;
-        }
-
-        if (fragmentParser.parent != null) {
-            parser.error("Closing bracket expected", token);
-            return null;
-        }
-
-        parser.addTerm(fragmentParser.fragment);
-        return new FragmentParser(null);
-    }
-}
-
 class FragmentParser implements Parser.IState {
     final Fragment fragment = new Fragment();
     final FragmentParser parent;
@@ -178,23 +71,77 @@ class FragmentParser implements Parser.IState {
 
         fragment.add(item);
 
-        Lexer.Token peek = parser.peek();
-        if (peek.type == Lexer.Token.CLOSE_BRACKET)
-            return new CloseFragmentByBracketParser(this);
-        if (peek.type == Lexer.Token.STAR)
-            return new CloseFragmentByStarParser(this);
-        if (peek.type == Lexer.Token.SLASH || peek.type == Lexer.Token.PIPE)
-            return new TabParser(this);
+        Lexer.Token token = parser.next();
+        if (token.type == Lexer.Token.CLOSE_BRACKET) {
+            if (parent == null) {
+                parser.error("Unexpected closing bracket", token);
+                return null;
+            }
+            return parent.addItem(parser, fragment);
+        }
+        if (token.type == Lexer.Token.STAR) {
+            if (parent != null) {
+                parser.error("Closing bracket expected", token);
+                return null;
+            }
+
+            parser.addTerm(fragment);
+            return new FragmentParser(null);
+        }
+        if (token.type == Lexer.Token.SLASH) {
+            if (fragment.direction != null && fragment.direction != Fragment.verticalDirection) {
+                parser.error("Tab direction miss match", token);
+                return null;
+            }
+            fragment.setVerticalDirection();
+            setTab(parser, parser.namedYTabs);
+            return this;
+        }
+        if (token.type == Lexer.Token.PIPE) {
+            if (fragment.direction != null && fragment.direction != Fragment.horizontalDirection) {
+                parser.error("Tab direction miss match", token);
+                return null;
+            }
+            fragment.setHorizontalDirection();
+            setTab(parser, parser.namedXTabs);
+            return this;
+        }
         // we handle the EOF
-        if (peek.type == Lexer.Token.EOF)
+        if (token.type == Lexer.Token.EOF)
             return this;
 
-        parser.error("Unexpected token", peek);
+        parser.error("Unexpected token", token);
         return null;
+    }
+
+    public <Tab extends Variable> void setTab(Parser parser, Map<String, Tab> namedTabs) {
+        IDirection direction = fragment.direction;
+        List<IArea> items = fragment.getItems();
+        IArea lastArea = items.get(items.size() - 1);
+        Tab existingTab = (Tab)direction.getTab(lastArea);
+        Tab tab;
+        Lexer.Token token = parser.peek();
+        if (token.type == Lexer.Token.TAB_NAME) {
+            // get the token
+            token = parser.next();
+            tab = namedTabs.get(token.value);
+            if (existingTab != null && existingTab != tab)
+                parser.error("Area is already assigned to a different tabstop", token);
+
+            if (tab == null) {
+                tab = (Tab) direction.createTab();
+                namedTabs.put(token.value, tab);
+            }
+        } else if (existingTab != null)
+            tab = existingTab;
+        else
+            tab = (Tab)direction.createTab();
+
+        direction.setTab(lastArea, tab);
     }
 }
 
-public class Parser implements Lexer.IListener {
+public class Parser {
     final Map<String, XTab> namedXTabs = new HashMap<String, XTab>();
     final Map<String, YTab> namedYTabs = new HashMap<String, YTab>();
 
@@ -229,18 +176,17 @@ public class Parser implements Lexer.IListener {
 
     IState state = new FragmentParser(null);
     final List<Fragment> terms = new ArrayList<Fragment>();
+    final Lexer.TokenStream tokenStream;
     final IAreaFactory areaFactory;
     final IListener listener;
     boolean hasError = false;
 
-    final static int MIN_QUEUE_SIZE = 2;
-    List<Lexer.Token> tokenQueue = new ArrayList<Lexer.Token>(MIN_QUEUE_SIZE);
-
-    public Parser(IListener listener) {
-        this(null, listener);
+    public Parser(Lexer.TokenStream tokenStream, IListener listener) {
+        this(tokenStream, null, listener);
     }
 
-    public Parser(IAreaFactory areaFactory, IListener listener) {
+    public Parser(Lexer.TokenStream tokenStream, IAreaFactory areaFactory, IListener listener) {
+        this.tokenStream = tokenStream;
         if (areaFactory == null)
             this.areaFactory = getDefaultAreaFactory();
         else
@@ -248,26 +194,17 @@ public class Parser implements Lexer.IListener {
         this.listener = listener;
     }
 
-    @Override
-    public void onNewToken(Lexer.Token token) {
-        if (token.type == Lexer.Token.ERROR) {
-            error(token.value, token);
-            state = null;
-        }
-        tokenQueue.add(token);
-
-        while (state != null && (tokenQueue.size() >= MIN_QUEUE_SIZE || token.type == Lexer.Token.EOF))
+    public void run() {
+        while (state != null)
             state = state.parse(this);
     }
 
     public Lexer.Token next() {
-        if (peek().type == Lexer.Token.EOF)
-            return peek();
-        return tokenQueue.remove(0);
+        return tokenStream.next();
     }
 
     public Lexer.Token peek() {
-        return tokenQueue.get(0);
+        return tokenStream.peek();
     }
 
     public void error(String error, Lexer.Token token) {

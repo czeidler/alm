@@ -8,6 +8,9 @@
 package nz.ac.auckland.alm.algebra.string;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 class MainLexer implements Lexer.IState {
     @Override
     public Lexer.IState lex(Lexer lexer) {
@@ -166,24 +169,38 @@ public class Lexer {
         IState lex(Lexer lexer);
     }
 
-    public interface IListener {
-        void onNewToken(Token token);
+    public class TokenStream {
+        IState state = new MainLexer();
+
+        public Token next() {
+            Token token = peek();
+            if (token.type == Token.EOF)
+                return token;
+            else
+                return tokenQueue.remove(0);
+        }
+
+        public Token peek() {
+            while (state != null && tokenQueue.size() == 0)
+                state = state.lex(Lexer.this);
+
+            assert  (tokenQueue.size() > 0);
+            return tokenQueue.get(0);
+        }
     }
 
     final String input;
-    final IListener listener;
     int itemStart = 0;
     int itemPosition = 0;
     int runeWidth = 1;
+    List<Token> tokenQueue = new ArrayList<Token>();
 
-    public Lexer(String input, IListener listener) {
+    public Lexer(String input) {
         this.input = input;
-        this.listener = listener;
     }
 
-    public void run() {
-        for (IState state = new MainLexer(); state != null;)
-            state = state.lex(this);
+    public TokenStream run() {
+        return new TokenStream();
     }
 
     public void emit(int type) {
@@ -197,8 +214,8 @@ public class Lexer {
     }
 
     private void emit(Token token) {
+        tokenQueue.add(token);
         itemStart = itemPosition;
-        listener.onNewToken(token);
     }
 
     public char next() {

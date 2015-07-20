@@ -18,7 +18,8 @@ import java.util.List;
 
 public class StringReader {
     static public List<Fragment> readRawFragments(final String input, Parser.IAreaFactory areaFactory) {
-        Parser parser = new Parser(areaFactory, new Parser.IListener() {
+        Lexer lexer = new Lexer(input);
+        Parser parser = new Parser(lexer.run(), areaFactory, new Parser.IListener() {
             @Override
             public void onError(String error, Lexer.Token token) {
                 System.out.println(input);
@@ -30,8 +31,7 @@ public class StringReader {
                 System.out.println("Parser error at " + token.position + ": " + error);
             }
         });
-        Lexer lexer = new Lexer(input, parser);
-        lexer.run();
+        parser.run();
 
         if (parser.hasError())
             return null;
