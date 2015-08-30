@@ -33,6 +33,14 @@ abstract class AbstractLayoutSpecArea extends TabArea implements ILayoutSpecArea
             layoutSpec.linearSpec.addConstraint(constraint);
     }
 
+    protected boolean removeConstraint(Constraint constraint) {
+        if (!constraints.remove(constraint))
+            return false;
+        if (layoutSpec != null)
+            layoutSpec.linearSpec.removeConstraint(constraint);
+        return true;
+    }
+
     @Override
     public void attachedToLayoutSpec(LayoutSpec layoutSpec) {
         if (this.layoutSpec != null)

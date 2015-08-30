@@ -113,7 +113,7 @@ public class Area extends AbstractLayoutSpecArea {
 
 	Size minSize = new Size(0, 0);
 	Size preferredSize = UNDEFINED_SIZE;
-	Size maxSize = new Size(Integer.MAX_VALUE, Integer.MAX_VALUE);;
+	Size maxSize = new Size(Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 	int leftInset = 0;
 	int topInset = 0;
@@ -139,12 +139,12 @@ public class Area extends AbstractLayoutSpecArea {
 	private void updateHorizontalConstraintVars() {
 		minWidthConstraint.setLeftSide(-1, left, 1, right);
 
-		// if a maximum constraint was set, then it nees to use the new tab
+		// if a maximum constraint was set, then it needs to use the new tab
 		if (maxWidthConstraint != null)
 			maxWidthConstraint.setLeftSide(-1, left, 1, right);
 
 		if (preferredWidthConstraint != null)
-			maxWidthConstraint.setLeftSide(-1, left, 1, right);
+			preferredWidthConstraint.setLeftSide(-1, left, 1, right);
 
 		invalidateLayoutSpec();
 	}
@@ -153,7 +153,7 @@ public class Area extends AbstractLayoutSpecArea {
 		// the respective minimum constraint needs to use the new tab
 		minHeightConstraint.setLeftSide(-1, top, 1, bottom);
 
-		// if a maximum constraint was set, then it nees to use the new tab
+		// if a maximum constraint was set, then it needs to use the new tab
 		if (maxHeightConstraint != null)
 			maxHeightConstraint.setLeftSide(-1, top, 1, bottom);
 
@@ -271,7 +271,7 @@ public class Area extends AbstractLayoutSpecArea {
 			}
 			updateRightSideHorizontal(maxWidthConstraint, effectiveSize.getWidth());
 		} else if (maxWidthConstraint != null) {
-			maxWidthConstraint.remove();
+			removeConstraint(maxWidthConstraint);
 			maxWidthConstraint = null;
 		}
 
@@ -282,7 +282,7 @@ public class Area extends AbstractLayoutSpecArea {
 			}
 			updateRightSideVertical(maxHeightConstraint, effectiveSize.getHeight());
 		} else if (maxHeightConstraint != null) {
-			maxHeightConstraint.remove();
+			removeConstraint(maxHeightConstraint);
 			maxHeightConstraint = null;
 		}
 
@@ -320,18 +320,19 @@ public class Area extends AbstractLayoutSpecArea {
 			}
 			updateRightSideHorizontal(preferredWidthConstraint, effectiveSize.getWidth());
 		} else if (preferredWidthConstraint != null) {
-			preferredWidthConstraint.remove();
+			removeConstraint(preferredWidthConstraint);
 			preferredWidthConstraint = null;
 		}
 
 		if (preferredSize.getHeight() > 0) {
 			if (preferredHeightConstraint == null) {
-				preferredHeightConstraint = new Constraint(-1, top, 1, bottom, OperatorType.EQ, 0, shrinkPenalty.width);
-				addConstraint(preferredWidthConstraint);
+				preferredHeightConstraint = new Constraint(-1, top, 1, bottom, OperatorType.EQ, 0,
+						shrinkPenalty.height);
+				addConstraint(preferredHeightConstraint);
 			}
 			updateRightSideVertical(preferredHeightConstraint, effectiveSize.getHeight());
 		} else if (preferredHeightConstraint != null){
-			preferredHeightConstraint.remove();
+			removeConstraint(preferredHeightConstraint);
 			preferredHeightConstraint = null;
 		}
 
@@ -420,7 +421,7 @@ public class Area extends AbstractLayoutSpecArea {
 			} else
 				aspectRatioConstraint.setLeftSide(-1, left, 1, right, aspectRatio, top, -aspectRatio, bottom);
 		} else if (aspectRatioConstraint != null) {
-			aspectRatioConstraint.remove();
+			removeConstraint(aspectRatioConstraint);
 			aspectRatioConstraint = null;
 		}
 
