@@ -39,6 +39,9 @@ public class ForceSolver extends AbstractLinearSolver {
         private double averageDisplacement;
         private double effectiveK;
         private double averageForce;
+        private double averageK;
+        private double forceSum;
+        private double kSum;
 
         private boolean isStrong = false;
 
@@ -65,16 +68,22 @@ public class ForceSolver extends AbstractLinearSolver {
             averageDisplacement = 0;
             averageForce = 0;
             effectiveK = 0;
+            averageK = 0;
+            forceSum = 0;
+            kSum = 0;
 
             int i = 0;
             for (Force force : forces) {
                 i++;
                 averageDisplacement += force.displacement;
+                forceSum += force.getForce();
+                kSum += force.k;
                 averageForce += force.getForce();
             }
 
             averageDisplacement /= i;
-            averageForce /= i;
+            averageForce = forceSum / i;
+            averageK = kSum / i;
             effectiveK = averageForce / averageDisplacement;
 
             valid = true;
@@ -98,6 +107,21 @@ public class ForceSolver extends AbstractLinearSolver {
             validated();
             return averageForce;
         }
+
+        public double getForceSum() {
+            validated();
+            return forceSum;
+        }
+
+        public double getKSum() {
+            validated();
+            return kSum;
+        }
+
+        public double getAverageK() {
+            validated();
+            return averageK;
+        }
     }
 
     private class VariableForce {
@@ -117,6 +141,23 @@ public class ForceSolver extends AbstractLinearSolver {
         public double getEffectiveDisplacement() {
             if (leftForce.size() == 0 && rightForce.size() == 0)
                 return 0;
+            double leftDelta = 0;
+            double rightDelta = 0;
+            if (leftForce.size() != 0)
+                leftDelta = leftForce.getForceSum() / leftForce.getKSum();
+            if (rightForce.size() != 0)
+                rightDelta = rightForce.getForceSum() / rightForce.getKSum();
+
+            if (rightForce.size() == 0)
+                return leftDelta;
+            if (leftForce.size() == 0)
+                return rightDelta;
+
+            return (leftForce.getKSum() * leftDelta
+                    + rightForce.getKSum() * rightDelta)
+                    / (leftForce.getKSum() + rightForce.getKSum());
+
+            /*
             if (rightForce.size() == 0)
                 return leftForce.getEffectiveK() * leftForce.getAverageDisplacement();
             if (leftForce.size() == 0)
@@ -125,6 +166,7 @@ public class ForceSolver extends AbstractLinearSolver {
             return (leftForce.getEffectiveK() * leftForce.getAverageDisplacement()
                     + rightForce.getEffectiveK() * rightForce.getAverageDisplacement())
                     / (leftForce.getEffectiveK() + rightForce.getEffectiveK());
+            */
         }
     }
 
