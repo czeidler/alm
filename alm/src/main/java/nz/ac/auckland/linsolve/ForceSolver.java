@@ -26,33 +26,16 @@ public class ForceSolver extends AbstractLinearSolver {
         public double getForce() {
             return k * displacement;
         }
-
-        public boolean isStrong() {
-            return k < 0;
-        }
     }
 
     private class ForceSum {
         final private List<Force> forces = new ArrayList<>();
 
         private boolean valid = false;
-        private double averageDisplacement;
-        private double effectiveK;
-        private double averageForce;
-        private double averageK;
         private double forceSum;
         private double kSum;
 
-        private boolean isStrong = false;
-
         public void addForce(Force force) {
-            if (isStrong && !force.isStrong())
-                return;
-            if (!isStrong && force.isStrong()) {
-                isStrong = true;
-                forces.clear();
-            }
-
             forces.add(force);
             valid = false;
         }
@@ -65,47 +48,15 @@ public class ForceSolver extends AbstractLinearSolver {
             if (valid)
                 return;
 
-            averageDisplacement = 0;
-            averageForce = 0;
-            effectiveK = 0;
-            averageK = 0;
             forceSum = 0;
             kSum = 0;
 
-            int i = 0;
             for (Force force : forces) {
-                i++;
-                averageDisplacement += force.displacement;
                 forceSum += force.getForce();
                 kSum += force.k;
-                averageForce += force.getForce();
             }
 
-            averageDisplacement /= i;
-            averageForce = forceSum / i;
-            averageK = kSum / i;
-            effectiveK = averageForce / averageDisplacement;
-
             valid = true;
-        }
-
-        public boolean isStrong() {
-            return isStrong;
-        }
-
-        public double getAverageDisplacement() {
-            validated();
-            return averageDisplacement;
-        }
-
-        public double getEffectiveK() {
-            validated();
-            return effectiveK;
-        }
-
-        public double getAverageForce() {
-            validated();
-            return averageForce;
         }
 
         public double getForceSum() {
@@ -117,26 +68,11 @@ public class ForceSolver extends AbstractLinearSolver {
             validated();
             return kSum;
         }
-
-        public double getAverageK() {
-            validated();
-            return averageK;
-        }
     }
 
     private class VariableForce {
         final public ForceSum leftForce = new ForceSum();
         final public ForceSum rightForce = new ForceSum();
-
-        public double getStrongDisplacement() {
-            if (leftForce.size() > 0 && rightForce.size() > 0)
-                return leftForce.getAverageDisplacement() + rightForce.getAverageDisplacement();
-            if (leftForce.size() > 0)
-                return leftForce.getAverageDisplacement();
-            if (rightForce.size() > 0)
-                return rightForce.getAverageDisplacement();
-            return 0;
-        }
 
         public double getEffectiveDisplacement() {
             if (leftForce.size() == 0 && rightForce.size() == 0)
@@ -153,55 +89,81 @@ public class ForceSolver extends AbstractLinearSolver {
             if (leftForce.size() == 0)
                 return rightDelta;
 
-            return (leftForce.getKSum() * leftDelta
-                    + rightForce.getKSum() * rightDelta)
+            return (leftForce.getKSum() * leftDelta + rightForce.getKSum() * rightDelta)
                     / (leftForce.getKSum() + rightForce.getKSum());
-
-            /*
-            if (rightForce.size() == 0)
-                return leftForce.getEffectiveK() * leftForce.getAverageDisplacement();
-            if (leftForce.size() == 0)
-                return rightForce.getEffectiveK() * rightForce.getAverageDisplacement();
-
-            return (leftForce.getEffectiveK() * leftForce.getAverageDisplacement()
-                    + rightForce.getEffectiveK() * rightForce.getAverageDisplacement())
-                    / (leftForce.getEffectiveK() + rightForce.getEffectiveK());
-            */
         }
     }
-
-    public static final int MAX_ITERATION = 1000;
 
     @Override
     protected ResultType doSolve() {
         initVariableValues();
 
         double cooling = 1.9d;
-        double COOLING_FACTOR = 0.9;
+        final double COOLING_FACTOR = 0.9;
+        final int MAX_ITERATION = 1000;
 
+        // do an initial Kaczmarz
+        doKaczmarzHard();
+
+        final double tolerance = 0.1;
+        double prevError = Double.MAX_VALUE;
         for (int i = 0; i < MAX_ITERATION; i++) {
-            doIteration(cooling);
+            // Optimize soft constraints.
+            doOptimizeForcesSoft(cooling);
             cooling *= COOLING_FACTOR;
+            // Fix hard constraints using Kaczmarz.
+            doKaczmarzHard();
+
+            // check the result
+            double error2 = error2SoftConstraints();
+            double diff = Math.abs(prevError - error2);
+            prevError = error2;
+            if (diff < tolerance * tolerance) {
+                System.out.println("Iterations: " + (i + 1));
+                if (allHardConstraintsSatisfied())
+                    return ResultType.OPTIMAL;
+            }
         }
 
-        return ResultType.OPTIMAL;
+        if (!allHardConstraintsSatisfied())
+            return ResultType.INFEASIBLE;
+
+        return ResultType.SUBOPTIMAL;
     }
 
-    private void doIteration(double cooling) {
+    private boolean allHardConstraintsSatisfied() {
+        for (Constraint constraint : this.getLinearSpec().getConstraints()) {
+            if (!constraint.isHard())
+                continue;
+            if (!constraint.isSatisfied())
+                return false;
+        }
+        return true;
+    }
+
+    private double error2SoftConstraints() {
+        double error2 = 0;
+        for (Constraint constraint : this.getLinearSpec().getConstraints()) {
+            if (constraint.isHard())
+                continue;
+            error2 += Math.pow(constraint.error(), 2);
+        }
+        return error2;
+    }
+
+    private void doOptimizeForcesSoft(double cooling) {
         Map<Variable, VariableForce> variableForceMap = new HashMap<>();
 
+        // Calculate forces on each variable. The force is proportional to the displacement of the variable. The
+        // displacement is calculated using the Kaczmarz projection.
         for (Constraint constraint : getLinearSpec().getConstraints()) {
             if (constraint.isSatisfied())
                 continue;
             if (constraint.isHard())
                 continue;
 
-            // calculate projection parameter (b_i - A_i*x)/|A_i|^2
-            double b = constraint.getRightSide();
-            Summand[] A = constraint.getLeftSide();
-            double p = (b - scalarProduct(A)) / euclidianNorm(A);
-
-            for (Summand summand : A) {
+            double p = getKaczmarzProjection(constraint);
+            for (Summand summand : constraint.getLeftSide()) {
                 Variable variable = summand.getVar();
                 VariableForce variableForce = variableForceMap.get(variable);
                 if (variableForce == null) {
@@ -217,36 +179,43 @@ public class ForceSolver extends AbstractLinearSolver {
                     variableForce.rightForce.addForce(force);
             }
         }
-
+        // Apply forces on the variables.
         for (Map.Entry<Variable, VariableForce> entry : variableForceMap.entrySet()) {
             Variable variable = entry.getKey();
             VariableForce variableForce = entry.getValue();
-            double delta;
-            if (variableForce.leftForce.isStrong() || variableForce.rightForce.isStrong())
-                delta = variableForce.getStrongDisplacement();
-            else
-                delta = cooling * variableForce.getEffectiveDisplacement();
+            double delta = cooling * variableForce.getEffectiveDisplacement();
             variable.setValue(variable.getValue() + delta);
         }
+    }
 
+    private void doKaczmarzHard() {
         for (Constraint constraint : getLinearSpec().getConstraints()) {
             if (constraint.isSatisfied())
                 continue;
             if (!constraint.isHard())
                 continue;
 
-            // calculate projection parameter (b_i - A_i*x)/|A_i|^2
-            double b = constraint.getRightSide();
-            Summand[] A = constraint.getLeftSide();
-            double p = (b - scalarProduct(A)) / euclidianNorm(A);
-
-            for (Summand summand : A) {
+            double p = getKaczmarzProjection(constraint);
+            for (Summand summand : constraint.getLeftSide()) {
                 Variable variable = summand.getVar();
                 variable.setValue(variable.getValue() + p * summand.getCoeff());
             }
         }
     }
 
+    private double getKaczmarzProjection(Constraint constraint) {
+        // calculate projection parameter (b_i - A_i*x)/|A_i|^2
+        double b = constraint.getRightSide();
+        Summand[] A = constraint.getLeftSide();
+        return (b - scalarProduct(A)) / euclidianNorm(A);
+    }
+
+    /**
+     * Translates a penalty value to a force value.
+     *
+     * @param penalty of an constraint
+     * @return associated force value of the penalty
+     */
     private double getK(double penalty) {
         if (penalty == 1)
             return -1;
