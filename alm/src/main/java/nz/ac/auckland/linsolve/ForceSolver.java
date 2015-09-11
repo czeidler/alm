@@ -74,7 +74,7 @@ public class ForceSolver extends AbstractLinearSolver {
         final public ForceSum leftForce = new ForceSum();
         final public ForceSum rightForce = new ForceSum();
 
-        public double getEffectiveDisplacement() {
+        public double getZeroForceDisplacement() {
             if (leftForce.size() == 0 && rightForce.size() == 0)
                 return 0;
             double leftDelta = 0;
@@ -183,7 +183,7 @@ public class ForceSolver extends AbstractLinearSolver {
         for (Map.Entry<Variable, VariableForce> entry : variableForceMap.entrySet()) {
             Variable variable = entry.getKey();
             VariableForce variableForce = entry.getValue();
-            double delta = cooling * variableForce.getEffectiveDisplacement();
+            double delta = cooling * variableForce.getZeroForceDisplacement();
             variable.setValue(variable.getValue() + delta);
         }
     }
@@ -217,6 +217,7 @@ public class ForceSolver extends AbstractLinearSolver {
      * @return associated force value of the penalty
      */
     private double getK(double penalty) {
+        // TODO: use a better translation
         if (penalty == 1)
             return -1;
         if (penalty > 0.8)
