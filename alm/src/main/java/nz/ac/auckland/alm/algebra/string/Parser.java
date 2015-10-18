@@ -7,7 +7,6 @@
  */
 package nz.ac.auckland.alm.algebra.string;
 
-
 import nz.ac.auckland.alm.Area;
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.XTab;

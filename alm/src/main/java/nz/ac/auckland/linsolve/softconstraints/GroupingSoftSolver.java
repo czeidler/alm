@@ -3,6 +3,7 @@ package nz.ac.auckland.linsolve.softconstraints;
 import nz.ac.auckland.linsolve.AbstractLinearSolver;
 import nz.ac.auckland.linsolve.ResultType;
 
+
 public class GroupingSoftSolver extends AbstractSoftSolver {
 
     public GroupingSoftSolver(AbstractLinearSolver solver) {
@@ -23,9 +24,8 @@ public class GroupingSoftSolver extends AbstractSoftSolver {
         int end = 2 * upperbound;
 
         ResultType solverResult = ResultType.INFEASIBLE; // Result type of the solving attempt
-        int counter = 0;
 
-        // The Pivot selector only returns a list of active constraints. SO the size of the constraints list chagens
+        // The Pivot selector only returns a list of active constraints. SO the size of the constraints list changes
         // while the algorithm runs.
         // stop if we reach with the lower bound the last element in the list
         rememberVariableValues();

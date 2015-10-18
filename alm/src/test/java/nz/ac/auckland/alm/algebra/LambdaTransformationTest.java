@@ -194,6 +194,7 @@ public class LambdaTransformationTest extends BaseAlgebraTestCase {
         YTab top = layoutSpec.getTop();
         XTab right = layoutSpec.getRight();
         YTab bottom = layoutSpec.getBottom();
+        // (E0 / A1) | (E1 / A2) | E3
         layoutSpec.addArea(new Area(left, y1, x0, bottom));
         layoutSpec.addArea(new Area(x0, y2, x1, bottom));
         layoutSpec.addArea(new EmptySpace(left, top, x0, y1));
@@ -214,27 +215,27 @@ public class LambdaTransformationTest extends BaseAlgebraTestCase {
         XTab x1 = makeXTabAt(968.9999999923093);
         XTab x2 = makeXTabAt(181.99358896604542);
         YTab y0 = makeYTabAt(621.9946225682406);
-        YTab y5 = makeYTabAt(621.993867640258);
+        YTab y1 = makeYTabAt(621.993867640258);
 
         XTab left = layoutSpec.getLeft();
         YTab top = layoutSpec.getTop();
         XTab right = layoutSpec.getRight();
         YTab bottom = layoutSpec.getBottom();
 
-
+        // (E0 /{0} A1) | (E1 /{1} A2 | E2 /{1} (E4 | A3))
         layoutSpec.addArea(new Area(left, y0, x2, bottom));
-        layoutSpec.addArea(new Area(x2, y5, x0, bottom));
-        layoutSpec.addArea(new Area(x1, y5, right, bottom));
+        layoutSpec.addArea(new Area(x2, y1, x0, bottom));
+        layoutSpec.addArea(new Area(x1, y1, right, bottom));
 
         layoutSpec.addArea(new EmptySpace(left, top, x2, y0));
-        layoutSpec.addArea(new EmptySpace(x2, top, x0, y5));
-        layoutSpec.addArea(new EmptySpace(x0, top, right, y5));
-        layoutSpec.addArea(new EmptySpace(x0, y5, x1, bottom));
+        layoutSpec.addArea(new EmptySpace(x2, top, x0, y1));
+        layoutSpec.addArea(new EmptySpace(x0, top, right, y1));
+        layoutSpec.addArea(new EmptySpace(x0, y1, x1, bottom));
 
         AlgebraData algebraData = new AlgebraData(layoutSpec, null);
         LambdaTransformation trafo = new LambdaTransformation(algebraData);
 
-        EmptySpace emptySpace = trafo.makeSpace(left, top, right, y5);
+        EmptySpace emptySpace = trafo.makeSpace(left, top, right, y1);
         assertTrue(emptySpace != null);
     }
 }

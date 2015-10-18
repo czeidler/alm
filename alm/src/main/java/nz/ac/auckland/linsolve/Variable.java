@@ -86,6 +86,10 @@ public class Variable {
 		}
 	}
 
+	public List<Constraint> getActiveConstraints() {
+		return activeConstraints;
+	}
+
 	/**
 	 * Gets 1-based index of the variable.
 	 * 
