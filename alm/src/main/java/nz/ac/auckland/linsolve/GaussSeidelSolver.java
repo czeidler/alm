@@ -77,7 +77,7 @@ public class GaussSeidelSolver extends AbstractLinearSolver {
             maxError = getLinearSpec().computeCurrentMaxError();
             lastRelaxationStepMaxError = maxError;
 
-            if (Constraint.equalZero(maxError)) {
+            if (getLinearSpec().equalZero(maxError)) {
                 lastSolvingResult = ResultType.OPTIMAL;
                 requiredNoIterations = iteration;
                 return ResultType.OPTIMAL;

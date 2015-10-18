@@ -12,6 +12,12 @@ import java.util.Map;
  * Layout specification.
  */
 public class LayoutSpec {
+    /**
+     * For GUI problems 0.001 tolerance should be enough. If we want to test general problems then
+     * we should increase tolerance.
+     */
+    public static final double GUI_TOLERANCE = 0.001;
+
     final LinearSpec linearSpec;
     /**
      * The areas that were added to the specification.
@@ -79,6 +85,7 @@ public class LayoutSpec {
             linearSpec = new LinearSpec();
         else
             linearSpec = new LinearSpec(solver);
+        linearSpec.setTolerance(GUI_TOLERANCE);
 
         //Create the Tabs defining the edge of the layout.
         left = new XTab("left");
@@ -94,7 +101,9 @@ public class LayoutSpec {
     }
 
     public LayoutSpec clone() {
-        return clone(getAreas(), customConstraints, getLeft(), getTop(), getRight(), getBottom());
+        LayoutSpec layoutSpec = clone(getAreas(), customConstraints, getLeft(), getTop(), getRight(), getBottom());
+        layoutSpec.linearSpec.setTolerance(linearSpec.getTolerance());
+        return layoutSpec;
     }
 
     static public LayoutSpec clone(List<IArea> areas, List<Constraint> customConstraints, XTab left, YTab top,
@@ -188,7 +197,7 @@ public class LayoutSpec {
     }
 
     static public boolean fuzzyEquals(double tab1, double tab2) {
-        return Math.abs(tab1 - tab2) < Constraint.GUI_TOLERANCE;
+        return Math.abs(tab1 - tab2) < GUI_TOLERANCE;
     }
 
     public void release() {

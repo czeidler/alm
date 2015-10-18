@@ -1,7 +1,5 @@
 package nz.ac.auckland.linsolve;
 
-import nz.ac.auckland.linsolve.softconstraints.GroupingSoftSolver;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +8,20 @@ import java.util.List;
  * Specification for a linear system. It contains variables and constraints.
  */
 public class LinearSpec {
+    /**
+     * The standard tolerance should be close to the maximum precision of double
+     * here it is set to 12 decimal digits
+     * <p/>
+     * TODO: must take largest coefficient into account
+     * if this is bigger than 1000, then the precision must be adjusted
+     */
+    public static final double DEFAULT_TOLERANCE = 0.0000000000001;
+
+    /**
+     * The tolerance value used by the relaxation solver.
+     * This can be set by programs.
+     */
+    private static double tolerance = DEFAULT_TOLERANCE;
 
     private Double maxPenalty = 0.0d;
     private boolean maxPenaltyCalculated = false;
@@ -30,10 +42,11 @@ public class LinearSpec {
         solver.setLinearSpec(this);
     }
 
-
     public LinearSpec() {
         //this(new AddingSoftSolver(new KaczmarzSolver()));
-        this(new GroupingSoftSolver(new KaczmarzSolver()));
+        //this(new GroupingSoftSolver(new KaczmarzSolver()));
+        //this(new KaczmarzLeastSquares());
+        this(new ForceSolver2());
         //this(new GroupingSoftSolver(new KaczmarzLeastSquares()));
         //this(new AddingSoftSolver(new GaussSeidelSolver(new DeterministicPivotSummandSelector(), 500)));
     }
@@ -41,6 +54,28 @@ public class LinearSpec {
     public LinearSpec(LinearSolver solver) {
         this.solver = solver;
         solver.setLinearSpec(this);
+    }
+
+    public static double getTolerance() {
+        return tolerance;
+    }
+
+    public static void setTolerance(double tolerance) {
+        LinearSpec.tolerance = tolerance;
+    }
+
+    /**
+     * Checks whether a value is smaller than tolerance.
+     */
+    public boolean equalZero(double x) {
+        return Math.abs(x) < getTolerance();
+    }
+
+    /**
+     * Checks whether the difference of two values is smaller than tolerance.
+     */
+    public boolean isFuzzyEqual(double x, double y) {
+        return equalZero(y - x);
     }
 
     /**
@@ -265,7 +300,10 @@ public class LinearSpec {
     }
 
     public ResultType solve() {
-        return solver.solve();
+        long start = System.currentTimeMillis();
+        ResultType resultType = solver.solve();
+        System.out.println("Solving Time: " + (System.currentTimeMillis() - start) + "ms");
+        return resultType;
     }
 
     /**

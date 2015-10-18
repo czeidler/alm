@@ -11,29 +11,11 @@ import java.util.List;
  */
 public class Constraint implements Cloneable {
     public static final double MIN_PENALTY = 0.0;
-    public static final double PREFERRED_SIZE_PENALTY = 0.5;
     public static final double MAX_PENALTY = 1.0;
 
-    // TODO: tolerance does not belong into the Constaint class but into the solver or LinearSpec!
-    /**
-     * The standard tolerance should be close to the maximum precision of double
-     * here it is set to 12 decimal digits
-     * <p/>
-     * TODO: must take largest coefficient into account
-     * if this is bigger than 1000, then the precision must be adjusted
-     */
-    public static final double DEFAULT_TOLERANCE = 0.0000000000001;
-
-    /**
-     * For GUI problems 0.001 tolerance should be enough. If we want to test general problems then
-     * we should increase tolerance.
-     */
-    public static final double GUI_TOLERANCE = 0.01;
-    /**
-     * The tolerance value used by the relaxation solver.
-     * This can be set by programs.
-     */
-    private static double tolerance = GUI_TOLERANCE;
+    public interface IDynamicRightSide {
+        double getRightSide();
+    }
 
     protected LinearSpec linearSpec; // linear spec which holds this constraint
     private Summand[] leftSide; // left side of the constraint
@@ -43,6 +25,7 @@ public class Constraint implements Cloneable {
     private Summand pivotSummand;
     private Summand dNegSummand, dPosSummand;    // negative and positive slack variables. Only used in solver that needs it
     private double rightSide; // right side of the constraint
+    private IDynamicRightSide dynamicRightSide; // if right side can vary
     private double penalty = Double.POSITIVE_INFINITY; // penalty, if the constraint gets violated
     private String name; // a string which specifies the constraint. useful for debugging
 
@@ -167,20 +150,6 @@ public class Constraint implements Cloneable {
      */
     public void setUnassignedVariables(int unassignedVariables) {
         this.unassignedVariables = unassignedVariables;
-    }
-
-    /**
-     * Sets the tolerance for errors.
-     */
-    public static void setTolerance(double tolerance) {
-        Constraint.tolerance = tolerance;
-    }
-
-    /**
-     * Returns the tolerance for errors.
-     */
-    public static double getTolerance() {
-        return tolerance;
     }
 
     public Summand getPivotSummand() {
@@ -569,6 +538,8 @@ public class Constraint implements Cloneable {
      * @return the constant value that is on the right side of the operator
      */
     public double getRightSide() {
+        if (dynamicRightSide != null)
+            return dynamicRightSide.getRightSide();
         return rightSide;
     }
 
@@ -582,6 +553,11 @@ public class Constraint implements Cloneable {
         notifyConstraintUpdated();
     }
 
+    public void setRightSide(IDynamicRightSide dynamicRightSide) {
+        this.dynamicRightSide = dynamicRightSide;
+        notifyConstraintUpdated();
+    }
+
     /**
      * Gets the coefficient of positive summand.
      *
@@ -589,6 +565,10 @@ public class Constraint implements Cloneable {
      */
     public double getPenalty() {
         return penalty;
+    }
+
+    public boolean isHard() {
+        return penalty == 1.f;
     }
 
     /**
@@ -606,7 +586,7 @@ public class Constraint implements Cloneable {
      * This is the termination criteria for Gauss-Seidel method
      */
     public boolean isSatisfied() {
-        return Math.abs(residual()) < tolerance;
+        return Math.abs(residual()) < linearSpec.getTolerance();
     }
 
     /**
@@ -616,11 +596,11 @@ public class Constraint implements Cloneable {
         double leftSideSum = 0;
         for (Summand summand : leftSide)
             leftSideSum += summand.coeff * summand.var.getValue();
-        if (op == OperatorType.GE && leftSideSum >= rightSide)
+        if (op == OperatorType.GE && leftSideSum >= getRightSide())
             return 0;
-        if (op == OperatorType.LE && leftSideSum <= rightSide)
+        if (op == OperatorType.LE && leftSideSum <= getRightSide())
             return 0;
-        return rightSide - leftSideSum;
+        return getRightSide() - leftSideSum;
     }
 
     public double error() {
@@ -640,21 +620,7 @@ public class Constraint implements Cloneable {
             sumOfOtherSummands += summand.coeff * summand.var.getValue();
         }
 
-        return (rightSide - sumOfOtherSummands) / chosenSummand.coeff;
-    }
-
-    /**
-     * Checks whether a value is smaller than tolerance.
-     */
-    public static boolean equalZero(double x) {
-        return Math.abs(x) < tolerance;
-    }
-
-    /**
-     * Checks whether the difference of two values is smaller than tolerance.
-     */
-    public static boolean isEqual(double x, double y) {
-        return equalZero(y - x);
+        return (getRightSide() - sumOfOtherSummands) / chosenSummand.coeff;
     }
 
     /**

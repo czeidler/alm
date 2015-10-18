@@ -113,7 +113,7 @@ public class RelaxationSolverAdapter extends LinearSolverAdapter {
             maxError = computeMaxError();
             lastRelaxationStepMaxError = maxError;
 
-            if (Constraint.equalZero(maxError)) {
+            if (linearSpec.equalZero(maxError)) {
                 lastSolvingResult = ResultType.OPTIMAL;
                 requiredNoIterations = iteration;
                 return ResultType.OPTIMAL;
