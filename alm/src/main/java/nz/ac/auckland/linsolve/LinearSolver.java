@@ -59,6 +59,8 @@ public interface LinearSolver {
      */
     ResultType solve();
 
+    void onSolveFinished();
+
     /**
      * Total time of last solving attempt in milliseconds.
      *

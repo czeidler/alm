@@ -138,6 +138,11 @@ public abstract class AbstractLinearSolver implements LinearSolver {
         return lastSolvingResult;
     }
 
+    @Override
+    public void onSolveFinished() {
+
+    }
+
     /**
      * @link nz.ac.auckland.linsolve.LinearSolver#doSolve()
      */

@@ -14,6 +14,13 @@ public class DeterministicPivotSummandSelector implements PivotSummandSelector {
 
     Dictionary<Constraint, Summand> pivotSummands;
 
+    private MaxDominanceVariableCookie getMaxDominanceCookie(Variable variable) {
+        Object cookie = variable.getSolverCookie();
+        if (cookie == null)
+            variable.setSolverCookie(new MaxDominanceVariableCookie());
+        return (MaxDominanceVariableCookie)variable.getSolverCookie();
+    }
+
     @Override
     public List<Constraint> init(LinearSpec linearSpec, int maxIndex) {
         return init(linearSpec.getConstraints(), linearSpec.getVariables(), maxIndex);
@@ -30,7 +37,8 @@ public class DeterministicPivotSummandSelector implements PivotSummandSelector {
 		* turned off.
 		*/
         for (Variable v : variables) {
-            v.setConstraintWhereMaxDominant(null);
+            MaxDominanceVariableCookie cookie = getMaxDominanceCookie(v);
+            cookie.setConstraintWhereMaxDominant(null);
         }
 		
 		/*
@@ -103,10 +111,11 @@ public class DeterministicPivotSummandSelector implements PivotSummandSelector {
             // i.e. check for each variable if this constraint is more dominant
             for (Summand s : currentSummands) {
                 double dominance = Math.abs(s.getCoeff()) / absCoeffSum;
-                if (dominance > s.getVar().getMaxDominance()) {
-                    s.getVar().setConstraintWhereMaxDominant(constraint);
-                    s.getVar().setSummandWhereMaxDominant(s);
-                    s.getVar().setMaxDominance(dominance);
+                MaxDominanceVariableCookie cookie = getMaxDominanceCookie(s.getVar());
+                if (dominance > cookie.getMaxDominance()) {
+                    cookie.setConstraintWhereMaxDominant(constraint);
+                    cookie.setSummandWhereMaxDominant(s);
+                    cookie.setMaxDominance(dominance);
                 }
             }
 
@@ -238,10 +247,11 @@ public class DeterministicPivotSummandSelector implements PivotSummandSelector {
             // i.e. check for each variable if this constraint is more dominant
             for (Summand s : currentSummands) {
                 double dominance = Math.abs(s.getCoeff()) / absCoeffSum;
-                if (dominance > s.getVar().getMaxDominance()) {
-                    s.getVar().setConstraintWhereMaxDominant(constraint);
-                    s.getVar().setSummandWhereMaxDominant(s);
-                    s.getVar().setMaxDominance(dominance);
+                MaxDominanceVariableCookie cookie = getMaxDominanceCookie(s.getVar());
+                if (dominance > cookie.getMaxDominance()) {
+                    cookie.setConstraintWhereMaxDominant(constraint);
+                    cookie.setSummandWhereMaxDominant(s);
+                    cookie.setMaxDominance(dominance);
                 }
             }
 
@@ -300,8 +310,9 @@ public class DeterministicPivotSummandSelector implements PivotSummandSelector {
     private List<Constraint> duplicateConstraintForVariable(
             List<Constraint> assignedConstraints, Variable v) {
 
+        MaxDominanceVariableCookie cookie = getMaxDominanceCookie(v);
         // add a duplicate of the most dominant constraint for that variable
-        if (v.getConstraintWhereMaxDominant() == null) {
+        if (cookie.getConstraintWhereMaxDominant() == null) {
             double coeff = 0.0d;
             Summand max = null;
             Constraint maxC = null;
@@ -318,21 +329,21 @@ public class DeterministicPivotSummandSelector implements PivotSummandSelector {
                 }
             }
             //System.err.println("Variable " + v + " has no constraint. Assign " + maxC);
-            v.setConstraintWhereMaxDominant(maxC);
-            v.setSummandWhereMaxDominant(max);
+            cookie.setConstraintWhereMaxDominant(maxC);
+            cookie.setSummandWhereMaxDominant(max);
 
             //System.err.println("Variable has no Pivot constraint: " + v);
         }
-        Constraint duplicate = v.getConstraintWhereMaxDominant().clone();
+        Constraint duplicate = cookie.getConstraintWhereMaxDominant().clone();
 
         // insert duplicate constraint after the original constraint,
         // so that the ordering by penalty is not disturbed
-        int k = assignedConstraints.indexOf(v.getConstraintWhereMaxDominant());
+        int k = assignedConstraints.indexOf(cookie.getConstraintWhereMaxDominant());
         assignedConstraints.add(k + 1, duplicate);
 
         // register the chosen pivot element
-        pivotSummands.put(duplicate, v.getSummandWhereMaxDominant());
-        duplicate.setPivotSummand(v.getSummandWhereMaxDominant());
+        pivotSummands.put(duplicate, cookie.getSummandWhereMaxDominant());
+        duplicate.setPivotSummand(cookie.getSummandWhereMaxDominant());
 
         return assignedConstraints;
     }

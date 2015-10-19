@@ -89,6 +89,10 @@ public class GaussSeidelSolver extends AbstractLinearSolver {
         return ResultType.INFEASIBLE;
     }
 
+    @Override
+    public void onSolveFinished() {
+        getLinearSpec().cleanSolverCookies();
+    }
 
     protected void doRelaxationStep() {
         double start = System.nanoTime();
@@ -126,6 +130,7 @@ public class GaussSeidelSolver extends AbstractLinearSolver {
         }
         return w;
     }
+
 
     private double calculatesw(double chosenSummand, double absCoeffSum) {
         double w;

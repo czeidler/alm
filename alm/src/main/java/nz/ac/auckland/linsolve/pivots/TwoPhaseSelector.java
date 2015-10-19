@@ -19,13 +19,19 @@ import nz.ac.auckland.linsolve.Variable;
  *
  */
 public class TwoPhaseSelector implements PivotSummandSelector{
-
 	private LinearSpec linearSpec;
 	protected ArrayList<Constraint> unassignedConstraints;
 	protected HashSet<Variable> unassignedVariables;
 	Dictionary<Constraint, Summand> pivotSummands = new Hashtable<Constraint, Summand>();
 	Dictionary<Summand, Double> influences = new Hashtable<Summand, Double>();
-	
+
+	private MaxDominanceVariableCookie getMaxDominanceCookie(Variable variable) {
+		Object cookie = variable.getSolverCookie();
+		if (cookie == null)
+			variable.setSolverCookie(new MaxDominanceVariableCookie());
+		return (MaxDominanceVariableCookie)variable.getSolverCookie();
+	}
+
 	@Override
 	public List<Constraint> init(LinearSpec linearSpec) {
 		unassignedConstraints = new ArrayList<Constraint>();
@@ -130,13 +136,14 @@ public class TwoPhaseSelector implements PivotSummandSelector{
 				
 				int k = assignedConstraints.indexOf(maxInfluenceConstraint);
 				assignedConstraints.add(k + 1, clone);
-				
-				var.setConstraintWhereMaxDominant(clone);
-				var.setSummandWhereMaxDominant(pivotSummand);
-				var.setMaxDominance(influences.get(pivotSummand));
+
+				MaxDominanceVariableCookie cookie = getMaxDominanceCookie(var);
+				cookie.setConstraintWhereMaxDominant(clone);
+				cookie.setSummandWhereMaxDominant(pivotSummand);
+				cookie.setMaxDominance(influences.get(pivotSummand));
 				
 				clone.setPivotSummand(pivotSummand);
-				pivotSummands.put(clone, var.getSummandWhereMaxDominant());
+				pivotSummands.put(clone, cookie.getSummandWhereMaxDominant());
 			}
 			unassignedVariables.remove(var);
 			

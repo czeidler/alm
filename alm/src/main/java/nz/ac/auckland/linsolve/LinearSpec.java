@@ -64,6 +64,11 @@ public class LinearSpec {
         LinearSpec.tolerance = tolerance;
     }
 
+    void cleanSolverCookies() {
+        for (Variable variable : getVariables())
+            variable.setSolverCookie(null);
+    }
+
     /**
      * Checks whether a value is smaller than tolerance.
      */
@@ -303,6 +308,7 @@ public class LinearSpec {
         long start = System.currentTimeMillis();
         ResultType resultType = solver.solve();
         System.out.println("Solving Time: " + (System.currentTimeMillis() - start) + "ms");
+        solver.onSolveFinished();
         return resultType;
     }
 

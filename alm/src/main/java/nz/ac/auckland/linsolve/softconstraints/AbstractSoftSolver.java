@@ -43,6 +43,11 @@ public abstract class AbstractSoftSolver extends AbstractLinearSolver {
         return null;
     }
 
+    @Override
+    public void onSolveFinished() {
+        
+    }
+
     protected AbstractLinearSolver getLinearSolver() {
         return solver;
     }

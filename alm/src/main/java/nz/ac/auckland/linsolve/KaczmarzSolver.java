@@ -70,4 +70,9 @@ public class KaczmarzSolver extends AbstractLinearSolver {
             ret += s.getCoeff() * s.getCoeff();
         return ret;
     }
+
+    @Override
+    public void onSolveFinished() {
+
+    }
 }

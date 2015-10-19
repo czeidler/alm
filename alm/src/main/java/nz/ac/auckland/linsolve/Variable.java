@@ -9,12 +9,10 @@ import java.util.List;
  */
 
 public class Variable {
-
+	Object solverCookie;
 	public LinearSpec ls; // linear spec that this variable belongs to
 	double value = Double.NaN; // value of the variable
 	String name; // name of the variable
-	protected nz.ac.auckland.linsolve.Summand summandWhereMaxDominant;
-	protected double maxDominance = 0;
 	final List<Constraint> activeConstraints = new ArrayList<Constraint>();
 
 	/**
@@ -30,29 +28,12 @@ public class Variable {
 		setName(name);
 	}
 
-	protected Constraint constraintWhereMaxDominant;
-	public Constraint getConstraintWhereMaxDominant() {
-		return constraintWhereMaxDominant;
+	public Object getSolverCookie() {
+		return solverCookie;
 	}
 
-	public void setConstraintWhereMaxDominant(Constraint constraintWhereMaxDominant) {
-		this.constraintWhereMaxDominant = constraintWhereMaxDominant;
-	}
-
-	public Summand getSummandWhereMaxDominant() {
-		return summandWhereMaxDominant;
-	}
-
-	public void setSummandWhereMaxDominant(Summand summandWhereMaxDominant) {
-		this.summandWhereMaxDominant = summandWhereMaxDominant;
-	}
-
-	public double getMaxDominance() {
-		return maxDominance;
-	}
-
-	public void setMaxDominance(double maxDominance) {
-		this.maxDominance = maxDominance;
+	public void setSolverCookie(Object solverCookie) {
+		this.solverCookie = solverCookie;
 	}
 
 	public String getName() {
