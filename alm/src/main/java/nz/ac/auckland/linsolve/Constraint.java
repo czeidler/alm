@@ -582,9 +582,6 @@ public class Constraint implements Cloneable {
         notifyConstraintUpdated();
     }
 
-    /**
-     * This is the termination criteria for Gauss-Seidel method
-     */
     public boolean isSatisfied() {
         return Math.abs(residual()) < linearSpec.getTolerance();
     }
