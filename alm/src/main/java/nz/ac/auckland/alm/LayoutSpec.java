@@ -13,10 +13,10 @@ import java.util.Map;
  */
 public class LayoutSpec {
     /**
-     * For GUI problems 0.001 tolerance should be enough. If we want to test general problems then
+     * For GUI problems 0.01 tolerance should be enough. If we want to test general problems then
      * we should increase tolerance.
      */
-    public static final double GUI_TOLERANCE = 0.001;
+    public static final double GUI_TOLERANCE = 0.01;
 
     final LinearSpec linearSpec;
     /**
