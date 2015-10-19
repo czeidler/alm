@@ -29,7 +29,7 @@ public class ForceSolver extends AbstractLinearSolver {
     }
 
     private class ForceSum {
-        final private List<Force> forces = new ArrayList<>();
+        final private List<Force> forces = new ArrayList<Force>();
 
         private boolean valid = false;
         private double forceSum;
@@ -99,13 +99,13 @@ public class ForceSolver extends AbstractLinearSolver {
         initVariableValues();
 
         double cooling = 1.9d;
-        final double COOLING_FACTOR = 0.9;
-        final int MAX_ITERATION = 1000;
+        final double COOLING_FACTOR = 1.d;
+        final int MAX_ITERATION = 10000;
 
         // do an initial Kaczmarz
         doKaczmarzHard();
 
-        final double tolerance = 0.1;
+        final double tolerance = getLinearSpec().getTolerance();
         double prevError = Double.MAX_VALUE;
         for (int i = 0; i < MAX_ITERATION; i++) {
             // Optimize soft constraints.
@@ -119,7 +119,7 @@ public class ForceSolver extends AbstractLinearSolver {
             double diff = Math.abs(prevError - error2);
             prevError = error2;
             if (diff < tolerance * tolerance) {
-                System.out.println("Iterations: " + (i + 1));
+                //System.out.println("Iterations: " + (i + 1));
                 if (allHardConstraintsSatisfied())
                     return ResultType.OPTIMAL;
             }
@@ -152,7 +152,7 @@ public class ForceSolver extends AbstractLinearSolver {
     }
 
     private void doOptimizeForcesSoft(double cooling) {
-        Map<Variable, VariableForce> variableForceMap = new HashMap<>();
+        Map<Variable, VariableForce> variableForceMap = new HashMap<Variable, VariableForce>();
 
         // Calculate forces on each variable. The force is proportional to the displacement of the variable. The
         // displacement is calculated using the Kaczmarz projection.

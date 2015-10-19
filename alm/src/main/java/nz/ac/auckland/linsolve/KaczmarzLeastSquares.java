@@ -2,40 +2,67 @@ package nz.ac.auckland.linsolve;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 
 public class KaczmarzLeastSquares extends AbstractLinearSolver {
-    public static final int GUI_MAXITERATION = 1000;
+    public static final int GUI_MAXITERATION = 5000;
     public static final double DEFAULT_LAMBDA = 1.9d;
     public static final double tolerance = 0.01;
     public static final double COOLING_FACTOR = 0.9;
     private double lambda = DEFAULT_LAMBDA;
 
-    double maxError = Double.MAX_VALUE;
 
     @Override
     protected ResultType doSolve() {
+        double prevError = Double.MAX_VALUE;
+
+        double maxError = Double.MAX_VALUE;
         lambda = DEFAULT_LAMBDA;
         initVariableValues();
 
-        for (int i = 0; i < GUI_MAXITERATION && maxError > tolerance; i++) {
+        Collections.sort(this.getLinearSpec().getConstraints(), new Comparator<Constraint>() {
+            @Override
+            public int compare(Constraint constraint, Constraint constraint2) {
+                return ((Double)constraint2.getPenalty()).compareTo(constraint.getPenalty());
+            }
+        });
+
+        for (int i = 0; i < GUI_MAXITERATION; i++) {
             doIteration();
+            double error2 = error2SoftConstraints();
+            double diff = Math.abs(prevError - error2);
+            if (diff < tolerance * tolerance) {
+                System.out.println("Iterations 1: " + i);
+                break;
+            }
+            prevError = error2;
         }
+
         if (maxError <= tolerance)
             return ResultType.OPTIMAL;
         return ResultType.SUBOPTIMAL;
+    }
+
+    private double error2SoftConstraints() {
+        double error2 = 0;
+        for (Constraint c : this.getLinearSpec().getConstraints()) {
+            if (c.isHard())
+                continue;
+            error2 += Math.pow(c.error(), 2);
+        }
+        return error2;
     }
 
     protected void doIteration() {
         lambda = lambda * COOLING_FACTOR;
         double lambda1 = 1.0;
         for (Constraint c : this.getLinearSpec().getConstraints()) {
-
-            // If constraint is enabled and operator is equalty or constraint is
-            // not satisfied then apply projection and use normal kaczmarz
-            if (c.isEnabled()
+            // If constraint is enabled and operator is equality or constraint is
+            // not satisfied then apply projection and use normal Kaczmarz
+            /*if (c.isEnabled()
                     && (c.getOp() == OperatorType.EQ || !c.isSatisfied())) {
-                projectConstraint(c, c.getPenalty() * lambda1);
+                projectConstraint(c, c.getPenalty() * lambda);
 
             }
             // Otherwise use Kaczmarz with cooling
@@ -43,7 +70,14 @@ public class KaczmarzLeastSquares extends AbstractLinearSolver {
                 if (!c.isEnabled()) {
                     projectConstraint(c, c.getPenalty() * lambda);
                 }
-            }
+            }*/
+            if (c.isSatisfied())
+                continue;
+            // hard or soft constraint?
+            if (c.isHard())
+                projectConstraint(c, lambda1);
+            else
+                projectConstraint(c, c.getPenalty() * lambda);
         }
     }
 
@@ -64,14 +98,15 @@ public class KaczmarzLeastSquares extends AbstractLinearSolver {
         Summand[] A = c.getLeftSide();
         double p = (b - scalarProduct(A)) / euclidianNorm(A);
 
-        double x = 0.0d;
-        double y = 0.0d;
         ArrayList<Double> residual = new ArrayList<Double>();
         for (Summand s : A) {
-            x = s.getVar().getValue();
-            y = x;
+            //if (isFixed(s.getVar()))
+              //  continue;
+            double x = s.getVar().getValue();
+            double y = x;
 
             // Actual projection formula
+            //x = x + lambda * p * s.getCoeff();
             x = x + lambda * p * s.getCoeff();
             s.getVar().setValue(x);
 
@@ -79,7 +114,17 @@ public class KaczmarzLeastSquares extends AbstractLinearSolver {
             residual.add(Math.abs(x - y));
         }
         // collecting maximum between previous and current variables values
-        return Collections.max(residual);
+        return 0;//Collections.max(residual);
+    }
+
+    private boolean isFixed(Variable variable) {
+        for (Constraint constraint : variable.getActiveConstraints()) {
+            if (!constraint.isSatisfied())
+                continue;
+            if (constraint.getOp() == OperatorType.EQ && constraint.getLeftSide().length == 1)
+                return true;
+        }
+        return false;
     }
 
     protected double scalarProduct(Summand[] summands) {
