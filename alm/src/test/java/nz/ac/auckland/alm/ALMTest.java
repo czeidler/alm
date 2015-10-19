@@ -14,7 +14,7 @@ import nz.ac.auckland.linsolve.Summand;
 
 public class ALMTest extends TestCase {
     void assertFuzzyEqual(double expected, double value) throws Exception {
-        if (Math.abs(expected - value) < 0.01)
+        if (Math.abs(expected - value) < LayoutSpec.GUI_TOLERANCE)
             return;
         throw new Exception("assertFuzzyEqual: expected = " + expected + " value = " + value);
     }
