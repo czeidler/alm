@@ -9,14 +9,7 @@ package nz.ac.auckland.linsolve;
 
 import junit.framework.TestCase;
 import nz.ac.auckland.alm.*;
-import nz.ac.auckland.linsolve.Constraint;
-import nz.ac.auckland.linsolve.LinearSpec;
-import nz.ac.auckland.linsolve.OperatorType;
-import nz.ac.auckland.linsolve.Variable;
 
-import javax.sound.sampled.Line;
-import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
 
@@ -96,6 +89,7 @@ public class LinSolveTest extends TestCase {
 
     public void testConstraintRandomButtons() {
         final int nButtons = 100;
+        System.out.println("testConstraintRandomButtons " + nButtons);
 
         LinearSpec linearSpec = new LinearSpec();
 
@@ -119,12 +113,13 @@ public class LinSolveTest extends TestCase {
     }
 
     public void testConstraintChains() {
+        System.out.println("testConstraintChains");
         LinearSpec linearSpec = new LinearSpec();
 
         for (int a = 0; a < 1; a++) {
             Variable var = new Variable();
             linearSpec.addConstraint(1, var, OperatorType.EQ, 0);
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 50; i++)
                 var = addInterval(linearSpec, var, 5 + Math.random() * 10, 5 + Math.random() * 50);
             linearSpec.addConstraint(1, var, OperatorType.EQ, 10000);
         }
@@ -132,45 +127,98 @@ public class LinSolveTest extends TestCase {
         benchmark(linearSpec);
     }
 
+    class BenchmarkResult {
+        class Statistic {
+            long maxTime = 0;
+            long minTime = Long.MAX_VALUE;
+            long n = 0;
+            long sumTime = 0;
+
+            public void addResult(long time) {
+                if (maxTime < time)
+                    maxTime = time;
+                if (minTime > time)
+                    minTime = time;
+                sumTime += time;
+                n++;
+            }
+
+            public long getAverageTime() {
+                return sumTime / n;
+            }
+
+            @Override
+            public String toString() {
+                return "(" + minTime + "," + getAverageTime() + "," + maxTime + ")";
+            }
+        }
+
+        final String name;
+        final Statistic stat = new Statistic();
+        final Statistic internalStat = new Statistic();
+
+        public BenchmarkResult(String name) {
+            this.name = name;
+        }
+
+        public void addResult(long time, long internalTime) {
+            stat.addResult(time);
+            internalStat.addResult(internalTime);
+        }
+
+        @Override
+        public String toString() {
+            return name + ": Time" + stat + " Internal time" + internalStat;
+        }
+    }
+
+    private BenchmarkResult benchmark(String name, LinearSpec linearSpec, int n) {
+        BenchmarkResult result = new BenchmarkResult(name);
+
+        for (int i = 0; i < n; i++) {
+            for (Variable variable : linearSpec.getVariables())
+                variable.setValue(0.0);
+            linearSpec.solve();
+            result.addResult(linearSpec.getSolvingTime(), linearSpec.getInternalSolvingTime());
+        }
+
+        return result;
+    }
+
     public void benchmark(LinearSpec linearSpec) {
-        linearSpec.setSolver(new OJAlgoSolver());
         linearSpec.setTolerance(LinearSpec.DEFAULT_TOLERANCE);
+        int n = 10;
 
-        List<Variable> variableList = linearSpec.getVariables();
-
-        for (Variable variable : variableList)
-            variable.setValue(0.0);
-        linearSpec.solve();
-        for (Variable variable : variableList)
-            variable.setValue(0.0);
-        linearSpec.solve();
-        for (Variable variable : variableList)
-            variable.setValue(0.0);
-        linearSpec.solve();
+        linearSpec.setSolver(new OJAlgoSolver());
+        System.out.println(benchmark("OJAlgoSolver", linearSpec, n));
         System.out.println("soft error2: " + error2(linearSpec));
 
+        List<Variable> variableList = linearSpec.getVariables();
         Double[] results1 = new Double[variableList.size()];
-        for (int i = 0; i < linearSpec.getVariables().size(); i++) {
-            Variable variable = linearSpec.getVariables().get(i);
+        for (int i = 0; i < variableList.size(); i++) {
+            Variable variable = variableList.get(i);
             results1[i] = variable.getValue();
         }
 
-        System.out.println("FORCE");
+        linearSpec.setSolver(new ForceSolver());
+        System.out.println(benchmark("ForceSolver", linearSpec, n));
+        System.out.println("soft error2: " + error2(linearSpec));
+
         linearSpec.setSolver(new ForceSolver2());
-        for (Variable variable : variableList)
-            variable.setValue(0.0);
-        linearSpec.solve();
-        for (Variable variable : variableList)
-            variable.setValue(0.0);
-        linearSpec.solve();
-        for (Variable variable : variableList)
-            variable.setValue(0.0);
-        linearSpec.solve();
+        System.out.println(benchmark("ForceSolver2", linearSpec, n));
+        System.out.println("soft error2: " + error2(linearSpec));
+
+        linearSpec.setSolver(new ForceSolver3());
+        System.out.println(benchmark("ForceSolver3", linearSpec, n));
+        System.out.println("soft error2: " + error2(linearSpec));
+
+        linearSpec.setSolver(new OJAlgoSolver());
+        System.out.println(benchmark("OJAlgoSolver", linearSpec, n));
         System.out.println("soft error2: " + error2(linearSpec));
 
         for (int i = 0; i < variableList.size(); i++) {
             //System.out.println(results1[i] + " " + variableList.get(i).getValue());
-            //assertTrue(fuzzyEquals(results1[i], variableList.get(i).getValue()));
+            assertTrue(fuzzyEquals(results1[i], variableList.get(i).getValue()));
         }
     }
 }
