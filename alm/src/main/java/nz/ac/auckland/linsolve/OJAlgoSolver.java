@@ -77,8 +77,7 @@ public class OJAlgoSolver extends AbstractLinearSolver {
         ConvexSolver solver = builder.build();
 
         final Optimisation.Result result = solver.solve();
-        System.out.println("QJAlgoSolver solving time: " + (System.currentTimeMillis() - startTime) + "ms");
-        System.out.println(result.getState().toString());
+        internalSolvingTime = System.currentTimeMillis() - startTime;
 
         for (int i = 0; i < variables.size(); i++)
             variables.get(i).setValue(result.doubleValue(i));
