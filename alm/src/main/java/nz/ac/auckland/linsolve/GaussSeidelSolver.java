@@ -74,7 +74,7 @@ public class GaussSeidelSolver extends AbstractLinearSolver {
             doRelaxationStep();
 
             // stop if max error over all constraints is close to 0
-            maxError = getLinearSpec().computeCurrentMaxError();
+            maxError = getLinearSpec().getMaxConstraintError();
             lastRelaxationStepMaxError = maxError;
 
             if (getLinearSpec().equalZero(maxError)) {

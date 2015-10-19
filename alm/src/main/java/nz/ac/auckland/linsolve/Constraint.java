@@ -582,8 +582,12 @@ public class Constraint implements Cloneable {
         notifyConstraintUpdated();
     }
 
+    public boolean isSatisfied(double tolerance) {
+        return Math.abs(residual()) < tolerance;
+    }
+
     public boolean isSatisfied() {
-        return Math.abs(residual()) < linearSpec.getTolerance();
+        return isSatisfied(linearSpec.getTolerance());
     }
 
     /**

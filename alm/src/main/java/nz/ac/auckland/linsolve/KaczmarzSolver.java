@@ -19,7 +19,7 @@ public class KaczmarzSolver extends AbstractLinearSolver {
         double maxError = Double.MAX_VALUE;
         for (int i = 0; i < iteration && maxError > tolerance; i++) {
             doIteration();
-            maxError = this.getLinearSpec().computeCurrentMaxError();
+            maxError = this.getLinearSpec().getMaxConstraintError();
         }
 
         if (maxError <= tolerance)
@@ -69,10 +69,5 @@ public class KaczmarzSolver extends AbstractLinearSolver {
         for (Summand s : summands)
             ret += s.getCoeff() * s.getCoeff();
         return ret;
-    }
-
-    @Override
-    public void onSolveFinished() {
-
     }
 }

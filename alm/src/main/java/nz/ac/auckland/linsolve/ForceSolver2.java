@@ -75,7 +75,7 @@ public class ForceSolver2 extends AbstractLinearSolver {
     protected ResultType doSolve() {
         initVariableValues();
 
-        double cooling = 1.95d;
+        double cooling = 1.9d;
         final double COOLING_FACTOR = 1.d;
         final int MAX_ITERATION = 50000;
 
@@ -83,6 +83,7 @@ public class ForceSolver2 extends AbstractLinearSolver {
             v.setValue(0.0);
 
         // do an initial Kaczmarz
+        doKaczmarzHard();
         /*for (int i = 0; i < MAX_ITERATION; i++) {
             if (allHardConstraintsSatisfied()) {
                 System.out.println("Init Iterations: " + (i + 1));

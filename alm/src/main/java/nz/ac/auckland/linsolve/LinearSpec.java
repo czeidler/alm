@@ -15,16 +15,14 @@ public class LinearSpec {
      * TODO: must take largest coefficient into account
      * if this is bigger than 1000, then the precision must be adjusted
      */
-    public static final double DEFAULT_TOLERANCE = 0.0000000000001;
+    public static final double DEFAULT_TOLERANCE = 1E-13;//0.000,000,000,0001;
 
     /**
      * The tolerance value used by the relaxation solver.
      * This can be set by programs.
      */
-    private static double tolerance = DEFAULT_TOLERANCE;
+    private double tolerance = DEFAULT_TOLERANCE;
 
-    private Double maxPenalty = 0.0d;
-    private boolean maxPenaltyCalculated = false;
     ArrayList<Variable> variables = new ArrayList<Variable>(); // list of variables in the spec
     ArrayList<Constraint> constraints = new ArrayList<Constraint>(); // list of constraints in the spec
     private LinearSolver solver; // the linear solver which is used for solving the spec
@@ -57,12 +55,12 @@ public class LinearSpec {
         solver.setLinearSpec(this);
     }
 
-    public static double getTolerance() {
+    public double getTolerance() {
         return tolerance;
     }
 
-    public static void setTolerance(double tolerance) {
-        LinearSpec.tolerance = tolerance;
+    public void setTolerance(double tolerance) {
+        this.tolerance = tolerance;
     }
 
     void cleanSolverCookies() {
@@ -261,19 +259,8 @@ public class LinearSpec {
                                     double penalty) {
         return addConstraint(lhs(s(coeff1, var1), s(coeff2, var2), s(coeff3, var3), s(coeff4, var4)), op, rhs, penalty);
     }
-
-
-    public double getMaxRealPenalty() {
-        if (!maxPenaltyCalculated) {
-            for (Constraint c : this.getConstraints()) {
-                if (c.getPenalty() != Double.POSITIVE_INFINITY && maxPenalty < c.getPenalty())
-                    maxPenalty = c.getPenalty();
-            }
-        }
-        return maxPenalty;
-    }
-
-    public double computeCurrentMaxError() {
+    
+    public double getMaxConstraintError() {
         double maxError = 0;
         for (Constraint constraint : constraints) {
             if (!constraint.isEnabled())
@@ -284,21 +271,15 @@ public class LinearSpec {
         return maxError;
     }
 
-    /**
-     * Calculates the objective function with the current variable
-     * values and the penalties of the constraints.
-     * It calculates the values according to the formula;
-     * objVal = sum_allConstraints(p_i * error_i)
-     *
-     * @return the value of the objective function
-     */
-    public double computeObjectiveValue() {
-        double objectiveValues = 0.0d;
-        for (Constraint c : this.getConstraints()) {
-            if (!Double.isInfinite(c.getPenalty()))
-                objectiveValues += Math.abs(c.getPenalty() * c.error());
+    public double getMaxHardConstraintError() {
+        double maxError = 0;
+        for (Constraint constraint : constraints) {
+            if (!constraint.isEnabled() || !constraint.isHard())
+                continue;
+            double error = constraint.error();
+            maxError = Math.max(maxError, error);
         }
-        return objectiveValues;
+        return maxError;
     }
 
     public void sortConstraintsByDescendingPenalty() {

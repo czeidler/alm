@@ -72,7 +72,7 @@ public class ForceSolver3 extends AbstractLinearSolver {
     protected ResultType doSolve() {
         initVariableValues();
 
-        double cooling = 1.95d;
+        double cooling = 1.9d;
         final double COOLING_FACTOR = 1.d;
         final int MAX_ITERATION = 10000;
 
@@ -80,6 +80,7 @@ public class ForceSolver3 extends AbstractLinearSolver {
             v.setValue(0.0);
 
         // do an initial Kaczmarz
+        doKaczmarzHard();
         /*for (int i = 0; i < MAX_ITERATION; i++) {
             if (allHardConstraintsSatisfied()) {
                 System.out.println("Init Iterations: " + (i + 1));
@@ -163,8 +164,6 @@ public class ForceSolver3 extends AbstractLinearSolver {
         // Calculate forces on each variable. The force is proportional to the displacement of the variable. The
         // displacement is calculated using the Kaczmarz projection.
         for (Constraint constraint : getLinearSpec().getConstraints()) {
-            //if (constraint.isSatisfied() && constraint.isHard() && constraint.getOp() != OperatorType.EQ)
-              //  continue;
             if (constraint.isSatisfied())
                 continue;
             if (constraint.isHard())

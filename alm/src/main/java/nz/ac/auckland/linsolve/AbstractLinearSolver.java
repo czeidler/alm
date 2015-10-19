@@ -130,7 +130,7 @@ public abstract class AbstractLinearSolver implements LinearSolver {
         if (debug) {
             System.out.println(getLinearSpec().toString());
             System.out.println(getLinearSpec().getCurrentSolution());
-            System.out.println("max error: " + getLinearSpec().computeCurrentMaxError());
+            System.out.println("max error: " + getLinearSpec().getMaxConstraintError());
         }
         return lastSolvingResult;
     }

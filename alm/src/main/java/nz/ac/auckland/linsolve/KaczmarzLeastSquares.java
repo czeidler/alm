@@ -8,13 +8,14 @@ import java.util.Comparator;
 public class KaczmarzLeastSquares extends AbstractLinearSolver {
     public static final int GUI_MAXITERATION = 5000;
     public static final double DEFAULT_LAMBDA = 1.9d;
-    public static final double tolerance = 0.01;
     public static final double COOLING_FACTOR = 0.9;
     private double lambda = DEFAULT_LAMBDA;
 
 
     @Override
     protected ResultType doSolve() {
+        double tolerance = getLinearSpec().getTolerance();
+
         double prevError = Double.MAX_VALUE;
 
         double maxError = Double.MAX_VALUE;
@@ -32,10 +33,8 @@ public class KaczmarzLeastSquares extends AbstractLinearSolver {
             doIteration();
             double error2 = error2SoftConstraints();
             double diff = Math.abs(prevError - error2);
-            if (diff < tolerance * tolerance) {
-                System.out.println("Iterations 1: " + i);
+            if (diff < tolerance * tolerance)
                 break;
-            }
             prevError = error2;
         }
 
