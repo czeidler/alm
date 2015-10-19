@@ -25,9 +25,10 @@ public class LinearSpec {
 
     private Double maxPenalty = 0.0d;
     private boolean maxPenaltyCalculated = false;
-    protected ArrayList<Variable> variables = new ArrayList<Variable>(); // list of variables in the spec
-    protected ArrayList<Constraint> constraints = new ArrayList<Constraint>(); // list of constraints in the spec
-    protected LinearSolver solver; // the linear solver which is used for solving the spec
+    ArrayList<Variable> variables = new ArrayList<Variable>(); // list of variables in the spec
+    ArrayList<Constraint> constraints = new ArrayList<Constraint>(); // list of constraints in the spec
+    private LinearSolver solver; // the linear solver which is used for solving the spec
+    private long solvingTime = 0l;
 
     public void setConstraints(ArrayList<Constraint> constraints) {
         this.constraints = constraints;
@@ -46,7 +47,7 @@ public class LinearSpec {
         //this(new AddingSoftSolver(new KaczmarzSolver()));
         //this(new GroupingSoftSolver(new KaczmarzSolver()));
         //this(new KaczmarzLeastSquares());
-        this(new ForceSolver2());
+        this(new ForceSolver3());
         //this(new GroupingSoftSolver(new KaczmarzLeastSquares()));
         //this(new AddingSoftSolver(new GaussSeidelSolver(new DeterministicPivotSummandSelector(), 500)));
     }
@@ -307,9 +308,25 @@ public class LinearSpec {
     public ResultType solve() {
         long start = System.currentTimeMillis();
         ResultType resultType = solver.solve();
-        System.out.println("Solving Time: " + (System.currentTimeMillis() - start) + "ms");
+        solvingTime = System.currentTimeMillis() - start;
         solver.onSolveFinished();
         return resultType;
+    }
+
+    /**
+     * Gets the last solving time.
+     *
+     * @return the last solving time
+     */
+    public long getSolvingTime() {
+        return solvingTime;
+    }
+
+    public long getInternalSolvingTime() {
+        long internalSolvingTime = solver.getInternalSolvingTime();
+        if (internalSolvingTime < 0)
+            return getSolvingTime();
+        return internalSolvingTime;
     }
 
     /**

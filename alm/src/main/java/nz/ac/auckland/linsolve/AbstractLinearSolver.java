@@ -14,7 +14,7 @@ public abstract class AbstractLinearSolver implements LinearSolver {
 
     private LinearSpec linearSpec;
     private ResultType lastSolvingResult = ResultType.INFEASIBLE;
-    private long start = 0l, end = 0l;
+    protected long internalSolvingTime = -1l;
 
     /**
      * Indicates whether debug output should be printed during solving.
@@ -126,15 +126,12 @@ public abstract class AbstractLinearSolver implements LinearSolver {
      */
     @Override
     public final ResultType solve() {
-        start = System.currentTimeMillis();
         lastSolvingResult = doSolve();
         if (debug) {
             System.out.println(getLinearSpec().toString());
             System.out.println(getLinearSpec().getCurrentSolution());
             System.out.println("max error: " + getLinearSpec().computeCurrentMaxError());
         }
-        end = System.currentTimeMillis();
-
         return lastSolvingResult;
     }
 
@@ -148,29 +145,16 @@ public abstract class AbstractLinearSolver implements LinearSolver {
      */
     protected abstract ResultType doSolve();
 
-    /**
-     * @link nz.ac.auckland.linsolve.LinearSolver#getLastSolvingTime()
-     */
     @Override
-    public long getLastSolvingTime() {
-        return end - start;
+    public long getInternalSolvingTime() {
+        return internalSolvingTime;
     }
 
     /**
      * @link nz.ac.auckland.linsolve.LinearSolver#getLastSolvingResult()
      */
     @Override
-    public ResultType getLastSolvingResult() {
+    public ResultType getSolvingResult() {
         return lastSolvingResult;
     }
-
-    /**
-     * resets all variables, used in the linear spec, to 0.
-     */
-    protected void resetVariableValues() {
-        for (Variable v : getLinearSpec().variables) {
-            v.setValue(0.0d);
-        }
-    }
-
 }

@@ -62,16 +62,21 @@ public interface LinearSolver {
     void onSolveFinished();
 
     /**
-     * Total time of last solving attempt in milliseconds.
+     * Total time of last solving of the attempt in milliseconds.
      *
-     * @return time in milliseconds
+     * The time should not include the time to convert the constraint system to the solver internal problem. For
+     * example, when using an external solver the time to describe the problem to the external solver should be
+     * excluded.
+     *
+     * @return time in milliseconds, -1 if there is no internal solving time, i.e. the constraint system is used
+     * directly
      */
-    long getLastSolvingTime();
+    long getInternalSolvingTime();
 
     /**
      * Result of last solving attempt (e.g. OPTIMAL, INFEASIBLE, ...).
      *
      * @return result
      */
-    ResultType getLastSolvingResult();
+    ResultType getSolvingResult();
 }
