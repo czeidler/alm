@@ -99,6 +99,7 @@ public class Area extends AbstractLayoutSpecArea {
 	 * Undefined size. Used if a certain size constraint is not set.
 	 */
 	static final Size UNDEFINED_SIZE = new Size(Size.UNDEFINED, Size.UNDEFINED);
+	static final public double PREFERRED_SIZE_PENALTY = 0.5;
 
 	// size constraint for the content
 	Constraint minWidthConstraint;
@@ -685,7 +686,7 @@ public class Area extends AbstractLayoutSpecArea {
 		addConstraint(minHeightConstraint);
 
 		setGrowPenalties(new Size(0, 0));
- 		setShrinkPenalties(Constraint.PREFERRED_SIZE_PENALTY, Constraint.PREFERRED_SIZE_PENALTY);
+ 		setShrinkPenalties(PREFERRED_SIZE_PENALTY, PREFERRED_SIZE_PENALTY);
 	}
 
 	@Override
