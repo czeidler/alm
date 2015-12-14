@@ -233,7 +233,7 @@ public class LinSolveTest extends TestCase {
 
     public void benchmark(LinearSpec linearSpec) {
         linearSpec.setTolerance(LinearSpec.DEFAULT_TOLERANCE);
-        int n = 2;
+        int n = 10;
 
         benchmark(new OJAlgoSolver(), linearSpec, n);
 
@@ -245,8 +245,6 @@ public class LinSolveTest extends TestCase {
         }
         benchmark(new KaczmarzLeastSquares(), linearSpec, n);
         benchmark(new ForceSolver(), linearSpec, n);
-        benchmark(new ForceSolver2(), linearSpec, n);
-        benchmark(new ForceSolver3(), linearSpec, n);
         benchmark(new OJAlgoSolver(), linearSpec, n);
 
         for (int i = 0; i < variableList.size(); i++) {
