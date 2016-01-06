@@ -8,6 +8,7 @@
 package nz.ac.auckland.alm.algebra.string;
 
 import nz.ac.auckland.alm.*;
+import nz.ac.auckland.alm.algebra.Fragment;
 import nz.ac.auckland.alm.algebra.RightDirection;
 import nz.ac.auckland.linsolve.Variable;
 
@@ -27,19 +28,33 @@ public class StringWriter {
 
     static public String write(AlgebraSpec spec) {
         StringWriter writer = new StringWriter(spec.getFragments());
-        return writer.write();
+        return writer.write(true);
+    }
+
+    static public String write(AlgebraSpec spec, boolean showNestedFragments) {
+        StringWriter writer = new StringWriter(spec.getFragments());
+        return writer.write(showNestedFragments);
     }
 
     static public String write(Collection<Fragment> fragments) {
         StringWriter writer = new StringWriter(fragments);
-        return writer.write();
+        return writer.write(true);
+    }
+
+    static public String write(Collection<Fragment> fragments, boolean showNestedFragments) {
+        StringWriter writer = new StringWriter(fragments);
+        return writer.write(showNestedFragments);
     }
 
     public static String write(Fragment fragment) {
         return write(Collections.singletonList(fragment));
     }
 
-    public String write() {
+    public static String write(Fragment fragment, boolean showNestedFragments) {
+        return write(Collections.singletonList(fragment), showNestedFragments);
+    }
+
+    public String write(boolean showNestedFragments) {
         areaCount = 0;
         emptyCount = 0;
         areaNames.clear();
@@ -51,7 +66,7 @@ public class StringWriter {
             if (!string.equals(""))
                 string += " * ";
             if (area instanceof Fragment)
-                string += writeFragment((Fragment) area);
+                string += writeFragment((Fragment) area, showNestedFragments);
             else
                 string += getName(area);
         }
@@ -87,7 +102,7 @@ public class StringWriter {
                 countTabs(area, tabCount);
             if (i == fragment.getItems().size() - 1)
                 continue;
-            Variable tab = fragment.direction.getTab(area);
+            Variable tab = fragment.getDirection().getTab(area);
             Integer count = tabCount.get(tab);
             if (count == null)
                 count = 1;
@@ -130,9 +145,10 @@ public class StringWriter {
         return null;
     }
 
-    private <Tab extends Variable, OrthTab extends Variable> String writeFragment(Fragment<Tab, OrthTab> fragment) {
+    private <Tab extends Variable, OrthTab extends Variable> String writeFragment(Fragment<Tab, OrthTab> fragment,
+                                                                                  boolean showNestedFragments) {
         String operator = "/";
-        if (fragment.direction instanceof RightDirection)
+        if (fragment.getDirection() instanceof RightDirection)
             operator = "|";
 
         String string = "";
@@ -140,17 +156,17 @@ public class StringWriter {
         for (IArea area : fragment.getItems()) {
             if (prevArea != null) {
                 string += operator;
-                String tabName = getName(fragment.direction.getTab(prevArea));
+                String tabName = getName(fragment.getDirection().getTab(prevArea));
                 if (tabName != null)
                     string += "{" + tabName + "}";
             }
             prevArea = area;
             if (area instanceof Fragment) {
                 Fragment subFragment = (Fragment) area;
-                if (subFragment.direction != fragment.direction)
+                if (showNestedFragments || subFragment.getDirection() != fragment.getDirection())
                     string += "(";
-                string += writeFragment(subFragment);
-                if (subFragment.direction != fragment.direction)
+                string += writeFragment(subFragment, showNestedFragments);
+                if (showNestedFragments || subFragment.getDirection() != fragment.getDirection())
                     string += ")";
             } else
                 string += getName(area);

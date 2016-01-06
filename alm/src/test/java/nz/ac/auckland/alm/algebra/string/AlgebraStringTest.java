@@ -10,6 +10,7 @@ package nz.ac.auckland.alm.algebra.string;
 import nz.ac.auckland.alm.*;
 import nz.ac.auckland.alm.algebra.AlgebraData;
 import nz.ac.auckland.alm.algebra.BaseAlgebraTestCase;
+import nz.ac.auckland.alm.algebra.Fragment;
 import nz.ac.auckland.linsolve.Variable;
 
 import java.util.HashMap;

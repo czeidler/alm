@@ -5,13 +5,13 @@
  * Authors:
  *      Clemens Zeidler <czei002@aucklanduni.ac.nz>
  */
-package nz.ac.auckland.alm.algebra.string;
+package nz.ac.auckland.alm.algebra;
 
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.TabArea;
 import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
-import nz.ac.auckland.alm.algebra.*;
+import nz.ac.auckland.alm.algebra.string.StringWriter;
 import nz.ac.auckland.linsolve.Variable;
 
 

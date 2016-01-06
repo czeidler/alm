@@ -11,6 +11,7 @@ import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
 import nz.ac.auckland.alm.algebra.AlgebraData;
+import nz.ac.auckland.alm.algebra.Fragment;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -11,6 +11,7 @@ import nz.ac.auckland.alm.Area;
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.XTab;
 import nz.ac.auckland.alm.YTab;
+import nz.ac.auckland.alm.algebra.Fragment;
 import nz.ac.auckland.alm.algebra.IDirection;
 import nz.ac.auckland.linsolve.Variable;
 
@@ -60,7 +61,7 @@ class FragmentParser implements Parser.IState {
 
         // set tab
         if (fragment.getItems().size() > 0) {
-            IDirection direction = fragment.direction;
+            IDirection direction = fragment.getDirection();
             List<IArea> items = fragment.getItems();
             IArea lastArea = items.get(items.size() - 1);
             Variable existingTab = direction.getTab(lastArea);
@@ -88,7 +89,7 @@ class FragmentParser implements Parser.IState {
             return new FragmentParser(null);
         }
         if (token.type == Lexer.Token.SLASH) {
-            if (fragment.direction != null && fragment.direction != Fragment.verticalDirection) {
+            if (fragment.getDirection() != null && fragment.getDirection() != Fragment.verticalDirection) {
                 parser.error("Tab direction miss match", token);
                 return null;
             }
@@ -97,7 +98,7 @@ class FragmentParser implements Parser.IState {
             return this;
         }
         if (token.type == Lexer.Token.PIPE) {
-            if (fragment.direction != null && fragment.direction != Fragment.horizontalDirection) {
+            if (fragment.getDirection() != null && fragment.getDirection() != Fragment.horizontalDirection) {
                 parser.error("Tab direction miss match", token);
                 return null;
             }
@@ -114,7 +115,7 @@ class FragmentParser implements Parser.IState {
     }
 
     public <Tab extends Variable> void setTab(Parser parser, Map<String, Tab> namedTabs) {
-        IDirection direction = fragment.direction;
+        IDirection direction = fragment.getDirection();
         List<IArea> items = fragment.getItems();
         IArea lastArea = items.get(items.size() - 1);
         Tab existingTab = (Tab)direction.getTab(lastArea);
