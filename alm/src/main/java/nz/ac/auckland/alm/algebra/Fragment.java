@@ -20,8 +20,8 @@ import java.util.List;
 
 
 public class Fragment<Tab extends Variable, OrthTab extends Variable> extends TabArea {
-    final List<IArea> items = new ArrayList<IArea>();
-    IDirection<Tab, OrthTab> direction;
+    final private List<IArea> items = new ArrayList<IArea>();
+    private IDirection<Tab, OrthTab> direction;
 
     static final public IDirection horizontalDirection = new RightDirection();
     static final public IDirection verticalDirection = new BottomDirection();
@@ -32,6 +32,12 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     static public Fragment verticalFragment(IArea area1, IArea area2) {
         return new Fragment(area1, area2, verticalDirection);
+    }
+
+    static public Fragment createEmptyFragment(IDirection direction) {
+        Fragment fragment = new Fragment();
+        fragment.direction = direction;
+        return fragment;
     }
 
     public Fragment() {
@@ -69,8 +75,20 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
         this.direction = horizontalDirection;
     }
 
+    public boolean isHorizontalDirection() {
+        return this.direction == horizontalDirection;
+    }
+
     public void setVerticalDirection() {
         this.direction = verticalDirection;
+    }
+
+    public boolean isVerticalDirection() {
+        return this.direction == verticalDirection;
+    }
+
+    public IDirection<Tab, OrthTab> getDirection() {
+        return direction;
     }
 
     public List<IArea> getItems() {
@@ -78,11 +96,22 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     }
 
     public void add(IArea item) {
-        if (item instanceof Fragment) {
+        add(item, true);
+    }
+
+    /**
+     * Add an item to the Fragment.
+     *
+     * @param item the item to add
+     * @param mergeFragments if true and item is a fragment with same direction the fragments are merged. For example,
+     *                       (A|B) + (C|D) becomes (A|B|C|D) instead of  (A|B|(C|D)).
+     */
+    public void add(IArea item, boolean mergeFragments) {
+        if (mergeFragments && item instanceof Fragment) {
             Fragment fragment = (Fragment) item;
             if (fragment.direction == null || fragment.direction == direction) {
                 for (Object subItem : fragment.getItems())
-                    add((IArea)subItem);
+                    add((IArea)subItem, mergeFragments);
                 return;
             }
         }
