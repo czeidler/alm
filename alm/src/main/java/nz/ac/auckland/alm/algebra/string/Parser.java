@@ -69,7 +69,7 @@ class FragmentParser implements Parser.IState {
             direction.setOppositeTab(item, existingTab);
         }
 
-        fragment.add(item);
+        fragment.add(item, true);
 
         Lexer.Token token = parser.next();
         if (token.type == Lexer.Token.CLOSE_BRACKET) {

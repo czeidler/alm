@@ -85,7 +85,7 @@ public class AlgebraSpec {
                             fragments.addFragment((Fragment) area1);
                         } else {
                             Fragment fragment = new Fragment();
-                            fragment.add(area1);
+                            fragment.add(area1, true);
                             fragments.addFragment(fragment);
                         }
                     }
@@ -383,7 +383,7 @@ public class AlgebraSpec {
 
             Fragment neighbourFragment = orthFactory.create(neighbours.get(0), null);
             for (int i = 1; i < neighbours.size(); i++)
-                neighbourFragment.add(neighbours.get(i));
+                neighbourFragment.add(neighbours.get(i), true);
 
             Fragment mergedFragment;
             if (direction instanceof LeftDirection || direction instanceof TopDirection)

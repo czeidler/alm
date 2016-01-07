@@ -64,10 +64,10 @@ public class GroupDetectorTest extends TestCase {
     public void testGroupDetection() throws Exception {
         // A|B|A|B
         Fragment fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
 
         List<Fragment> alternatives = GroupDetector.detect(fragment, comparator);
 
@@ -78,11 +78,11 @@ public class GroupDetectorTest extends TestCase {
 
         // A|B|A|B|A
         fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
-        fragment.add(createArea("A"));
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
+        fragment.add(createArea("A"), false);
 
         alternatives = GroupDetector.detect(fragment, comparator);
 
@@ -93,10 +93,10 @@ public class GroupDetectorTest extends TestCase {
 
         // A|A|B
         fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
-        fragment.add(createArea("A"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
 
         alternatives = GroupDetector.detect(fragment, comparator);
 
@@ -107,16 +107,16 @@ public class GroupDetectorTest extends TestCase {
 
         // A|A|B|A|A|B|A|B|D|D
         fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
-        fragment.add(createArea("A"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
-        fragment.add(createArea("A"));
-        fragment.add(createArea("B"));
-        fragment.add(createArea("D"));
-        fragment.add(createArea("D"));
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("B"), false);
+        fragment.add(createArea("D"), false);
+        fragment.add(createArea("D"), false);
 
         alternatives = GroupDetector.detect(fragment, comparator);
 

@@ -34,6 +34,18 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
         return new Fragment(area1, area2, verticalDirection);
     }
 
+    static public Fragment horizontalFragment() {
+        Fragment fragment = new Fragment();
+        fragment.direction = horizontalDirection;
+        return fragment;
+    }
+
+    static public Fragment verticalFragment() {
+        Fragment fragment = new Fragment();
+        fragment.direction = verticalDirection;
+        return fragment;
+    }
+
     static public Fragment createEmptyFragment(IDirection direction) {
         Fragment fragment = new Fragment();
         fragment.direction = direction;
@@ -48,9 +60,9 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
         assert direction == horizontalDirection || direction == verticalDirection;
         this.direction = direction;
 
-        add(area1);
+        add(area1, true);
         if  (area2 != null)
-            add(area2);
+            add(area2, true);
     }
 
     @Override
@@ -93,10 +105,6 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     public List<IArea> getItems() {
         return items;
-    }
-
-    public void add(IArea item) {
-        add(item, true);
     }
 
     /**
