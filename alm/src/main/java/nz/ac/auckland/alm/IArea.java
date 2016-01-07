@@ -23,4 +23,12 @@ public interface IArea {
     void setBottom(YTab value);
 
     Area.Rect getRect();
+
+    Object getCookie();
+
+    /**
+     * Assign a cookie to the Area. E.g. the associated view.
+     * @param cookie the cookie object
+     */
+    void setCookie(Object cookie);
 }

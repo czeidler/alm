@@ -17,6 +17,8 @@ public class TabArea implements IArea {
     YTab top;
     YTab bottom;
 
+    private Object cookie;
+
     @Override
     public void setId(String id) {
         this.id = id;
@@ -72,4 +74,15 @@ public class TabArea implements IArea {
         return new Area.Rect((float)getLeft().getValue(), (float)getTop().getValue(), (float)getRight().getValue(),
                 (float)getBottom().getValue());
     }
+
+    @Override
+    public Object getCookie() {
+        return cookie;
+    }
+
+    @Override
+    public void setCookie(Object cookie) {
+        this.cookie = cookie;
+    }
+
 }
