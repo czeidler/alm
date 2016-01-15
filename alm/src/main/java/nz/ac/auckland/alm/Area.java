@@ -134,6 +134,8 @@ public class Area extends AbstractLayoutSpecArea {
 		clone.setMinSize(getMinSize());
 		clone.setPreferredSize(getPreferredSize());
 		clone.setMaxSize(getMaxSize());
+		clone.setId(getId());
+		clone.setCookie(getCookie());
 		return clone;
 	}
 

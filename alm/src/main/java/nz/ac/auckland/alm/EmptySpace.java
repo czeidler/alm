@@ -28,7 +28,10 @@ public class EmptySpace extends AbstractLayoutSpecArea {
 
     @Override
     public ILayoutSpecArea clone(XTab clonedLeft, YTab clonedTop, XTab clonedRight, YTab clonedBottom) {
-        return new EmptySpace(clonedLeft, clonedTop, clonedRight, clonedBottom);
+        EmptySpace clone =  new EmptySpace(clonedLeft, clonedTop, clonedRight, clonedBottom);
+        clone.setId(getId());
+        clone.setCookie(getCookie());
+        return clone;
     }
 
     @Override
