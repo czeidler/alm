@@ -119,18 +119,17 @@ public class StringWriter {
         name = areaNames.get(area);
         if (name != null)
             return name;
-        if (area instanceof Area) {
-            final String areaNames = "ABCDEFGHIJKMNOPQRSTUVWXYZ";
+        if (area instanceof EmptySpace) {
+            name = "_" + emptyCount;
+            emptyCount++;
+        } else {
+            final String areaNames = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             int letter = areaCount % areaNames.length();
             int index = areaCount / areaNames.length();
             name = "" + areaNames.charAt(letter);
             if (index > 0)
                 name += index;
             areaCount++;
-        }
-        if (area instanceof EmptySpace) {
-            name = "L" + emptyCount;
-            emptyCount++;
         }
         assert name != null;
         areaNames.put(area, name);
