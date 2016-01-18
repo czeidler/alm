@@ -447,14 +447,12 @@ public class LayoutSpec {
             rightValue = rightConstraint.getRightSide();
             linearSpec.removeConstraint(rightConstraint);
             rightConstraint = null;
-
         }
 
         if (bottomConstraint != null) {
             bottomValue = bottomConstraint.getRightSide();
             linearSpec.removeConstraint(bottomConstraint);
             bottomConstraint = null;
-
         }
 
         //Solve with no fixed GUI size

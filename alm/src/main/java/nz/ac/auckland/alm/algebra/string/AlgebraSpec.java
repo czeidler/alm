@@ -25,7 +25,7 @@ public class AlgebraSpec {
          * Adds a fragment to the bucket.
          *
          * @param fragment
-         * @return true if the fragment was not in the bucket
+         * @return the fragment
          */
         public Fragment addFragment(Fragment fragment) {
             String hash = fragment.hash();
@@ -144,10 +144,8 @@ public class AlgebraSpec {
     }
 
     final AlgebraSpecData algebraSpecData;
-    final AlgebraData data;
 
     public AlgebraSpec(AlgebraData data) {
-        this.data = data;
         algebraSpecData = new AlgebraSpecData(data.getXTabEdges(), data.getYTabEdges());
     }
 
