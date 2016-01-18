@@ -107,6 +107,56 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
         return items;
     }
 
+    public Fragment clone() {
+        return cloneResolve(false);
+    }
+
+    /**
+     * Clone and resolve sub fragments
+     *
+     * @param resolve merges sub fragments if true
+     * @return a copy of the fragment
+     */
+    public Fragment cloneResolve(boolean resolve) {
+        Fragment clone = Fragment.createEmptyFragment(getDirection());
+        for (IArea child : getItems()) {
+            if (child instanceof Fragment)
+                clone.add(((Fragment)child).clone(), resolve);
+            else
+                clone.add(child, resolve);
+        }
+        return clone;
+    }
+
+    public boolean isEquivalent(Fragment fragment) {
+        Fragment resolvedCopy = cloneResolve(true);
+        return resolvedCopy.isEquivalentResolved(fragment.cloneResolve(true));
+    }
+
+    /**
+     * Assumes both fragment are resolved
+     * @param fragment
+     * @return
+     */
+    private boolean isEquivalentResolved(Fragment fragment) {
+        if (fragment.getDirection() != getDirection())
+            return false;
+        if (fragment.getItems().size() != getItems().size())
+            return false;
+        for (int i = 0; i < getItems().size(); i++) {
+            IArea ours = getItems().get(i);
+            IArea theirs = getItems().get(i);
+            if (ours instanceof Fragment) {
+                if (!(theirs instanceof Fragment))
+                    return false;
+                if (!((Fragment)ours).isEquivalentResolved((Fragment)theirs))
+                    return false;
+            } else if (ours != theirs)
+                return false;
+        }
+        return true;
+    }
+
     /**
      * Add an item to the Fragment.
      *
@@ -117,7 +167,7 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     public void add(IArea item, boolean mergeFragments) {
         if (mergeFragments && item instanceof Fragment) {
             Fragment fragment = (Fragment) item;
-            if (fragment.direction == null || fragment.direction == direction) {
+            if (fragment.direction == null || fragment.direction == direction || fragment.getItems().size() == 1) {
                 for (Object subItem : fragment.getItems())
                     add((IArea)subItem, mergeFragments);
                 return;

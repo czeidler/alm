@@ -16,25 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 
 
-class Result {
-    final public float quality;
-    final public Fragment fragment;
-
-    public Result(float quality, Fragment fragment) {
-        this.quality = quality;
-        this.fragment = fragment;
-    }
-}
-
-interface ITransformation {
-    /**
-     * Tries to transform a fragment and returns a list of possible transformations.
-     * @param fragment the fragment to transform
-     * @return list of possible transformations
-     */
-    List<Result> transform(Fragment fragment);
-}
-
 public class FragmentAlternatives {
     final private List<ITransformation> transformations = new ArrayList<ITransformation>();
 
@@ -77,10 +58,6 @@ public class FragmentAlternatives {
                 currentPosition++;
             }
 
-            public boolean leftRootLevel() {
-                return currentPosition == LEFT_ROOT_LEVEL;
-            }
-
             public int getCurrentPosition() {
                 return currentPosition;
             }
@@ -119,7 +96,7 @@ public class FragmentAlternatives {
          * @return
          */
         protected FragmentIterator cloneFragment() {
-            Fragment clone = FragmentAlternatives.cloneFragment(rootFragment);
+            Fragment clone = rootFragment.clone();
             FragmentIterator iterator = new FragmentIterator(clone, currentFragmentRef, nextFragmentRef);
             return iterator;
         }
@@ -136,6 +113,9 @@ public class FragmentAlternatives {
             int currentIndex = iterator.getCurrentPosition();
             currentLevel.getItems().remove(currentIndex);
             currentLevel.getItems().add(currentIndex, newFragment);
+            // recalculate the next fragment position
+            iterator.nextFragmentRef.setTo(iterator.currentFragmentRef);
+            iterator.calculateNextFragmentPosition();
             return iterator;
         }
 
@@ -158,9 +138,14 @@ public class FragmentAlternatives {
         }
 
         private void calculateNextFragmentPosition() {
+            if (nextFragmentRef.getCurrentPosition() == AreaRef.LEFT_ROOT_LEVEL)
+                return;
+
+            // if currently on a fragment enter it
             if (peek() instanceof Fragment)
                 nextFragmentRef.enterNextLevel();
 
+            // iterate through the fragment and its parent fragments till we find the next fragment
             while (nextFragmentRef.getCurrentPosition() != AreaRef.LEFT_ROOT_LEVEL) {
                 Fragment levelFragment = getLevelFragment(rootFragment, nextFragmentRef);
                 if (nextFragmentRef.getCurrentPosition() >= levelFragment.getItems().size()) {
@@ -198,17 +183,6 @@ public class FragmentAlternatives {
         }
     }
 
-    static private Fragment cloneFragment(Fragment fragment) {
-        Fragment clone = Fragment.createEmptyFragment(fragment.getDirection());
-        for (IArea child : (List<IArea>)fragment.getItems()) {
-            if (child instanceof Fragment)
-                clone.add(cloneFragment((Fragment)child), false);
-            else
-                clone.add(child, false);
-        }
-        return clone;
-    }
-
     public void addTransformation(ITransformation transformation) {
         transformations.add(transformation);
     }
@@ -223,12 +197,12 @@ public class FragmentAlternatives {
         }
     }
 
-    public List<Result> calculateAlternatives(Fragment fragment) {
+    public List<ITransformation.Result> calculateAlternatives(Fragment fragment) {
         // put the fragment into a container fragment so that the iterator also includes the fragment
         final Fragment containerFragment = Fragment.horizontalFragment();
         containerFragment.add(fragment, false);
 
-        final List<Result> results = new ArrayList<Result>();
+        final List<ITransformation.Result> results = new ArrayList<ITransformation.Result>();
         final List<IntermediateResult> ongoingTransformations = new ArrayList<IntermediateResult>();
         // add first fragment
         ongoingTransformations.add(new IntermediateResult(1, new FragmentIterator(containerFragment)));
@@ -239,8 +213,8 @@ public class FragmentAlternatives {
             while (currentIterator.hasNext()) {
                 Fragment subFragment = currentIterator.next();
                 for (ITransformation transformation : transformations) {
-                    List<Result> trafoResults = transformation.transform(subFragment);
-                    for (Result result : trafoResults) {
+                    List<ITransformation.Result> trafoResults = transformation.transform(subFragment);
+                    for (ITransformation.Result result : trafoResults) {
                         FragmentIterator subIterator = currentIterator.cloneAndReplaceCurrent(result.fragment);
                         ongoingTransformations.add(new IntermediateResult(current.quality * result.quality,
                                 subIterator));
@@ -249,10 +223,28 @@ public class FragmentAlternatives {
             }
             // get the fragment out of the container
             Fragment returnedFragment = (Fragment)currentIterator.getRootFragment().getItems().get(0);
-            if (returnedFragment != fragment)
-                results.add(new Result(current.quality, returnedFragment));
+            if (returnedFragment != fragment && !returnedFragment.isEquivalent(fragment)) {
+                int equivalentIndex = getEquivalent(results, returnedFragment);
+                if (equivalentIndex >= 0) {
+                    // choose the one with lower quality
+                    if (results.get(equivalentIndex).quality > current.quality) {
+                        results.remove(equivalentIndex);
+                        results.add(new ITransformation.Result(current.quality, returnedFragment));
+                    }
+                } else
+                    results.add(new ITransformation.Result(current.quality, returnedFragment));
+            }
         }
 
         return results;
+    }
+
+    private int getEquivalent(List<ITransformation.Result> results, Fragment fragment) {
+        for (int i = 0; i < results.size(); i++) {
+            ITransformation.Result result = results.get(i);
+            if (result.fragment.isEquivalent(fragment))
+                return i;
+        }
+        return -1;
     }
 }

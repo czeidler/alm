@@ -16,6 +16,13 @@ import java.util.List;
 
 
 public class GroupDetector {
+    /**
+     * Detects item groups.
+     *
+     * @param fragment the fragment to analyse
+     * @param comparator used to find similar items
+     * @return all detected groups exclusive the fragment.
+     */
     static public List<Fragment> detect(Fragment fragment, Comparator<IArea> comparator) {
         List<Fragment> ongoing = detectSinglePass(fragment, comparator);
         List<Fragment> finalized = new ArrayList<Fragment>();
