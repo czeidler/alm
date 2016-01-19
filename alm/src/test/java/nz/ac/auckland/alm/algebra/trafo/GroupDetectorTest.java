@@ -25,8 +25,7 @@ public class GroupDetectorTest extends TestCase {
                 id += "h";
             else
                 id += "v";
-            List<IArea> items = fragment.getItems();
-            for (IArea item : items) {
+            for (IArea item : (Iterable<IArea>)fragment.getItems()) {
                 if (item instanceof Fragment)
                     id += fragmentId((Fragment)item);
                 else

@@ -16,11 +16,39 @@ import nz.ac.auckland.linsolve.Variable;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
 public class Fragment<Tab extends Variable, OrthTab extends Variable> extends TabArea {
-    final private List<IArea> items = new ArrayList<IArea>();
+    static public class Item<Tab extends Variable> {
+        // for horizontal direction; the tab on the right side of the item
+        private Tab tab2;
+        private IArea item;
+
+        public Item(IArea item, Tab tab2) {
+            this.item = item;
+            this.tab2 = tab2;
+        }
+
+        public Tab getTab2() {
+            return tab2;
+        }
+
+        public void setTab2(Tab tab2) {
+            this.tab2 = tab2;
+        }
+
+        public IArea getItem() {
+            return item;
+        }
+
+        public void setItem(IArea item) {
+            this.item = item;
+        }
+    }
+
+    final private List<Item<Tab>> items = new ArrayList<Item<Tab>>();
     private IDirection<Tab, OrthTab> direction;
 
     static final public IDirection horizontalDirection = new RightDirection();
@@ -103,8 +131,41 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
         return direction;
     }
 
-    public List<IArea> getItems() {
+    public List<Item<Tab>> getRawItems() {
         return items;
+    }
+
+    public Iterable<IArea> getItems() {
+        final Iterator<Item<Tab>> itemIterator = items.iterator();
+        return new Iterable<IArea>() {
+            @Override
+            public Iterator<IArea> iterator() {
+                return new Iterator<IArea>() {
+                    @Override
+                    public boolean hasNext() {
+                        return itemIterator.hasNext();
+                    }
+
+                    @Override
+                    public IArea next() {
+                        return itemIterator.next().item;
+                    }
+
+                    @Override
+                    public void remove() {
+                        throw new RuntimeException("not supported");
+                    }
+                };
+            }
+        };
+    }
+
+    public int size() {
+        return items.size();
+    }
+
+    public IArea getItemAt(int i) {
+        return items.get(i).item;
     }
 
     public Fragment clone() {
@@ -120,9 +181,10 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     public Fragment cloneResolve(boolean resolve) {
         Fragment clone = Fragment.createEmptyFragment(getDirection());
         for (IArea child : getItems()) {
-            if (child instanceof Fragment)
-                clone.add(((Fragment)child).clone(), resolve);
-            else
+            if (child instanceof Fragment) {
+                Fragment childClone = ((Fragment) child).cloneResolve(resolve);
+                clone.add(childClone, resolve);
+            } else
                 clone.add(child, resolve);
         }
         return clone;
@@ -141,11 +203,11 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     private boolean isEquivalentResolved(Fragment fragment) {
         if (fragment.getDirection() != getDirection())
             return false;
-        if (fragment.getItems().size() != getItems().size())
+        if (fragment.size() != size())
             return false;
-        for (int i = 0; i < getItems().size(); i++) {
-            IArea ours = getItems().get(i);
-            IArea theirs = getItems().get(i);
+        for (int i = 0; i < size(); i++) {
+            IArea ours = getItemAt(i);
+            IArea theirs = fragment.getItemAt(i);
             if (ours instanceof Fragment) {
                 if (!(theirs instanceof Fragment))
                     return false;
@@ -161,24 +223,36 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
      * Add an item to the Fragment.
      *
      * @param item the item to add
+     * @param index index where to add the item
      * @param mergeFragments if true and item is a fragment with same direction the fragments are merged. For example,
      *                       (A|B) + (C|D) becomes (A|B|C|D) instead of  (A|B|(C|D)).
      */
-    public void add(IArea item, boolean mergeFragments) {
+    public void add(int index, IArea item, boolean mergeFragments) {
         if (mergeFragments && item instanceof Fragment) {
             Fragment fragment = (Fragment) item;
-            if (fragment.direction == null || fragment.direction == direction || fragment.getItems().size() == 1) {
-                for (Object subItem : fragment.getItems())
-                    add((IArea)subItem, mergeFragments);
+            if (fragment.direction == direction || fragment.size() == 1) {
+                int reverseIndex = size() - index;
+                for (Item<Tab> subItem : (List<Item<Tab>>)fragment.getRawItems())
+                    add(size() - reverseIndex, subItem.getItem(), true);
                 return;
             }
         }
-        items.add(item);
+        items.add(index, new Item<Tab>(item, null));
+    }
+
+    public void add(IArea item, boolean mergeFragments) {
+        add(size(), item, mergeFragments);
+    }
+
+    public void remove(int index, Tab mergeTab) {
+        items.remove(index);
+        if (index > 0)
+            items.get(index - 1).setTab2(mergeTab);
     }
 
     public int countAtoms() {
         int count = 0;
-        for (IArea item : items) {
+        for (IArea item : getItems()) {
             if (item instanceof Fragment)
                 count += ((Fragment) item).countAtoms();
             else
@@ -188,11 +262,11 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     }
 
     private <Tab extends Variable, OrthTab extends Variable> Tab getTab1(IDirection<Tab, OrthTab> direction) {
-        Tab tab = direction.getTab(items.get(0));
+        Tab tab = direction.getTab(getItemAt(0));
         if (tab == null)
             return null;
-        for (int i = 1; i < items.size(); i++) {
-            Tab areaTab = direction.getTab(items.get(i));
+        for (int i = 1; i < size(); i++) {
+            Tab areaTab = direction.getTab(getItemAt(i));
             if (areaTab == null || tab != areaTab)
                 return null;
         }
@@ -200,11 +274,11 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     }
 
     private <Tab extends Variable, OrthTab extends Variable> Tab getTab2(IDirection<Tab, OrthTab> direction) {
-        Tab tab = direction.getTab(items.get(items.size() - 1));
+        Tab tab = direction.getTab(getItemAt(size() - 1));
         if (tab == null)
             return null;
-        for (int i = 0; i < items.size() - 1; i++) {
-            Tab areaTab = direction.getTab(items.get(i));
+        for (int i = 0; i < size() - 1; i++) {
+            Tab areaTab = direction.getTab(getItemAt(i));
             if (areaTab == null || tab != areaTab)
                 return null;
         }
@@ -217,7 +291,7 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
             return null;
 
         if (direction == horizontalDirection)
-            return items.get(0).getLeft();
+            return getItemAt(0).getLeft();
         return getTab1(new LeftDirection());
     }
 
@@ -227,7 +301,7 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
             return null;
 
         if (direction == verticalDirection)
-            return items.get(0).getTop();
+            return getItemAt(0).getTop();
         return getTab1(new TopDirection());
     }
 
@@ -237,64 +311,64 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
             return null;
 
         if (direction == horizontalDirection)
-            return items.get(items.size() - 1).getRight();
+            return getItemAt(items.size() - 1).getRight();
         return getTab2(new RightDirection());
     }
 
     @Override
     public YTab getBottom() {
-        if (items.size() == 0)
+        if (size() == 0)
             return null;
 
         if (direction == verticalDirection)
-            return items.get(items.size() - 1).getBottom();
+            return getItemAt(items.size() - 1).getBottom();
         return getTab2(new BottomDirection());
     }
 
     @Override
     public void setLeft(XTab value) {
-        if (items.size() == 0 || value == null)
+        if (size() == 0 || value == null)
             return;
         if (direction == horizontalDirection)
-            items.get(0).setLeft(value);
+            getItemAt(0).setLeft(value);
         else {
-            for (IArea area : items)
+            for (IArea area : getItems())
                 area.setLeft(value);
         }
     }
 
     @Override
     public void setRight(XTab value) {
-        if (items.size() == 0 || value == null)
+        if (size() == 0 || value == null)
             return;
         if (direction == horizontalDirection)
-            items.get(items.size() - 1).setRight(value);
+            getItemAt(size() - 1).setRight(value);
         else {
-            for (IArea area : items)
+            for (IArea area : getItems())
                 area.setRight(value);
         }
     }
 
     @Override
     public void setTop(YTab value) {
-        if (items.size() == 0 || value == null)
+        if (size() == 0 || value == null)
             return;
         if (direction == verticalDirection)
-            items.get(0).setTop(value);
+            getItemAt(0).setTop(value);
         else {
-            for (IArea area : items)
+            for (IArea area : getItems())
                 area.setTop(value);
         }
     }
 
     @Override
     public void setBottom(YTab value) {
-        if (items.size() == 0 || value == null)
+        if (size() == 0 || value == null)
             return;
         if (direction == verticalDirection)
-            items.get(items.size() - 1).setBottom(value);
+            getItemAt(size() - 1).setBottom(value);
         else {
-            for (IArea area : items)
+            for (IArea area : getItems())
                 area.setBottom(value);
         }
     }

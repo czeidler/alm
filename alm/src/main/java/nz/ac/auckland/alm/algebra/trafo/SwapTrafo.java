@@ -24,7 +24,7 @@ public class SwapTrafo implements ITransformation {
         else
             trafo = Fragment.horizontalFragment();
 
-        for (IArea area : (List<IArea>)fragment.getItems())
+        for (IArea area : (Iterable<IArea>)fragment.getItems())
             trafo.add(area, false);
 
         results.add(new Result(1.1f, trafo));

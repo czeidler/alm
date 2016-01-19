@@ -7,7 +7,6 @@
  */
 package nz.ac.auckland.alm.algebra.trafo;
 
-import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.algebra.Fragment;
 
 import java.util.ArrayList;
@@ -21,19 +20,18 @@ public class ColumnOneToTwoTrafo implements ITransformation {
         if (fragment.isHorizontalDirection())
             return results;
         // at least 3 items otherwise it's a swap
-        if (fragment.getItems().size() < 3)
+        if (fragment.size() < 3)
             return results;
-        int splitPoint = fragment.getItems().size() / 2 + 1;
+        int splitPoint = fragment.size() / 2 + 1;
         Fragment column1 = Fragment.verticalFragment();
         Fragment column2 = Fragment.verticalFragment();
         Fragment hFragment = Fragment.horizontalFragment();
         hFragment.add(column1, false);
         hFragment.add(column2, false);
-        List<IArea> items = fragment.getItems();
         for (int i = 0; i < splitPoint; i++)
-            column1.add(items.get(i), false);
-        for (int i = splitPoint; i < items.size(); i++)
-            column2.add(items.get(i), false);
+            column1.add(fragment.getItemAt(i), false);
+        for (int i = splitPoint; i < fragment.size(); i++)
+            column2.add(fragment.getItemAt(i), false);
 
         results.add(new Result(1.1f, hFragment));
         return results;

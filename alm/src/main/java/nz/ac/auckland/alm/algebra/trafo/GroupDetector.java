@@ -48,8 +48,7 @@ public class GroupDetector {
 
     static private List<Fragment> detectSinglePass(Fragment fragment, Comparator<IArea> comparator) {
         List<Fragment> alternatives = new ArrayList<Fragment>();
-        List<IArea> items = fragment.getItems();
-        for (int groupSize = 1; groupSize <= items.size() / 2; groupSize++) {
+        for (int groupSize = 1; groupSize <= fragment.size() / 2; groupSize++) {
             for (int offset = 0; offset < groupSize; offset++) {
                 Fragment alternative = detect(fragment, offset, groupSize, comparator);
                 if (alternative != null)
@@ -60,11 +59,10 @@ public class GroupDetector {
     }
 
     static private void addIfNotAtTail(Fragment fragment, IArea item) {
-        List<IArea> items = fragment.getItems();
-        int tail = items.size() - 1;
+        int tail = fragment.size() - 1;
         IArea tailArea = null;
         if (tail >= 0)
-            tailArea = items.get(tail);
+            tailArea = fragment.getItemAt(tail);
         if (tailArea != item)
             fragment.add(item, false);
     }
@@ -84,12 +82,11 @@ public class GroupDetector {
         Fragment alternative = Fragment.createEmptyFragment(fragment.getDirection());
         IArea currentSubGroup = null;
         IArea nextSubGroup;
-        List<IArea> items = fragment.getItems();
         for (int i = 0; i < offset; i++)
-            alternative.add(items.get(i), false);
+            alternative.add(fragment.getItemAt(i), false);
         int currentPosition = offset;
         Fragment currentMatches = null;
-        for (int i = offset; i <= items.size() - 2 * groupSize; i += groupSize) {
+        for (int i = offset; i <= fragment.size() - 2 * groupSize; i += groupSize) {
             if (currentSubGroup == null)
                 currentSubGroup = copySubGroup(fragment, i, groupSize);
             nextSubGroup = copySubGroup(fragment, i + groupSize, groupSize);
@@ -107,7 +104,7 @@ public class GroupDetector {
                     currentMatches = null;
                 }
                 for (int a = currentPosition; a < i + groupSize; a++)
-                    alternative.add(items.get(a), false);
+                    alternative.add(fragment.getItemAt(a), false);
                 currentPosition = i + groupSize;
             }
             currentSubGroup = nextSubGroup;
@@ -117,30 +114,29 @@ public class GroupDetector {
             alternative.add(currentMatches, false);
 
         // add the remaining areas
-        for (int i = currentPosition; i < items.size(); i++)
-            alternative.add(items.get(i), false);
+        for (int i = currentPosition; i < fragment.size(); i++)
+            alternative.add(fragment.getItemAt(i), false);
 
-        if (alternative.getItems().size() == 0)
+        if (alternative.size() == 0)
             return null;
         // remove superfluous containing fragment, e.g. ((A|B) | (A|B)) -> (A|B) | (A|B)
-        if (alternative.getItems().size() == 1) {
-            IArea area = (IArea) alternative.getItems().get(0);
+        if (alternative.size() == 1) {
+            IArea area = alternative.getItemAt(0);
             if (area instanceof Fragment)
                 alternative = (Fragment)area;
         }
         // don't return an alternative if all item in a fragment are the same, i.e. the alternative is equivalent
-        if (alternative.getItems().size() == fragment.getItems().size())
+        if (alternative.size() == fragment.size())
             return null;
         return alternative;
     }
 
     static private IArea copySubGroup(Fragment fragment, int offset, int size) {
-        List<IArea> items = fragment.getItems();
         if (size == 1)
-            return items.get(offset);
+            return fragment.getItemAt(offset);
         Fragment subGroup = Fragment.createEmptyFragment(fragment.getDirection());
         for (int i = offset; i < offset + size; i++)
-            subGroup.add(items.get(i), false);
+            subGroup.add(fragment.getItemAt(i), false);
         return subGroup;
     }
 }

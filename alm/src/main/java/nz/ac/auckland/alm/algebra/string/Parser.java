@@ -55,15 +55,14 @@ class FragmentParser implements Parser.IState {
         // empty terms with a single item
         if (item instanceof Fragment) {
             Fragment fragment = (Fragment) item;
-            if (fragment.getItems().size() == 1)
-                item = (IArea) fragment.getItems().get(0);
+            if (fragment.size() == 1)
+                item = fragment.getItemAt(0);
         }
 
         // set tab
-        if (fragment.getItems().size() > 0) {
+        if (fragment.size() > 0) {
             IDirection direction = fragment.getDirection();
-            List<IArea> items = fragment.getItems();
-            IArea lastArea = items.get(items.size() - 1);
+            IArea lastArea = fragment.getItemAt(fragment.size() - 1);
             Variable existingTab = direction.getTab(lastArea);
             assert (existingTab != null);
             direction.setOppositeTab(item, existingTab);
@@ -116,8 +115,7 @@ class FragmentParser implements Parser.IState {
 
     public <Tab extends Variable> void setTab(Parser parser, Map<String, Tab> namedTabs) {
         IDirection direction = fragment.getDirection();
-        List<IArea> items = fragment.getItems();
-        IArea lastArea = items.get(items.size() - 1);
+        IArea lastArea = fragment.getItemAt(fragment.size() - 1);
         Tab existingTab = (Tab)direction.getTab(lastArea);
         Tab tab;
         Lexer.Token token = parser.peek();
@@ -137,6 +135,7 @@ class FragmentParser implements Parser.IState {
         else
             tab = (Tab)direction.createTab();
 
+        ((List<Fragment.Item<Tab>>)fragment.getRawItems()).get(fragment.size() - 1).setTab2(tab);
         direction.setTab(lastArea, tab);
     }
 }
@@ -222,7 +221,7 @@ public class Parser {
     }
 
     public void addTerm(Fragment fragment) {
-        if (fragment.getItems().size() == 0)
+        if (fragment.size() == 0)
             return;
         terms.add(fragment);
     }

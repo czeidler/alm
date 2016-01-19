@@ -72,7 +72,7 @@ public class StringReader {
     }
 
     static private void toAtoms(Fragment fragment, List<IArea> atoms) {
-        for (IArea child : (List<IArea>)fragment.getItems()) {
+        for (IArea child : (Iterable<IArea>)fragment.getItems()) {
             if (child instanceof Fragment)
                 toAtoms((Fragment)child, atoms);
             else if (!atoms.contains(child))

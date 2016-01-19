@@ -238,7 +238,7 @@ public class AlgebraSpec {
         List<Fragment> dirtyFragments = new ArrayList<Fragment>(fragments);
         while (dirtyFragments.size() > 0) {
             Fragment f = dirtyFragments.remove(0);
-            for (IArea child : (List<IArea>)f.getItems()) {
+            for (IArea child : (Iterable<IArea>)f.getItems()) {
                 if (child instanceof Fragment)
                     dirtyFragments.add((Fragment)child);
                 else

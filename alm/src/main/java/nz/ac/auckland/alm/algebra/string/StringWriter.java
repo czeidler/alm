@@ -96,11 +96,11 @@ public class StringWriter {
         if (!(fragmentArea instanceof Fragment))
             return;
         Fragment fragment = (Fragment) fragmentArea;
-        for (int i = 0; i < fragment.getItems().size(); i++) {
-            IArea area = (IArea) fragment.getItems().get(i);
+        for (int i = 0; i < fragment.size(); i++) {
+            IArea area = fragment.getItemAt(i);
             if (area instanceof Fragment)
                 countTabs(area, tabCount);
-            if (i == fragment.getItems().size() - 1)
+            if (i == fragment.size() - 1)
                 continue;
             Variable tab = fragment.getDirection().getTab(area);
             Integer count = tabCount.get(tab);

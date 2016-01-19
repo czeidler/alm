@@ -79,12 +79,12 @@ public class FragmentAlternatives {
 
         public FragmentIterator(Fragment rootFragment) {
             this.rootFragment = rootFragment;
-            assert rootFragment.getItems().size() >= 1;
+            assert rootFragment.size() >= 1;
         }
 
         private FragmentIterator(Fragment clone, AreaRef currentFragmentRef, AreaRef nextFragmentRef) {
             this.rootFragment = clone;
-            assert rootFragment.getItems().size() >= 1;
+            assert rootFragment.size() >= 1;
 
             this.currentFragmentRef.setTo(currentFragmentRef);
             this.nextFragmentRef.setTo(nextFragmentRef);
@@ -111,8 +111,8 @@ public class FragmentAlternatives {
             FragmentIterator iterator = cloneFragment();
             Fragment currentLevel = iterator.getCurrentLevelFragment();
             int currentIndex = iterator.getCurrentPosition();
-            currentLevel.getItems().remove(currentIndex);
-            currentLevel.getItems().add(currentIndex, newFragment);
+            currentLevel.remove(currentIndex, null);
+            currentLevel.add(currentIndex, newFragment, false);
             // recalculate the next fragment position
             iterator.nextFragmentRef.setTo(iterator.currentFragmentRef);
             iterator.calculateNextFragmentPosition();
@@ -148,11 +148,11 @@ public class FragmentAlternatives {
             // iterate through the fragment and its parent fragments till we find the next fragment
             while (nextFragmentRef.getCurrentPosition() != AreaRef.LEFT_ROOT_LEVEL) {
                 Fragment levelFragment = getLevelFragment(rootFragment, nextFragmentRef);
-                if (nextFragmentRef.getCurrentPosition() >= levelFragment.getItems().size()) {
+                if (nextFragmentRef.getCurrentPosition() >= levelFragment.size()) {
                     nextFragmentRef.leaveLevel();
                     continue;
                 }
-                if (levelFragment.getItems().get(nextFragmentRef.getCurrentPosition()) instanceof Fragment)
+                if (levelFragment.getItemAt(nextFragmentRef.getCurrentPosition()) instanceof Fragment)
                     break;
 
                 nextFragmentRef.advance();
@@ -161,7 +161,7 @@ public class FragmentAlternatives {
 
         public IArea peek() {
             Fragment currentLevel = getLevelFragment(rootFragment, currentFragmentRef);
-            return (IArea)currentLevel.getItems().get(currentFragmentRef.getCurrentPosition());
+            return currentLevel.getItemAt(currentFragmentRef.getCurrentPosition());
         }
 
         public Fragment getRootFragment() {
@@ -178,7 +178,7 @@ public class FragmentAlternatives {
 
         private Fragment getLevelFragment(Fragment root, AreaRef areaRef) {
             for (Integer index : areaRef.getFragLevelPosition())
-                root = (Fragment)root.getItems().get(index);
+                root = (Fragment)root.getItemAt(index);
             return root;
         }
     }
@@ -222,7 +222,7 @@ public class FragmentAlternatives {
                 }
             }
             // get the fragment out of the container
-            Fragment returnedFragment = (Fragment)currentIterator.getRootFragment().getItems().get(0);
+            Fragment returnedFragment = (Fragment)currentIterator.getRootFragment().getItemAt(0);
             if (returnedFragment != fragment && !returnedFragment.isEquivalent(fragment)) {
                 int equivalentIndex = getEquivalent(results, returnedFragment);
                 if (equivalentIndex >= 0) {
