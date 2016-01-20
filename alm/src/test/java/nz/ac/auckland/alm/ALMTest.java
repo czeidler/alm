@@ -19,12 +19,79 @@ public class ALMTest extends TestCase {
         throw new Exception("assertFuzzyEqual: expected = " + expected + " value = " + value);
     }
 
+    final static int MIN_WIDTH = 10;
+    final static int MIN_HEIGHT = 40;
+    final static int PREF_WIDTH = 20;
+    final static int PREF_HEIGHT = 50;
+    final static int H_SPACING = 10;
+    final static int V_SPACING = 5;
+
     Area addDefaultArea(LayoutSpec layoutSpec, XTab left, YTab top, XTab right, YTab bottom) {
         Area area = layoutSpec.addArea(left, top, right, bottom);
-        area.setMinSize(10, 10);
+        area.setMinSize(MIN_WIDTH, MIN_HEIGHT);
+        area.setPreferredSize(PREF_WIDTH, PREF_HEIGHT);
         area.setMaxSize(-1, -1);
-        area.setPreferredSize(20, 50);
         return area;
+    }
+
+    void assertFuzzyEqual(double expectedWidth, double expectedHeight, Area.Size size) throws Exception {
+        assertFuzzyEqual(expectedWidth, size.getWidth());
+        assertFuzzyEqual(expectedHeight, size.getHeight());
+    }
+
+    public void testMinPrefMaxSizes() throws Exception {
+        LayoutSpec layoutSpec = new LayoutSpec();
+        layoutSpec.setHorizontalSpacing(H_SPACING);
+        layoutSpec.setVerticalSpacing(V_SPACING);
+
+        XTab left = layoutSpec.getLeft();
+        YTab top = layoutSpec.getTop();
+        XTab right = layoutSpec.getRight();
+        YTab bottom = layoutSpec.getBottom();
+
+        XTab x0 = new XTab();
+        YTab y0 = new YTab();
+
+        addDefaultArea(layoutSpec, left, top, x0, y0).setMaxSize(100, 100);
+        addDefaultArea(layoutSpec, x0, top, right, y0).setMaxSize(50, 100);
+        addDefaultArea(layoutSpec, left, y0, x0, bottom).setMaxSize(50, 200);
+
+        Area.Size minSize = layoutSpec.getMinSize();
+        assertFuzzyEqual(MIN_WIDTH * 2 + H_SPACING, MIN_HEIGHT * 2 + V_SPACING, minSize);
+        Area.Size prefSize = layoutSpec.getPreferredSize();
+        assertFuzzyEqual(PREF_WIDTH * 2 + H_SPACING, PREF_HEIGHT * 2 + V_SPACING, prefSize);
+        // the max size calculation is currently not working
+        //Area.Size maxSize = layoutSpec.getMaxSize();
+        //assertFuzzyEqual(150, 300, maxSize);
+    }
+
+    public void testMinPrefMaxSizes2() throws Exception {
+        LayoutSpec layoutSpec = new LayoutSpec();
+        layoutSpec.setHorizontalSpacing(H_SPACING);
+        layoutSpec.setVerticalSpacing(V_SPACING);
+
+        XTab left = layoutSpec.getLeft();
+        YTab top = layoutSpec.getTop();
+        XTab right = layoutSpec.getRight();
+        YTab bottom = layoutSpec.getBottom();
+
+        XTab x0 = new XTab();
+        XTab x1 = new XTab();
+        YTab y0 = new YTab();
+        YTab y1 = new YTab();
+        YTab y2 = new YTab();
+
+        addDefaultArea(layoutSpec, left, top, x0, y0).setMaxSize(100, 100);
+        addDefaultArea(layoutSpec, left, y0, x0, y1).setMaxSize(100, 100);
+        addDefaultArea(layoutSpec, left, y1, x0, y2).setMaxSize(100, 100);
+        addDefaultArea(layoutSpec, left, y2, x0, bottom).setMaxSize(100, 100);
+        addDefaultArea(layoutSpec, x0, top, x1, bottom).setMaxSize(100, 100);
+        addDefaultArea(layoutSpec, x1, top, right, bottom).setMaxSize(100, 100);
+
+        Area.Size minSize = layoutSpec.getMinSize();
+        assertFuzzyEqual(MIN_WIDTH * 3 + H_SPACING * 2, MIN_HEIGHT * 4 + V_SPACING * 3, minSize);
+        Area.Size prefSize = layoutSpec.getPreferredSize();
+        assertFuzzyEqual(PREF_WIDTH * 3 + H_SPACING * 2, PREF_HEIGHT * 4 + V_SPACING * 3, prefSize);
     }
 
     public void testThreeButtons() throws Exception {

@@ -377,7 +377,6 @@ public class LayoutSpec {
      * @return Size defining the minimal size of the GUI
      */
     private Area.Size calculateMinSize() {
-
         //Store the preferred sizes and temporarily set the preferred size to the min size.
         Area.Size[] store = new Area.Size[areas.size()];
 
@@ -401,14 +400,11 @@ public class LayoutSpec {
 
         //Recalculate to avoid any potential errors.
         solve();
-
         return min;
     }
 
     /**
      * Calculate the maximal size of the GUI.
-     * If the specifications have not changed use getMaxSize to get an cached
-     * value for the maximal size and save some CPU cycles.
      *
      * @return Size defining the maximal size of the GUI
      */

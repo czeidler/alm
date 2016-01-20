@@ -228,9 +228,23 @@ public class Area extends AbstractLayoutSpecArea {
 	}
 
 	private Size addSpacingAndInset(Size value) {
+		// don't add spacing if the area is at the border
+		float hSpacingFactor = 1;
+		float vSpacingFactor = 1;
+		if (layoutSpec != null) {
+			if (getLeft() == layoutSpec.getLeft())
+				hSpacingFactor -= 0.5;
+			if (getRight() == layoutSpec.getRight())
+				hSpacingFactor -= 0.5;
+			if (getTop() == layoutSpec.getTop())
+				vSpacingFactor -= 0.5;
+			if (getBottom() == layoutSpec.getBottom())
+				vSpacingFactor -= 0.5;
+		}
+
 		// Add insets and 2 times the half of the horizontal and vertical spacing.
-		return new Size(value.getWidth() + getLayoutHSpacing() + getLeftInset() + getRightInset(),
-				value.getHeight() + getLayoutHSpacing() + getTopInset() + getBottomInset());
+		return new Size(value.getWidth() + hSpacingFactor * getLayoutHSpacing() + getLeftInset() + getRightInset(),
+				value.getHeight() + vSpacingFactor * getLayoutVSpacing() + getTopInset() + getBottomInset());
 	}
 
 	/**
@@ -591,34 +605,34 @@ public class Area extends AbstractLayoutSpecArea {
 		invalidateLayoutSpec();
 	}
 
-	void updateRightSideHorizontal(Constraint constraint, double rightSide) {
-		constraint.setRightSide(rightSide + leftInset + rightInset);
+	private void updateRightSideHorizontal(Constraint constraint, double rightSide) {
+		constraint.setRightSide(rightSide);
 	}
 
 	/**
 	 * Update the constraints for horizontal insets and alignment.
 	 */
-	void updateHorizontal() {
-		updateRightSideHorizontal(minWidthConstraint, minSize.getWidth());
+	private void updateHorizontal() {
+		updateRightSideHorizontal(minWidthConstraint, addSpacingAndInset(minSize).getWidth());
 		if (preferredWidthConstraint != null)
-			updateRightSideHorizontal(preferredWidthConstraint, preferredSize.getWidth());
+			updateRightSideHorizontal(preferredWidthConstraint, addSpacingAndInset(preferredSize).getWidth());
 		if (maxWidthConstraint != null)
-			updateRightSideHorizontal(maxWidthConstraint, maxSize.getWidth());
+			updateRightSideHorizontal(maxWidthConstraint, addSpacingAndInset(maxSize).getWidth());
 	}
 
-	void updateRightSideVertical(Constraint constraint, double rightSide) {
-		constraint.setRightSide(rightSide + topInset + bottomInset);
+	private void updateRightSideVertical(Constraint constraint, double rightSide) {
+		constraint.setRightSide(rightSide);
 	}
 
 	/**
 	 * Update the constraints for vertical insets and alignment.
 	 */
-	void updateVertical() {
-		updateRightSideVertical(minHeightConstraint, minSize.getHeight());
+	private void updateVertical() {
+		updateRightSideVertical(minHeightConstraint, addSpacingAndInset(minSize).getHeight());
 		if (preferredWidthConstraint != null)
-			updateRightSideVertical(preferredWidthConstraint, preferredSize.getHeight());
+			updateRightSideVertical(preferredWidthConstraint, addSpacingAndInset(preferredSize).getHeight());
 		if (maxWidthConstraint != null)
-			updateRightSideVertical(maxWidthConstraint, maxSize.getHeight());
+			updateRightSideVertical(maxWidthConstraint, addSpacingAndInset(maxSize).getHeight());
 	}
 
 	/**
