@@ -97,12 +97,10 @@ public class StringWriter {
             return;
         Fragment fragment = (Fragment) fragmentArea;
         for (int i = 0; i < fragment.size(); i++) {
-            IArea area = fragment.getItemAt(i);
-            if (area instanceof Fragment)
-                countTabs(area, tabCount);
-            if (i == fragment.size() - 1)
-                continue;
-            Variable tab = fragment.getDirection().getTab(area);
+            Fragment.Item item = fragment.getRawItemAt(i);
+            if (item.getItem() instanceof Fragment)
+                countTabs(item.getItem(), tabCount);
+            Variable tab = item.getTab2();
             Integer count = tabCount.get(tab);
             if (count == null)
                 count = 1;
@@ -137,6 +135,8 @@ public class StringWriter {
     }
 
     private String getName(Variable tab) {
+        if (tab == null)
+            return null;
         if (multipleXTabs.contains(tab))
             return "" + multipleXTabs.indexOf(tab);
         if (multipleYTabs.contains(tab))

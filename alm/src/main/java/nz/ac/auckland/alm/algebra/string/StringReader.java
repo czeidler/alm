@@ -44,6 +44,8 @@ public class StringReader {
         List<Fragment> fragments = readRawFragments(input, areaFactory);
         if (fragments == null)
             return null;
+        for (Fragment fragment : fragments)
+            fragment.applySpecsToChild();
         List<IArea> atoms = toAtoms(fragments);
         // set border tabs
         for (IArea atom : atoms) {
