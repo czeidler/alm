@@ -54,21 +54,21 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     static final public IDirection horizontalDirection = new RightDirection();
     static final public IDirection verticalDirection = new BottomDirection();
 
-    static public Fragment horizontalFragment(IArea area1, IArea area2) {
-        return new Fragment(area1, area2, horizontalDirection);
+    static public Fragment<XTab, YTab> horizontalFragment(IArea area1, XTab tab, IArea area2) {
+        return new Fragment<XTab, YTab>(area1, tab, area2, horizontalDirection);
     }
 
-    static public Fragment verticalFragment(IArea area1, IArea area2) {
-        return new Fragment(area1, area2, verticalDirection);
+    static public Fragment<YTab, XTab> verticalFragment(IArea area1, YTab tab, IArea area2) {
+        return new Fragment<YTab, XTab>(area1, tab, area2, verticalDirection);
     }
 
-    static public Fragment horizontalFragment() {
+    static public Fragment<XTab, YTab> horizontalFragment() {
         Fragment fragment = new Fragment();
         fragment.direction = horizontalDirection;
         return fragment;
     }
 
-    static public Fragment verticalFragment() {
+    static public Fragment<YTab, XTab> verticalFragment() {
         Fragment fragment = new Fragment();
         fragment.direction = verticalDirection;
         return fragment;
@@ -84,13 +84,35 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     }
 
-    public Fragment(IArea area1, IArea area2, IDirection<Tab, OrthTab> direction) {
+    public Fragment(IArea area1, Tab tab, IArea area2, IDirection<Tab, OrthTab> direction) {
         assert direction == horizontalDirection || direction == verticalDirection;
         this.direction = direction;
 
-        add(area1, true);
+        add(area1, tab, true);
         if  (area2 != null)
             add(area2, true);
+    }
+
+    /**
+     * Apply the fragment specification to the child, i.e. set the tabs
+     */
+    public void applySpecsToChild() {
+        IDirection direction = getDirection();
+        if (size() == 1 && getItemAt(0) instanceof Fragment) {
+            ((Fragment)getItemAt(0)).applySpecsToChild();
+            return;
+        }
+        for (int i = 0; i < size() - 1; i++) {
+            IArea area1 = getItemAt(i);
+            IArea area2 = getItemAt(i + 1);
+            if (area1 instanceof Fragment)
+                ((Fragment)area1).applySpecsToChild();
+            if (area2 instanceof Fragment)
+                ((Fragment)area2).applySpecsToChild();
+            Variable tab = direction.createTab();
+            direction.setTab(area1, tab);
+            direction.setOppositeTab(area2, tab);
+        }
     }
 
     @Override
@@ -133,6 +155,10 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
 
     public List<Item<Tab>> getRawItems() {
         return items;
+    }
+
+    public Item<Tab> getRawItemAt(int index) {
+        return items.get(index);
     }
 
     public Iterable<IArea> getItems() {
@@ -183,11 +209,38 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
         for (IArea child : getItems()) {
             if (child instanceof Fragment) {
                 Fragment childClone = ((Fragment) child).cloneResolve(resolve);
-                clone.add(childClone, resolve);
+                if (childClone.size() == 1 && resolve)
+                    clone.add(childClone.getItemAt(0), resolve);
+                else
+                    clone.add(childClone, resolve);
             } else
                 clone.add(child, resolve);
         }
         return clone;
+    }
+
+    /**
+     * Ensure that each child fragment contains more than one item.
+     *
+     * For example, A|(B)|C -> A|B|C
+     */
+    public void removeSingletons() {
+        for (int i = 0; i < size(); i++) {
+            IArea area = getItemAt(i);
+            if (!(area instanceof Fragment))
+                continue;
+            Fragment fragment = (Fragment)area;
+            if (fragment.size() == 1) {
+                // replace fragment
+                remove(i, null);
+                add(i, fragment.getRawItemAt(0), false);
+
+                // scan the merged fragment by reducing i
+                i--;
+                continue;
+            }
+            fragment.removeSingletons();
+        }
     }
 
     public boolean isEquivalent(Fragment fragment) {
@@ -227,27 +280,32 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
      * @param mergeFragments if true and item is a fragment with same direction the fragments are merged. For example,
      *                       (A|B) + (C|D) becomes (A|B|C|D) instead of  (A|B|(C|D)).
      */
-    public void add(int index, IArea item, boolean mergeFragments) {
-        if (mergeFragments && item instanceof Fragment) {
-            Fragment fragment = (Fragment) item;
+    public void add(int index, Item<Tab> item, boolean mergeFragments) {
+        if (mergeFragments && item.getItem() instanceof Fragment) {
+            Fragment fragment = (Fragment) item.getItem();
             if (fragment.direction == direction || fragment.size() == 1) {
                 int reverseIndex = size() - index;
                 for (Item<Tab> subItem : (List<Item<Tab>>)fragment.getRawItems())
-                    add(size() - reverseIndex, subItem.getItem(), true);
+                    add(size() - reverseIndex, subItem, true);
                 return;
             }
         }
-        items.add(index, new Item<Tab>(item, null));
+        items.add(index, item);
+    }
+
+    public void add(IArea item, Tab tab, boolean mergeFragments) {
+        add(size(), new Item<Tab>(item, tab), mergeFragments);
     }
 
     public void add(IArea item, boolean mergeFragments) {
-        add(size(), item, mergeFragments);
+        add(item, null, mergeFragments);
     }
 
-    public void remove(int index, Tab mergeTab) {
-        items.remove(index);
+    public Item remove(int index, Tab mergeTab) {
+        Item item = items.remove(index);
         if (index > 0)
             items.get(index - 1).setTab2(mergeTab);
+        return item;
     }
 
     public int countAtoms() {
