@@ -11,6 +11,8 @@ import junit.framework.TestCase;
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.TabArea;
 import nz.ac.auckland.alm.algebra.Fragment;
+import nz.ac.auckland.alm.algebra.string.Parser;
+import nz.ac.auckland.alm.algebra.string.StringReader;
 import nz.ac.auckland.alm.algebra.string.StringWriter;
 
 import java.util.Comparator;
@@ -18,47 +20,13 @@ import java.util.List;
 
 
 public class GroupDetectorTest extends TestCase {
-    private Comparator<IArea> comparator = new Comparator<IArea>() {
-        private String fragmentId(Fragment fragment) {
-            String id = "";
-            if (fragment.isHorizontalDirection())
-                id += "h";
-            else
-                id += "v";
-            for (IArea item : (Iterable<IArea>)fragment.getItems()) {
-                if (item instanceof Fragment)
-                    id += fragmentId((Fragment)item);
-                else
-                    id += item.getId();
-            }
-            return id;
-        }
-
-        @Override
-        public int compare(IArea area0, IArea area1) {
-            String area0Id;
-            String area1Id;
-            if (area0 instanceof Fragment)
-                area0Id = fragmentId((Fragment)area0);
-            else
-                area0Id = area0.getId();
-
-            if (area1 instanceof Fragment)
-                area1Id = fragmentId((Fragment)area1);
-            else
-                area1Id = area1.getId();
-
-            if (area0Id.equals(area1Id))
-                return 0;
-            return -1;
-        }
-    };
-
     private IArea createArea(String id) {
         IArea area = new TabArea();
         area.setId(id);
         return area;
     }
+
+    Comparator<IArea> comparator = new AreaComparator();
 
     public void testGroupDetection() throws Exception {
         // A|B|A|B
@@ -74,6 +42,8 @@ public class GroupDetectorTest extends TestCase {
         System.out.println("Alternatives:");
         for (Fragment alternative : alternatives)
             System.out.println(StringWriter.write(alternative, true));
+        assertEquals(1, alternatives.size());
+        assertEquals(alternatives.get(0).toString(), "(A|B)|(A|B)");
 
         // A|B|A|B|A
         fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
@@ -89,6 +59,7 @@ public class GroupDetectorTest extends TestCase {
         System.out.println("Alternatives:");
         for (Fragment alternative : alternatives)
             System.out.println(StringWriter.write(alternative, true));
+        assertEquals(2, alternatives.size());
 
         // A|A|B
         fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
@@ -103,6 +74,7 @@ public class GroupDetectorTest extends TestCase {
         System.out.println("Alternatives:");
         for (Fragment alternative : alternatives)
             System.out.println(StringWriter.write(alternative, true));
+        assertEquals(1, alternatives.size());
 
         // A|A|B|A|A|B|A|B|D|D
         fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
@@ -123,5 +95,37 @@ public class GroupDetectorTest extends TestCase {
         System.out.println("Alternatives:");
         for (Fragment alternative : alternatives)
             System.out.println(StringWriter.write(alternative, true));
+        assertEquals(4, alternatives.size());
+    }
+
+    private Parser.IAreaFactory areaFactory = new Parser.IAreaFactory() {
+        @Override
+        public IArea getArea(String areaId) {
+            return createArea(areaId);
+        }
+    };
+
+    private Fragment create(String algebraString) {
+        return StringReader.readRawFragments(algebraString, areaFactory).get(0);
+    }
+
+    public void testGroupMerge() throws Exception {
+        Fragment fragment = create("(A|B|C)/(A|B|C)/(D|E)/F/(G|H)");
+        Fragment result = GroupDetector.detectAcrossChild(fragment, comparator).get(0);
+        System.out.println("Org: " + StringWriter.write(fragment, true));
+        result.applySpecsToChild();
+        System.out.println("Merged: " + StringWriter.write(result, true));
+        assertEquals(result.toString(), "A/B/C/A/B/C/(D|E)/F/(G|H)");
+
+
+        fragment = create("C/(A|B)/(A|B)/(D|E)");
+        result = GroupDetector.detectAcrossChild(fragment, comparator).get(0);
+        System.out.println("Org: " + StringWriter.write(fragment, true));
+        result.applySpecsToChild();
+        System.out.println("Merged: " + StringWriter.write(result, true));
+        assertEquals(result.toString(), "C/A/B/A/B/(D|E)");
+
+        fragment = create("A/(B|C)/D");
+        assertTrue(GroupDetector.detectAcrossChild(fragment, comparator).size() == 0);
     }
 }

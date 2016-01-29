@@ -15,6 +15,7 @@ import nz.ac.auckland.alm.algebra.string.Parser;
 import nz.ac.auckland.alm.algebra.string.StringReader;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -39,6 +40,7 @@ public class FragmentAlternativesTest extends TestCase {
             return createArea(areaId);
         }
     };
+    Comparator<IArea> comparator = new AreaComparator();
 
     private Fragment create(String algebraString) {
         return StringReader.readRawFragments(algebraString, areaFactory).get(0);
@@ -51,27 +53,44 @@ public class FragmentAlternativesTest extends TestCase {
 
         Fragment fragment = create("A|B");
 
-        List<ITransformation.Result> results = fragmentAlternatives.calculateAlternatives(fragment);
+        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
         assertEquals(0, results.size());
 
         // add swap trafo
         fragmentAlternatives.addTransformation(new SwapTrafo());
-        results = fragmentAlternatives.calculateAlternatives(fragment);
+        results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
         assertEquals(1, results.size());
 
         fragment = create("A|B|(C/D)");
-        results = fragmentAlternatives.calculateAlternatives(fragment);
+        results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
         assertEquals(3, results.size());
 
         // add simple 1 column -> 2 column Trafo
         fragmentAlternatives.addTransformation(new ColumnOneToTwoTrafo());
         fragment = create("A/B/C");
-        results = fragmentAlternatives.calculateAlternatives(fragment);
+        results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
         assertEquals(2, results.size());
+
+        fragment = create("A|B|C");
+        results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        assertEquals(1, results.size());
 
         // test error case
         fragment = create("A/B/C/D/(E|F)");
-        results = fragmentAlternatives.calculateAlternatives(fragment);
-        assertEquals(6, results.size());
+        results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        assertEquals(13, results.size());
+    }
+
+    public void testError0() {
+        FragmentAlternatives fragmentAlternatives = new FragmentAlternatives();
+        fragmentAlternatives.addTransformation(new SwapTrafo());
+        fragmentAlternatives.addTransformation(new ColumnOneToTwoTrafo());
+
+        Fragment fragment = create("(A|A|A)/(A|A|A)/G/(A|A|A)");
+        fragment = fragment.cloneResolve(true);
+        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        for (FragmentAlternatives.Result result : results)
+            System.out.println(result.fragment);
+        System.out.println(results.size());
     }
 }
