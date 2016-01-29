@@ -7,11 +7,11 @@
  */
 package nz.ac.auckland.alm.algebra.trafo;
 
-
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.algebra.Fragment;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,23 +24,20 @@ public class FragmentAlternatives {
     }
 
     static public class FragmentIterator implements Iterator<Fragment> {
-        static class AreaRef {
-            // list of indices at what position the next level has been entered
-            final private List<Integer> fragLevelPosition = new ArrayList<Integer>();
+        static class IteratorFragmentRef extends FragmentRef {
             final static private int LEFT_ROOT_LEVEL = -1;
-            private int currentPosition = 0;
 
-            public AreaRef clone() {
-                AreaRef areaRef = new AreaRef();
-                areaRef.currentPosition = currentPosition;
-                areaRef.fragLevelPosition.addAll(fragLevelPosition);
-                return areaRef;
+            public IteratorFragmentRef clone() {
+                IteratorFragmentRef iteratorFragmentRef = new IteratorFragmentRef();
+                iteratorFragmentRef.currentPosition = currentPosition;
+                iteratorFragmentRef.fragLevelPosition.addAll(fragLevelPosition);
+                return iteratorFragmentRef;
             }
 
-            public void setTo(AreaRef areaRef) {
-                this.currentPosition = areaRef.currentPosition;
+            public void setTo(IteratorFragmentRef iteratorFragmentRef) {
+                this.currentPosition = iteratorFragmentRef.currentPosition;
                 this.fragLevelPosition.clear();
-                this.fragLevelPosition.addAll(areaRef.fragLevelPosition);
+                this.fragLevelPosition.addAll(iteratorFragmentRef.fragLevelPosition);
             }
 
             public void enterNextLevel() {
@@ -62,7 +59,7 @@ public class FragmentAlternatives {
                 return currentPosition;
             }
 
-            public List<Integer> getFragLevelPosition() {
+            public List<Integer> getLevelPositions() {
                 return fragLevelPosition;
             }
 
@@ -74,15 +71,15 @@ public class FragmentAlternatives {
 
         final private Fragment rootFragment;
 
-        final private AreaRef currentFragmentRef = new AreaRef();
-        final private AreaRef nextFragmentRef = new AreaRef();
+        final private IteratorFragmentRef currentFragmentRef = new IteratorFragmentRef();
+        final private IteratorFragmentRef nextFragmentRef = new IteratorFragmentRef();
 
         public FragmentIterator(Fragment rootFragment) {
             this.rootFragment = rootFragment;
             assert rootFragment.size() >= 1;
         }
 
-        private FragmentIterator(Fragment clone, AreaRef currentFragmentRef, AreaRef nextFragmentRef) {
+        private FragmentIterator(Fragment clone, IteratorFragmentRef currentFragmentRef, IteratorFragmentRef nextFragmentRef) {
             this.rootFragment = clone;
             assert rootFragment.size() >= 1;
 
@@ -111,12 +108,21 @@ public class FragmentAlternatives {
             FragmentIterator iterator = cloneFragment();
             Fragment currentLevel = iterator.getCurrentLevelFragment();
             int currentIndex = iterator.getCurrentPosition();
-            currentLevel.remove(currentIndex, null);
-            currentLevel.add(currentIndex, newFragment, false);
+            Fragment.Item item = currentLevel.getRawItemAt(currentIndex);
+            item.setItem(newFragment);
             // recalculate the next fragment position
             iterator.nextFragmentRef.setTo(iterator.currentFragmentRef);
             iterator.calculateNextFragmentPosition();
             return iterator;
+        }
+
+        public FragmentRef getFragmentRef() {
+            return currentFragmentRef;
+        }
+
+        @Override
+        public String toString() {
+            return currentFragmentRef.toString() + " " + rootFragment.toString();
         }
 
         @Override
@@ -138,7 +144,7 @@ public class FragmentAlternatives {
         }
 
         private void calculateNextFragmentPosition() {
-            if (nextFragmentRef.getCurrentPosition() == AreaRef.LEFT_ROOT_LEVEL)
+            if (nextFragmentRef.getCurrentPosition() == IteratorFragmentRef.LEFT_ROOT_LEVEL)
                 return;
 
             // if currently on a fragment enter it
@@ -146,7 +152,7 @@ public class FragmentAlternatives {
                 nextFragmentRef.enterNextLevel();
 
             // iterate through the fragment and its parent fragments till we find the next fragment
-            while (nextFragmentRef.getCurrentPosition() != AreaRef.LEFT_ROOT_LEVEL) {
+            while (nextFragmentRef.getCurrentPosition() != IteratorFragmentRef.LEFT_ROOT_LEVEL) {
                 Fragment levelFragment = getLevelFragment(rootFragment, nextFragmentRef);
                 if (nextFragmentRef.getCurrentPosition() >= levelFragment.size()) {
                     nextFragmentRef.leaveLevel();
@@ -176,8 +182,8 @@ public class FragmentAlternatives {
             return getLevelFragment(rootFragment, currentFragmentRef);
         }
 
-        private Fragment getLevelFragment(Fragment root, AreaRef areaRef) {
-            for (Integer index : areaRef.getFragLevelPosition())
+        private Fragment getLevelFragment(Fragment root, IteratorFragmentRef iteratorFragmentRef) {
+            for (Integer index : iteratorFragmentRef.getLevelPositions())
                 root = (Fragment)root.getItemAt(index);
             return root;
         }
@@ -187,61 +193,79 @@ public class FragmentAlternatives {
         transformations.add(transformation);
     }
 
-    private class IntermediateResult {
-        final public float quality;
+    static private class IntermediateResult {
+        final public TrafoHistory trafoHistory;
         final public FragmentIterator iterator;
 
-        public IntermediateResult(float quality, FragmentIterator iterator) {
-            this.quality = quality;
+        public IntermediateResult(TrafoHistory trafoHistory, FragmentIterator iterator) {
+            this.trafoHistory = trafoHistory;
             this.iterator = iterator;
         }
     }
 
-    public List<ITransformation.Result> calculateAlternatives(Fragment fragment) {
+    static public class Result {
+        final public TrafoHistory trafoHistory;
+        final public Fragment fragment;
+
+        public Result(TrafoHistory trafoHistory, Fragment fragment) {
+            this.trafoHistory = trafoHistory;
+            this.fragment = fragment;
+        }
+    }
+
+    public List<Result> calculateAlternatives(Fragment fragment, Comparator<IArea> comparator) {
         // put the fragment into a container fragment so that the iterator also includes the fragment
         final Fragment containerFragment = Fragment.horizontalFragment();
         containerFragment.add(fragment, false);
 
-        final List<ITransformation.Result> results = new ArrayList<ITransformation.Result>();
+        final List<Result> results = new ArrayList<Result>();
         final List<IntermediateResult> ongoingTransformations = new ArrayList<IntermediateResult>();
         // add first fragment
-        ongoingTransformations.add(new IntermediateResult(1, new FragmentIterator(containerFragment)));
+        ongoingTransformations.add(new IntermediateResult(new TrafoHistory(), new FragmentIterator(containerFragment)));
 
         while (ongoingTransformations.size() > 0) {
             IntermediateResult current = ongoingTransformations.remove(0);
             FragmentIterator currentIterator = current.iterator;
             while (currentIterator.hasNext()) {
                 Fragment subFragment = currentIterator.next();
-                for (ITransformation transformation : transformations) {
-                    List<ITransformation.Result> trafoResults = transformation.transform(subFragment);
-                    for (ITransformation.Result result : trafoResults) {
-                        FragmentIterator subIterator = currentIterator.cloneAndReplaceCurrent(result.fragment);
-                        ongoingTransformations.add(new IntermediateResult(current.quality * result.quality,
-                                subIterator));
+                List<Fragment> subGroups = GroupDetector.detect(subFragment, comparator);
+                subGroups.add(subFragment);
+                for (Fragment groupItem : subGroups) {
+                    for (ITransformation transformation : transformations) {
+                        List<ITransformation.Result> trafoResults = transformation.transform(groupItem);
+                        for (ITransformation.Result result : trafoResults) {
+                            TrafoHistory trafoHistory = current.trafoHistory.clone();
+                            FragmentRef fragmentRef = currentIterator.getFragmentRef().clone();
+                            trafoHistory.addTrafoHistory(fragmentRef, transformation, result);
+                            FragmentIterator subIterator = currentIterator.cloneAndReplaceCurrent(result.fragment);
+                            ongoingTransformations.add(new IntermediateResult(trafoHistory, subIterator));
+                        }
                     }
                 }
             }
             // get the fragment out of the container
             Fragment returnedFragment = (Fragment)currentIterator.getRootFragment().getItemAt(0);
             if (returnedFragment != fragment && !returnedFragment.isEquivalent(fragment)) {
+                //returnedFragment.removeSingletons();
                 int equivalentIndex = getEquivalent(results, returnedFragment);
                 if (equivalentIndex >= 0) {
                     // choose the one with lower quality
-                    if (results.get(equivalentIndex).quality > current.quality) {
+                    if (results.get(equivalentIndex).trafoHistory.getTotalQuality()
+                            > current.trafoHistory.getTotalQuality()) {
                         results.remove(equivalentIndex);
-                        results.add(new ITransformation.Result(current.quality, returnedFragment));
+                        results.add(new Result(current.trafoHistory, returnedFragment));
                     }
                 } else
-                    results.add(new ITransformation.Result(current.quality, returnedFragment));
+                    results.add(new Result(current.trafoHistory, returnedFragment));
             }
         }
 
         return results;
     }
 
-    private int getEquivalent(List<ITransformation.Result> results, Fragment fragment) {
+    private int getEquivalent(List<Result> results, Fragment fragment) {
         for (int i = 0; i < results.size(); i++) {
-            ITransformation.Result result = results.get(i);
+            Result result = results.get(i);
             if (result.fragment.isEquivalent(fragment))
                 return i;
         }
