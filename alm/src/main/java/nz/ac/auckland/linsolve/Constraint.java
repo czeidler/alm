@@ -12,6 +12,8 @@ import java.util.List;
 public class Constraint implements Cloneable {
     public static final double MIN_PENALTY = 0.0;
     public static final double MAX_PENALTY = 1.0;
+    public static final double AMOST_HARD_PENALTY = 0.9999;
+    public static final double HARD_PENALTY = MAX_PENALTY;
 
     public interface IDynamicRightSide {
         double getRightSide();

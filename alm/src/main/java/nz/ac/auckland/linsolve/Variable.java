@@ -91,7 +91,7 @@ public class Variable {
 		if (name != null)
 			return name;
 
-		return "Var" + getIndex();
+		return "Var" + getIndex() + "(" + value + " )";
 	}
 
 	public void setValue(double value) {
