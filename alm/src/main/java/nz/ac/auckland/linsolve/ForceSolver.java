@@ -45,8 +45,8 @@ public class ForceSolver extends AbstractLinearSolver {
             v.setValue(0.0);
 
         // do an initial Kaczmarz
-        doKaczmarzHard();
-        /*for (int i = 0; i < MAX_ITERATION; i++) {
+        /*doKaczmarzHard();
+        for (int i = 0; i < MAX_ITERATION; i++) {
             if (allHardConstraintsSatisfied()) {
                 System.out.println("Init Iterations: " + (i + 1));
                 break;
@@ -60,7 +60,18 @@ public class ForceSolver extends AbstractLinearSolver {
             // Optimize soft constraints.
             doOptimizeForcesSoft(cooling);
             // Fix hard constraints using Kaczmarz.
-            doKaczmarzHard();
+            boolean feasible = false;
+            for (int a = 0; a < MAX_ITERATION; a++) {
+                if (allHardConstraintsSatisfied()) {
+                    feasible = true;
+                    break;
+                }
+                doKaczmarzHard();
+            }
+            if (!feasible) {
+                System.out.println("INFEASIBLE");
+                return ResultType.INFEASIBLE;
+            }
 
             cooling *= COOLING_FACTOR;
 
@@ -70,14 +81,8 @@ public class ForceSolver extends AbstractLinearSolver {
             prevError2 = error2;
             if (diff < Math.pow(tolerance, 2)) {
                 //System.out.println("Iterations: " + (i + 1));
-                if (allHardConstraintsSatisfied())
-                    return ResultType.OPTIMAL;
+                return ResultType.OPTIMAL;
             }
-        }
-
-        if (!allHardConstraintsSatisfied()) {
-            System.out.println("INFEASIBLE");
-            return ResultType.INFEASIBLE;
         }
 
         System.out.println("SUBOPTIMAL");
@@ -129,9 +134,9 @@ public class ForceSolver extends AbstractLinearSolver {
         // Calculate forces on each variable. The force is proportional to the displacement of the variable. The
         // displacement is calculated using the Kaczmarz projection.
         for (Constraint constraint : getLinearSpec().getConstraints()) {
-            if (constraint.isSatisfied())
-                continue;
             if (constraint.isHard())
+                continue;
+            if (constraint.isSatisfied())
                 continue;
 
             double p = getKaczmarzProjection(constraint);
