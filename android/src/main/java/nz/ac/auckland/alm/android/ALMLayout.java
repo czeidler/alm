@@ -162,6 +162,47 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
     final LayoutSpec layoutSpec = new LayoutSpec();
     final Map<View, Area> areaMap = new HashMap<View, Area>();
 
+    final private AbstractViewInfoParser<View> viewInfoParser = new AbstractViewInfoParser<View>() {
+        @Override
+        protected Area.Size getLayoutParams(View view) {
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            return new Area.Size(layoutParams.width, layoutParams.height);
+        }
+
+        @Override
+        protected Area.Size getRootViewSize(View view) {
+            View rootView = view.getRootView();
+            return new Area.Size(rootView.getWidth(), rootView.getHeight());
+        }
+
+        @Override
+        protected Area.Size getMinSizeRaw(View view) {
+            Area.Size size = new Area.Size(-1, -1);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                size.setWidth(view.getMinimumWidth());
+                size.setHeight(view.getMinimumHeight());
+            }
+            return size;
+        }
+
+        private Area.Size measureSizeAtMost(View view, int width, int Height) {
+            view.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(Height, MeasureSpec.AT_MOST));
+            return new Area.Size(view.getMeasuredWidth(), view.getMeasuredHeight());
+        }
+
+        @Override
+        protected Area.Size getPreferredSizeRaw(View view) {
+            return measureSizeAtMost(view, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        }
+
+        @Override
+        protected Area.Size getMaxSizeRaw(View view) {
+            Area.Size rootSize = getRootViewSize(view);
+            return measureSizeAtMost(view, (int)rootSize.getWidth(), (int)rootSize.getHeight());
+        }
+    };
+
     public ALMLayout(Context context) {
         super(context);
     }
@@ -240,14 +281,12 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
             Area area = layoutSpec.addArea((XTab)areaRef.left.relation, (YTab)areaRef.top.relation,
                     (XTab)areaRef.right.relation, (YTab)areaRef.bottom.relation);
 
-            area.setMinSize(getMinimumSize(child));
-            area.setPreferredSize(getPreferredSize(child));
-            area.setMaxSize(getMaximumSize(child));
-
-            if (child.getLayoutParams().width == LayoutParams.MATCH_PARENT)
-                areaRef.horizontalAlignment = HorizontalAlignment.FILL;
-            if (child.getLayoutParams().height == LayoutParams.MATCH_PARENT)
-                areaRef.verticalAlignment = VerticalAlignment.FILL;
+            area.setMinSize(viewInfoParser.getMinSize(child));
+            area.setPreferredSize(viewInfoParser.getPreferredSize(child));
+            area.setMaxSize(viewInfoParser.getMaxSize(child));
+            AbstractViewInfoParser.Alignment alignment = viewInfoParser.getAlignment(child);
+            areaRef.horizontalAlignment = alignment.horizontalAlignment;
+            areaRef.verticalAlignment = alignment.verticalAlignment;
             area.setAlignment(areaRef.horizontalAlignment, areaRef.verticalAlignment);
 
             areaMap.put(child, area);
@@ -264,46 +303,6 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
         if (layoutSpecsNeedRebuild)
             rebuildLayoutSpecs();
         return areaMap.get(view);
-    }
-
-    private Area.Size getMinimumSize(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-            return new Area.Size(view.getMinimumWidth(), view.getMinimumHeight());
-
-        return getPreferredSize(view);
-    }
-
-    private Area.Size getPreferredSize(View view) {
-        view.measure(MeasureSpec.makeMeasureSpec(LayoutParams.WRAP_CONTENT, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(LayoutParams.WRAP_CONTENT, MeasureSpec.AT_MOST));
-        return new Area.Size(view.getMeasuredWidth(), view.getMeasuredHeight());
-    }
-
-    private Area.Size getMaximumSize(View view) {
-        final int LARGE_SIZE = 8000;
-
-        ViewGroup.LayoutParams viewLayoutParams = view.getLayoutParams();
-
-        Area.Size maxSize;
-        if (viewLayoutParams.width == LayoutParams.WRAP_CONTENT
-                || viewLayoutParams.height == LayoutParams.WRAP_CONTENT)
-            maxSize = getPreferredSize(view);
-        else
-            maxSize = new Area.Size(0, 0);
-
-        // max width
-        if (viewLayoutParams.width == LayoutParams.MATCH_PARENT)
-            maxSize.setWidth(LARGE_SIZE);
-        else if (viewLayoutParams.width != LayoutParams.WRAP_CONTENT)
-            maxSize.setWidth(viewLayoutParams.width);
-
-        // max height
-        if (viewLayoutParams.height == LayoutParams.MATCH_PARENT)
-            maxSize.setHeight(LARGE_SIZE);
-        else if (viewLayoutParams.height != LayoutParams.WRAP_CONTENT)
-            maxSize.setHeight(viewLayoutParams.height);
-
-        return maxSize;
     }
 
     public void setSpacing(float horizontalSpacing, float verticalSpacing) {
