@@ -8,26 +8,27 @@
 package nz.ac.auckland.alm.algebra;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 
-public class JoinedList<T> implements Iterable<T> {
-    private List<List<? extends T>> allLists = new ArrayList<List<? extends T>>();
+public class JoinedIterable<T> implements Iterable<T> {
+    private List<Collection<? extends T>> allLists = new ArrayList<Collection<? extends T>>();
 
-    public void addList(List<? extends T> list) {
+    public void addList(Collection<? extends T> list) {
         allLists.add(list);
     }
 
-    public JoinedList(List<? extends T>... lists) {
-        for (List<? extends T> list : lists)
+    public JoinedIterable(Collection<? extends T>... lists) {
+        for (Collection<? extends T> list : lists)
             addList(list);
     }
 
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {
-            final Iterator<List<? extends T>> allListIterator = allLists.iterator();
+            final Iterator<Collection<? extends T>> allListIterator = allLists.iterator();
             Iterator<? extends T> currentListIterator = null;
 
             {
