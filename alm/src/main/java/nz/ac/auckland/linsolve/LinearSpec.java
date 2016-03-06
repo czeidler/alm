@@ -45,7 +45,11 @@ public class LinearSpec {
         //this(new AddingSoftSolver(new KaczmarzSolver()));
         //this(new GroupingSoftSolver(new KaczmarzSolver()));
         //this(new KaczmarzLeastSquares());
-        this(new ForceSolver3());
+        //this(new ForceSolverSoftSlack());
+        this(new ForceSolver());
+        //this(new ForceSolver2());
+        //this(new ForceSolverPureSoft());
+        //this(new OJAlgoSolver());
         //this(new GroupingSoftSolver(new KaczmarzLeastSquares()));
         //this(new AddingSoftSolver(new GaussSeidelSolver(new DeterministicPivotSummandSelector(), 500)));
     }

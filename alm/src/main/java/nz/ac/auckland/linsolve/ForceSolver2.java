@@ -39,9 +39,9 @@ public class ForceSolver2 extends AbstractLinearSolver {
     protected ResultType doSolve() {
         initVariableValues();
 
-        double cooling = 1.9d;
+        double cooling = 1.d;
         final double COOLING_FACTOR = 1.d;
-        final int MAX_ITERATION = 10000;
+        final int MAX_ITERATION = 1000;
 
         for (Variable v : this.getLinearSpec().getVariables())
             v.setValue(0.0);
@@ -57,7 +57,7 @@ public class ForceSolver2 extends AbstractLinearSolver {
         }*/
 
         final double tolerance = getLinearSpec().getTolerance();
-        double prevError2 = Double.MAX_VALUE;
+        double prevError = Double.MAX_VALUE;
         for (int i = 0; i < MAX_ITERATION; i++) {
             // Optimize soft constraints.
             doOptimizeForcesSoft(cooling);
@@ -80,10 +80,10 @@ public class ForceSolver2 extends AbstractLinearSolver {
             cooling *= COOLING_FACTOR;
 
             // check the result
-            double error2 = error2SoftConstraints();
-            double diff = Math.abs(prevError2 - error2);
-            prevError2 = error2;
-            if (diff < Math.pow(tolerance, 2)) {
+            double error = errorSoftConstraints();
+            double diff = Math.abs(prevError - error);
+            prevError = error;
+            if (diff < tolerance) {
                 //System.out.println("Iterations: " + (i + 1));
                 return ResultType.OPTIMAL;
             }
@@ -108,14 +108,16 @@ public class ForceSolver2 extends AbstractLinearSolver {
         return true;
     }
 
-    private double error2SoftConstraints() {
-        double error2 = 0;
+    private double errorSoftConstraints() {
+        double error = 0;
+        int nSoftConstraints = 0;
         for (Constraint constraint : this.getLinearSpec().getConstraints()) {
             if (constraint.isHard())
                 continue;
-            error2 += Math.pow(constraint.error(), 2);
+            error += Math.pow(constraint.error(), 2);
+            nSoftConstraints++;
         }
-        return error2;
+        return Math.sqrt(error / Math.pow(nSoftConstraints + 1, 2));
     }
 
     private VariableForce getVariableForce(Variable variable) {
@@ -196,8 +198,8 @@ public class ForceSolver2 extends AbstractLinearSolver {
         // inequalities
         boolean inequalitiesViolated = false;
         for (Constraint constraint : getLinearSpec().getConstraints()) {
-            if (constraint.isHard())
-                continue;
+            //if (constraint.isHard())
+            //  continue;
             if (constraint.getOp() == OperatorType.EQ)
                 continue;
             if (constraint.isSatisfied(getLinearSpec().getTolerance()))
@@ -214,13 +216,40 @@ public class ForceSolver2 extends AbstractLinearSolver {
         }
         if (inequalitiesViolated)
             applyForces(variables, cooling);
+        /*
+        // inequalities
+        Constraint leastViolatedConstraint = null;
+        double error = Double.MAX_VALUE;
+        for (Constraint constraint : getLinearSpec().getConstraints()) {
+            if (constraint.isHard())
+                continue;
+            if (constraint.getOp() == OperatorType.EQ)
+                continue;
+            if (constraint.isSatisfied(getLinearSpec().getTolerance()))
+                continue;
+            double currentError = constraint.error();
+            if (currentError < error) {
+                leastViolatedConstraint = constraint;
+                error = currentError;
+            }
+        }
+        if (leastViolatedConstraint != null) {
+            // reset old values
+            for (int i = 0; i < variables.size(); i++) {
+                Variable variable = variables.get(i);
+                variable.setValue(oldValues[i]);
+            }
+            calculateForces(leastViolatedConstraint);
+
+            applyForces(variables, cooling);
+        }*/
     }
 
     private void doKaczmarzHard() {
         for (Constraint constraint : getLinearSpec().getConstraints()) {
             if (!constraint.isHard() )
                 continue;
-            if (constraint.isSatisfied())
+            if (constraint.isSatisfied(getLinearSpec().getTolerance()))
                 continue;
 
             double p = getKaczmarzProjection(constraint);
