@@ -7,30 +7,23 @@
  */
 package nz.ac.auckland.alm.algebra.trafo;
 
-import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.algebra.Fragment;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 
-public class SwapTrafo implements ITransformation {
+public class VerticalToHorizontalTrafo implements ITransformation {
     @Override
     public List<Result> transform(Fragment fragment) {
         if (fragment.size() <= 1)
             return Collections.emptyList();
-        List<Result> results = new ArrayList<Result>();
-        Fragment trafo;
         if (fragment.isHorizontalDirection())
-            trafo = Fragment.verticalFragment();
-        else
-            trafo = Fragment.horizontalFragment();
+            return Collections.emptyList();
 
-        for (IArea area : (Iterable<IArea>)fragment.getItems())
-            trafo.add(area, false);
+        Fragment trafo = fragment.clone();
+        trafo.setHorizontalDirection();
 
-        results.add(new Result(1.1f, trafo));
-        return results;
+        return Collections.singletonList(new Result(1.1f, trafo));
     }
 }

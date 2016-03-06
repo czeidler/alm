@@ -8,9 +8,11 @@
 package nz.ac.auckland.alm.algebra.trafo;
 
 import junit.framework.TestCase;
+import nz.ac.auckland.alm.Area;
 import nz.ac.auckland.alm.IArea;
-import nz.ac.auckland.alm.TabArea;
+import nz.ac.auckland.alm.LayoutSpec;
 import nz.ac.auckland.alm.algebra.Fragment;
+import nz.ac.auckland.alm.algebra.FragmentUtils;
 import nz.ac.auckland.alm.algebra.string.Parser;
 import nz.ac.auckland.alm.algebra.string.StringReader;
 
@@ -28,9 +30,16 @@ public class FragmentAlternativesTest extends TestCase {
         }
     }
 
+    final double SCREEN_WIDTH_LAND = 1800;
+    final double SCREEN_HEIGHT_LAND = 1000;
     private IArea createArea(String id) {
-        IArea area = new TabArea();
+        Area area = new Area();
         area.setId(id);
+        if (id.equals("L"))
+            area.setPreferredSize(SCREEN_WIDTH_LAND, SCREEN_HEIGHT_LAND);
+        else
+            area.setPreferredSize(200, 70);
+        area.setMinSize(200, 70);
         return area;
     }
 
@@ -46,6 +55,7 @@ public class FragmentAlternativesTest extends TestCase {
         return StringReader.readRawFragments(algebraString, areaFactory).get(0);
     }
 
+    /*
     public void testSimple() {
         FragmentAlternatives fragmentAlternatives = new FragmentAlternatives();
         // no trafo
@@ -58,6 +68,7 @@ public class FragmentAlternativesTest extends TestCase {
 
         // add swap trafo
         fragmentAlternatives.addTransformation(new SwapTrafo());
+
         results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
         assertEquals(1, results.size());
 
@@ -65,8 +76,9 @@ public class FragmentAlternativesTest extends TestCase {
         results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
         assertEquals(3, results.size());
 
-        // add simple 1 column -> 2 column Trafo
-        fragmentAlternatives.addTransformation(new ColumnOneToTwoTrafo());
+        // add simple column flow trafo
+        fragmentAlternatives.addTransformation(new ColumnFlowTrafo());
+
         fragment = create("A/B/C");
         results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
         assertEquals(2, results.size());
@@ -78,19 +90,164 @@ public class FragmentAlternativesTest extends TestCase {
         // test error case
         fragment = create("A/B/C/D/(E|F)");
         results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
-        assertEquals(13, results.size());
+        assertEquals(17, results.size());
+
+        // add simple row flow trafo
+        fragmentAlternatives.addTransformation(new RowFlowTrafo());
+
+        fragment = create("A|B|C");
+        results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        assertEquals(2, results.size());
+
+        fragment = create("A|B|C|D|E|F|G");
+        results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        assertEquals(22, results.size());
+    }*/
+
+    class Classification {
+        public TrafoHistory trafoHistory;
+        public double prefWidth;
+        public double prefHeight;
+        public double diffWidth;
+        public double diffHeight;
+
+        public double getDiffSize() {
+            return Math.pow(diffWidth, 2) + Math.pow(diffHeight, 2);
+        }
     }
 
-    public void testError0() {
-        FragmentAlternatives fragmentAlternatives = new FragmentAlternatives();
-        fragmentAlternatives.addTransformation(new SwapTrafo());
-        fragmentAlternatives.addTransformation(new ColumnOneToTwoTrafo());
+    IAlternativeClassifier<Classification> classifier = new IAlternativeClassifier<Classification>() {
+        VerticalToHorizontalTrafo verticalToHorizontalTrafo = new VerticalToHorizontalTrafo();
+        HorizontalToVerticalTrafo horizontalToVerticalTrafo = new HorizontalToVerticalTrafo();
 
-        Fragment fragment = create("(A|A|A)/(A|A|A)/G/(A|A|A)");
-        fragment = fragment.cloneResolve(true);
-        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        @Override
+        public Classification classify(Fragment fragment, TrafoHistory history) {
+            Classification classification = new Classification();
+            classification.trafoHistory = history;
+
+            LayoutSpec layoutSpec = FragmentUtils.toLayoutSpec(fragment);
+            layoutSpec.setRight(SCREEN_WIDTH_LAND);
+            layoutSpec.setBottom(SCREEN_HEIGHT_LAND);
+            layoutSpec.solve();
+            layoutSpec.release();
+
+            List<Area> areas = FragmentUtils.getAreas(fragment);
+            for (Area area : areas) {
+                double width = area.getRight().getValue() - area.getLeft().getValue();
+                double height = area.getBottom().getValue() - area.getTop().getValue();
+                Area.Size areaPrefSize = area.getPreferredSize();
+                classification.prefWidth = width;
+                classification.prefHeight = height;
+                classification.diffWidth += Math.pow(width - areaPrefSize.getWidth(), 2);
+                classification.diffHeight += Math.pow(height - areaPrefSize.getHeight(), 2);
+            }
+
+            return classification;
+        }
+
+        @Override
+        public List<ITransformation> selectTransformations(Fragment fragment, Classification classification) {
+            List<ITransformation> trafos = new ArrayList<ITransformation>();
+
+            //if (classification.diffWidth > classification.diffHeight)
+            trafos.add(verticalToHorizontalTrafo);
+            //else
+            trafos.add(horizontalToVerticalTrafo);
+            return trafos;
+        }
+
+        @Override
+        public double objectiveValue(Classification classification) {
+            double prefSizeDiffTerm = classification.getDiffSize() / (SCREEN_HEIGHT_LAND * SCREEN_WIDTH_LAND);
+            double ratioTerm = (classification.prefWidth / classification.prefHeight)
+                    / (SCREEN_WIDTH_LAND / SCREEN_HEIGHT_LAND);
+            return (float)(prefSizeDiffTerm + ratioTerm);
+        }
+    };
+
+    public void testFragmentAlternatives3() {
+        FragmentAlternatives fragmentAlternatives = new FragmentAlternatives(classifier, new GroupDetector(comparator));
+        SwapTrafo swapTrafo = new SwapTrafo();
+        fragmentAlternatives.addTrafo(swapTrafo);
+        //fragmentAlternatives.addTrafo(new ColumnFlowTrafo());
+        List<ITransformation> trafos = fragmentAlternatives.getTrafos();
+
+        //Fragment fragment = create("(B|C)/A/A");
+        //Fragment fragment = create("A|B");
+        //Fragment fragment = create("(A|B)/(C|D)");
+        //Fragment fragment = create("(A|B)/C");
+        //Fragment fragment = create("(A/B/C)|D");
+        //Fragment fragment = create("((A|B)/(C|D))/((E|F)/(G|H))");
+        //Fragment fragment = create("A/B/A/B/A");
+        //Fragment fragment = create("(A|A|A)/(A|A|A)/G/(A|A|A)");
+        Fragment fragment = create("S/T/S/T/E/T/E/T/T/E/T/T/E/T/E/T/E/T/E/T/E/T/E/T/E");
+        //Fragment fragment = create("T/T/E/T/T/E/T/E/T/E");
+        //Fragment fragment = create("(((T/T)/E)/((T/T)/E))/((T/E)/(T/E))");
+
+        IPermutationSelector<Classification> selector
+                = new ChainPermutationSelector<Classification>(
+                new ApplyToAllPermutationSelector<Classification>(trafos, swapTrafo),
+                new RandomPermutationSelector<Classification>(trafos));
+
+        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector, 30,
+                1000 * 60);
         for (FragmentAlternatives.Result result : results)
             System.out.println(result.fragment);
         System.out.println(results.size());
     }
+
+
+    /*
+    public void testError2() {
+        FragmentAlternatives2 fragmentAlternatives = new FragmentAlternatives2();
+        //fragmentAlternatives.addTransformation(new SwapTrafo());
+        //fragmentAlternatives.addTransformation(new ColumnFlowTrafo());
+
+        Fragment fragment = create("S/T/S/T/E/T/E/(T/T)/E/(T/T)/E/T/E/T/E/T/E/T/E/T/E/T/E");
+        List<FragmentAlternatives2.Result> results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        for (FragmentAlternatives2.Result result : results)
+            System.out.println(result.fragment);
+        System.out.println(results.size());
+    }
+
+    private Area.Size getPrefDiff(Fragment fragment) {
+        double diffWidth = 0;
+        double diffHeight = 0;
+        List<Area> areas = FragmentUtils.getAreas(fragment);
+        for (Area area : areas) {
+            double width = area.getRight().getValue() - area.getLeft().getValue();
+            double height = area.getBottom().getValue() - area.getTop().getValue();
+            Area.Size areaPrefSize = area.getPreferredSize();
+            diffWidth += Math.pow(width - areaPrefSize.getWidth(), 2);
+            diffHeight += Math.pow(height - areaPrefSize.getHeight(), 2);
+        }
+        diffWidth = Math.sqrt(diffWidth);
+        diffHeight = Math.sqrt(diffHeight);
+        return new Area.Size(diffWidth, diffHeight);
+    }
+
+    public void testError3() {
+        FragmentAlternatives2 fragmentAlternatives = new FragmentAlternatives2();
+
+        Fragment fragment = create("(A|A|A)/(A|A|A)/L/(A|A|A)");
+
+        LayoutSpec layoutSpec = FragmentUtils.toLayoutSpec(fragment);
+        layoutSpec.setRight(SCREEN_WIDTH_LAND);
+        layoutSpec.setBottom(SCREEN_HEIGHT_LAND);
+        layoutSpec.solve();
+        Area.Size diff = getPrefDiff(fragment);
+
+        for (Fragment group : GroupDetector.detect(fragment, comparator)) {
+            layoutSpec = FragmentUtils.toLayoutSpec(group);
+            layoutSpec.setRight(SCREEN_WIDTH_LAND);
+            layoutSpec.setBottom(SCREEN_HEIGHT_LAND);
+            layoutSpec.solve();
+            //Area.Size size =
+        }
+        List<FragmentAlternatives2.Result> results = fragmentAlternatives.calculateAlternatives(fragment, comparator);
+        for (FragmentAlternatives2.Result result : results)
+            System.out.println(result.fragment);
+        System.out.println(results.size());
+    }
+*/
 }

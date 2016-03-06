@@ -29,14 +29,27 @@ public class GroupDetectorTest extends TestCase {
     Comparator<IArea> comparator = new AreaComparator();
 
     public void testGroupDetection() throws Exception {
-        // A|B|A|B
+        // A|A|A
         Fragment fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("A"), false);
+        fragment.add(createArea("A"), false);
+        List<Fragment> alternatives = GroupDetector.detect(fragment, comparator);
+
+        System.out.println("Org: " + StringWriter.write(fragment, true));
+        System.out.println("Alternatives:");
+        for (Fragment alternative : alternatives)
+            System.out.println(StringWriter.write(alternative, true));
+        assertEquals(0, alternatives.size());
+
+        // A|B|A|B
+        fragment = Fragment.createEmptyFragment(Fragment.horizontalDirection);
         fragment.add(createArea("A"), false);
         fragment.add(createArea("B"), false);
         fragment.add(createArea("A"), false);
         fragment.add(createArea("B"), false);
 
-        List<Fragment> alternatives = GroupDetector.detect(fragment, comparator);
+        alternatives = GroupDetector.detect(fragment, comparator);
 
         System.out.println("Org: " + StringWriter.write(fragment, true));
         System.out.println("Alternatives:");

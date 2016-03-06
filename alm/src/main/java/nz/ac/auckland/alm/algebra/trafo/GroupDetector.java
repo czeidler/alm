@@ -17,7 +17,18 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class GroupDetector {
+public class GroupDetector implements IGroupDetector {
+    final private Comparator<IArea> comparator;
+
+    public GroupDetector(Comparator<IArea> comparator) {
+        this.comparator = comparator;
+    }
+
+    @Override
+    public List<Fragment> detect(Fragment fragment) {
+        return detect(fragment, comparator);
+    }
+
     /**
      * Detects item groups.
      *
@@ -26,7 +37,7 @@ public class GroupDetector {
      * @return all detected groups exclusive the fragment.
      */
     static public List<Fragment> detect(Fragment fragment, Comparator<IArea> comparator) {
-        List<Fragment> finalized = detectSinglePass(fragment, comparator);
+        /*List<Fragment> finalized = detectSinglePass(fragment, comparator);
         List<Fragment> ongoing = new ArrayList<Fragment>();
         ongoing.addAll(detectAcrossChild(fragment, comparator));
         while (ongoing.size() > 0) {
@@ -37,10 +48,10 @@ public class GroupDetector {
                     finalized.add(alternative);
             }
         }
-        return finalized;
-        /*
+        return finalized;*/
+
         List<Fragment> ongoing = detectSinglePass(fragment, comparator);
-        ongoing.addAll(detectAcrossChild(fragment, comparator));
+        //ongoing.addAll(detectAcrossChild(fragment, comparator));
         List<Fragment> finalized = new ArrayList<Fragment>();
         while (ongoing.size() > 0) {
             Fragment alternative = ongoing.remove(0);
@@ -51,7 +62,7 @@ public class GroupDetector {
             } else
                 ongoing.addAll(subAlternatives);
         }
-        return finalized;*/
+        return finalized;
     }
 
     static class DetectAcrossChild {
@@ -208,7 +219,7 @@ public class GroupDetector {
         return false;
     }
 
-    static private List<Fragment> detectSinglePass(Fragment fragment, Comparator<IArea> comparator) {
+    static public List<Fragment> detectSinglePass(Fragment fragment, Comparator<IArea> comparator) {
         List<Fragment> alternatives = new ArrayList<Fragment>();
         for (int groupSize = 1; groupSize <= fragment.size() / 2; groupSize++) {
             for (int offset = 0; offset < groupSize; offset++) {
@@ -216,7 +227,7 @@ public class GroupDetector {
                 if (alternative != null)
                     alternatives.add(alternative);
             }
-            if (alternatives.size() > 0)
+            if (alternatives.size() > 1)
                 break;
         }
         return alternatives;

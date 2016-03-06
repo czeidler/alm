@@ -1,5 +1,5 @@
 /*
- * Copyright 2015.
+ * Copyright 2016.
  * Distributed under the terms of the GPLv3 License.
  *
  * Authors:
@@ -10,265 +10,252 @@ package nz.ac.auckland.alm.algebra.trafo;
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.algebra.Fragment;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 
-public class FragmentAlternatives {
-    final private List<ITransformation> transformations = new ArrayList<ITransformation>();
-
-    public FragmentAlternatives() {
-
-    }
-
-    static public class FragmentIterator implements Iterator<Fragment> {
-        static class IteratorFragmentRef extends FragmentRef {
-            final static private int LEFT_ROOT_LEVEL = -1;
-
-            public IteratorFragmentRef clone() {
-                IteratorFragmentRef iteratorFragmentRef = new IteratorFragmentRef();
-                iteratorFragmentRef.currentPosition = currentPosition;
-                iteratorFragmentRef.fragLevelPosition.addAll(fragLevelPosition);
-                return iteratorFragmentRef;
-            }
-
-            public void setTo(IteratorFragmentRef iteratorFragmentRef) {
-                this.currentPosition = iteratorFragmentRef.currentPosition;
-                this.fragLevelPosition.clear();
-                this.fragLevelPosition.addAll(iteratorFragmentRef.fragLevelPosition);
-            }
-
-            public void enterNextLevel() {
-                fragLevelPosition.add(currentPosition);
-                currentPosition = 0;
-            }
-
-            public void leaveLevel() {
-                if (fragLevelPosition.size() == 0) {
-                    currentPosition = LEFT_ROOT_LEVEL;
-                    return;
-                }
-
-                currentPosition = fragLevelPosition.remove(fragLevelPosition.size() - 1);
-                currentPosition++;
-            }
-
-            public int getCurrentPosition() {
-                return currentPosition;
-            }
-
-            public List<Integer> getLevelPositions() {
-                return fragLevelPosition;
-            }
-
-            public int advance() {
-                currentPosition++;
-                return currentPosition;
-            }
-        }
-
-        final private Fragment rootFragment;
-
-        final private IteratorFragmentRef currentFragmentRef = new IteratorFragmentRef();
-        final private IteratorFragmentRef nextFragmentRef = new IteratorFragmentRef();
-
-        public FragmentIterator(Fragment rootFragment) {
-            this.rootFragment = rootFragment;
-            assert rootFragment.size() >= 1;
-        }
-
-        private FragmentIterator(Fragment clone, IteratorFragmentRef currentFragmentRef, IteratorFragmentRef nextFragmentRef) {
-            this.rootFragment = clone;
-            assert rootFragment.size() >= 1;
-
-            this.currentFragmentRef.setTo(currentFragmentRef);
-            this.nextFragmentRef.setTo(nextFragmentRef);
-        }
-
-        /**
-         * Clone the root fragment and return iterator that points the the same position as the current iterator.
-         *
-         * @return
-         */
-        protected FragmentIterator cloneFragment() {
-            Fragment clone = rootFragment.clone();
-            FragmentIterator iterator = new FragmentIterator(clone, currentFragmentRef, nextFragmentRef);
-            return iterator;
-        }
-
-        /**
-         * Clone the current fragment and replace the current fragment with the new fragment.
-         *
-         * @param newFragment
-         * @return
-         */
-        public FragmentIterator cloneAndReplaceCurrent(Fragment newFragment) {
-            FragmentIterator iterator = cloneFragment();
-            Fragment currentLevel = iterator.getCurrentLevelFragment();
-            int currentIndex = iterator.getCurrentPosition();
-            Fragment.Item item = currentLevel.getRawItemAt(currentIndex);
-            item.setItem(newFragment);
-            // recalculate the next fragment position
-            iterator.nextFragmentRef.setTo(iterator.currentFragmentRef);
-            iterator.calculateNextFragmentPosition();
-            return iterator;
-        }
-
-        public FragmentRef getFragmentRef() {
-            return currentFragmentRef;
-        }
-
-        @Override
-        public String toString() {
-            return currentFragmentRef.toString() + " " + rootFragment.toString();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return nextFragmentRef.getCurrentPosition() >= 0;
-        }
-
-        @Override
-        public Fragment next() {
-            currentFragmentRef.setTo(nextFragmentRef);
-            calculateNextFragmentPosition();
-            Fragment fragment = (Fragment)peek();
-            return fragment;
-        }
-
-        @Override
-        public void remove() {
-
-        }
-
-        private void calculateNextFragmentPosition() {
-            if (nextFragmentRef.getCurrentPosition() == IteratorFragmentRef.LEFT_ROOT_LEVEL)
-                return;
-
-            // if currently on a fragment enter it
-            if (peek() instanceof Fragment)
-                nextFragmentRef.enterNextLevel();
-
-            // iterate through the fragment and its parent fragments till we find the next fragment
-            while (nextFragmentRef.getCurrentPosition() != IteratorFragmentRef.LEFT_ROOT_LEVEL) {
-                Fragment levelFragment = getLevelFragment(rootFragment, nextFragmentRef);
-                if (nextFragmentRef.getCurrentPosition() >= levelFragment.size()) {
-                    nextFragmentRef.leaveLevel();
-                    continue;
-                }
-                if (levelFragment.getItemAt(nextFragmentRef.getCurrentPosition()) instanceof Fragment)
-                    break;
-
-                nextFragmentRef.advance();
-            }
-        }
-
-        public IArea peek() {
-            Fragment currentLevel = getLevelFragment(rootFragment, currentFragmentRef);
-            return currentLevel.getItemAt(currentFragmentRef.getCurrentPosition());
-        }
-
-        public Fragment getRootFragment() {
-            return rootFragment;
-        }
-
-        private int getCurrentPosition() {
-            return currentFragmentRef.getCurrentPosition();
-        }
-
-        private Fragment getCurrentLevelFragment() {
-            return getLevelFragment(rootFragment, currentFragmentRef);
-        }
-
-        private Fragment getLevelFragment(Fragment root, IteratorFragmentRef iteratorFragmentRef) {
-            for (Integer index : iteratorFragmentRef.getLevelPositions())
-                root = (Fragment)root.getItemAt(index);
-            return root;
-        }
-    }
-
-    public void addTransformation(ITransformation transformation) {
-        transformations.add(transformation);
-    }
-
-    static private class IntermediateResult {
-        final public TrafoHistory trafoHistory;
-        final public FragmentIterator iterator;
-
-        public IntermediateResult(TrafoHistory trafoHistory, FragmentIterator iterator) {
-            this.trafoHistory = trafoHistory;
-            this.iterator = iterator;
-        }
-    }
-
-    static public class Result {
+public class FragmentAlternatives<T> {
+    static public class Result<T> {
         final public TrafoHistory trafoHistory;
         final public Fragment fragment;
+        final public T classification;
 
-        public Result(TrafoHistory trafoHistory, Fragment fragment) {
+        public Result(TrafoHistory trafoHistory, Fragment fragment, T classification) {
             this.trafoHistory = trafoHistory;
             this.fragment = fragment;
+            this.classification = classification;
         }
     }
 
-    public List<Result> calculateAlternatives(Fragment fragment, Comparator<IArea> comparator) {
-        // put the fragment into a container fragment so that the iterator also includes the fragment
-        final Fragment containerFragment = Fragment.horizontalFragment();
-        containerFragment.add(fragment, false);
 
-        final List<Result> results = new ArrayList<Result>();
-        final List<IntermediateResult> ongoingTransformations = new ArrayList<IntermediateResult>();
-        // add first fragment
-        ongoingTransformations.add(new IntermediateResult(new TrafoHistory(), new FragmentIterator(containerFragment)));
+    final private IAlternativeClassifier<T> classifier;
+    final private IGroupDetector groupDetector;
+    final List<ITransformation> trafos = new ArrayList<ITransformation>();
 
-        while (ongoingTransformations.size() > 0) {
-            IntermediateResult current = ongoingTransformations.remove(0);
-            FragmentIterator currentIterator = current.iterator;
-            while (currentIterator.hasNext()) {
-                Fragment subFragment = currentIterator.next();
-                List<Fragment> subGroups = GroupDetector.detect(subFragment, comparator);
-                subGroups.add(subFragment);
-                for (Fragment groupItem : subGroups) {
-                    for (ITransformation transformation : transformations) {
-                        List<ITransformation.Result> trafoResults = transformation.transform(groupItem);
-                        for (ITransformation.Result result : trafoResults) {
-                            TrafoHistory trafoHistory = current.trafoHistory.clone();
-                            FragmentRef fragmentRef = currentIterator.getFragmentRef().clone();
-                            trafoHistory.addTrafoHistory(fragmentRef, transformation, result);
-                            FragmentIterator subIterator = currentIterator.cloneAndReplaceCurrent(result.fragment);
-                            ongoingTransformations.add(new IntermediateResult(trafoHistory, subIterator));
-                        }
-                    }
+    public FragmentAlternatives(IAlternativeClassifier<T> classifier, IGroupDetector groupDetector) {
+        this.classifier = classifier;
+        this.groupDetector = groupDetector;
+    }
+
+    public void addTrafo(ITransformation transformation) {
+        this.trafos.add(transformation);
+    }
+
+    public List<ITransformation> getTrafos() {
+        return trafos;
+    }
+
+    static private Fragment replaceFragment(Fragment root, FragmentRef fragmentRef, Fragment child) {
+        if (fragmentRef.getLevelPositions().size() == 0)
+            return child;
+        Fragment parent = root;
+        for (int i = 0; i < fragmentRef.getLevelPositions().size() - 1; i++)
+            parent = (Fragment)parent.getItemAt(fragmentRef.getLevelPositions().get(i));
+        int index = fragmentRef.getLevelPositions().get(fragmentRef.getLevelPositions().size() - 1);
+        Fragment.Item item = parent.getRawItemAt(index);
+        item.setItem(child);
+        return root;
+    }
+
+    static private Fragment getFragment(Fragment root, FragmentRef fragmentRef) {
+        Fragment child = root;
+        for (Integer index : fragmentRef.getLevelPositions())
+            child = (Fragment) child.getItemAt(index);
+        return child;
+    }
+
+    private void addResult(List<Result<T>> results, Result<T> result) {
+        if (classifier.objectiveValue(result.classification) >= IAlternativeClassifier.INVALID_OBJECTIVE)
+            return;
+        for (Result<T> existingResult : results) {
+            // todo add better result?
+            if (existingResult.fragment.isEquivalent(result.fragment))
+                return;
+        }
+        results.add(result);
+    }
+
+    class OngoingTrafoComparator implements Comparator<OngoingTrafo<T>> {
+        @Override
+        public int compare(OngoingTrafo<T> ongoingTrafo, OngoingTrafo<T> t1) {
+            int priorityComparison = -((Integer)ongoingTrafo.getSelector().getPriority()).compareTo(
+                    t1.getSelector().getPriority());
+            if (priorityComparison != 0)
+                return priorityComparison;
+
+            Double objectValue0 = classifier.objectiveValue(ongoingTrafo.getClassification());
+            Double objectValue2 = classifier.objectiveValue(t1.getClassification());
+
+            return -objectValue0.compareTo(objectValue2);
+        }
+    }
+
+    private void spawnOngoing(List<OngoingTrafo<T>> ongoingTrafos, OngoingTrafo<T> newOngoingTrafo,
+                              boolean groupDetection) {
+        if (!groupDetection) {
+            ongoingTrafos.add(newOngoingTrafo);
+            return;
+        }
+        // calculate all group permutations
+        List<OngoingTrafo<T>> groupPermutation = new ArrayList<OngoingTrafo<T>>();
+        groupPermutation.add(newOngoingTrafo);
+        for (FragmentRef ref : newOngoingTrafo.getFragmentRefs()) {
+            int currentSize = groupPermutation.size();
+            // only iterate to the current size so we can add elements on the fly
+            for (int i = 0; i < currentSize; i++) {
+                OngoingTrafo<T> current = groupPermutation.get(i);
+                Fragment fragment = getFragment(current.getAlternative(), ref);
+
+                List<Fragment> groups = groupDetector.detect(fragment);
+                for (Fragment group : groups) {
+                    Fragment fragmentClone = current.getAlternative().clone();
+                    fragmentClone = replaceFragment(fragmentClone, ref, group);
+                    OngoingTrafo<T> clone = new OngoingTrafo<T>(current.getTrafoHistory().clone(), fragmentClone,
+                            current.getClassification(), current.getFragmentRefs(), current.getSelector().create());
+                    groupPermutation.add(clone);
                 }
             }
-            // get the fragment out of the container
-            Fragment returnedFragment = (Fragment)currentIterator.getRootFragment().getItemAt(0);
-            if (returnedFragment != fragment && !returnedFragment.isEquivalent(fragment)) {
-                //returnedFragment.removeSingletons();
-                int equivalentIndex = getEquivalent(results, returnedFragment);
-                if (equivalentIndex >= 0) {
-                    // choose the one with lower quality
-                    if (results.get(equivalentIndex).trafoHistory.getTotalQuality()
-                            > current.trafoHistory.getTotalQuality()) {
-                        results.remove(equivalentIndex);
-                        results.add(new Result(current.trafoHistory, returnedFragment));
-                    }
-                } else
-                    results.add(new Result(current.trafoHistory, returnedFragment));
-            }
         }
+        // if a group has been detected remove the original trafo
+        if (groupPermutation.size() > 1)
+            groupPermutation.remove(newOngoingTrafo);
+        ongoingTrafos.addAll(groupPermutation);
+    }
 
+    public List<Result<T>> calculateAlternatives(Fragment fragment, IPermutationSelector selector, int maxResults,
+                                                 long maxTimes) {
+        T classification = classifier.classify(fragment, new TrafoHistory());
+        OngoingTrafo<T> root = new OngoingTrafo<T>(new TrafoHistory(), fragment.clone(), classification,
+                Collections.singletonList(new FragmentRef()), selector);
+        List<OngoingTrafo<T>> ongoingTrafos = new ArrayList<OngoingTrafo<T>>();
+        OngoingTrafoComparator ongoingTrafoComparator = new OngoingTrafoComparator();
+        spawnOngoing(ongoingTrafos, root, true);
+        List<Result<T>> results = new ArrayList<Result<T>>();
+        long startTime = System.currentTimeMillis();
+        while (ongoingTrafos.size() > 0 && results.size() < maxResults) {
+            OngoingTrafo<T> current = ongoingTrafos.get(0);
+            List<OngoingTrafo<T>> newResults = performTransformations(current);
+            if (current.done())
+                ongoingTrafos.remove(0);
+
+            boolean needsSorting = false;
+            for (OngoingTrafo<T> newResult : newResults) {
+                Result<T> result = new Result<T>(newResult.getTrafoHistory(), newResult.getAlternative(),
+                        newResult.getClassification());
+                addResult(results, result);
+
+                if (newResult.getFragmentRefs().size() > 0) {
+                    spawnOngoing(ongoingTrafos, newResult, false);
+                    needsSorting = true;
+                }
+            }
+            if (System.currentTimeMillis() - startTime > maxTimes)
+                break;
+            if (needsSorting)
+                Collections.sort(ongoingTrafos, ongoingTrafoComparator);
+        }
         return results;
     }
 
-    private int getEquivalent(List<Result> results, Fragment fragment) {
-        for (int i = 0; i < results.size(); i++) {
-            Result result = results.get(i);
-            if (result.fragment.isEquivalent(fragment))
-                return i;
+    public List<OngoingTrafo<T>> performTransformations(OngoingTrafo<T> ongoingTrafo) {
+        List<List<ITransformation>> permutations = ongoingTrafo.getSelector().next(ongoingTrafo);
+        if (permutations == null)
+            return Collections.emptyList();
+        List<OngoingTrafo<T>> results = new ArrayList<OngoingTrafo<T>>();
+        for (List<ITransformation> permutation : permutations) {
+            applyTransformations(ongoingTrafo, permutation, results);
+            int permutationValue = OngoingTrafo.getPermutationValue(permutation, trafos);
+            ongoingTrafo.getHandledPermutations().add(permutationValue);
         }
-        return -1;
+        return results;
+    }
+
+    private void applyTransformations(OngoingTrafo<T> ongoingTrafo, List<ITransformation> transformations,
+                                      List<OngoingTrafo<T>> results) {
+        final Fragment alternative = ongoingTrafo.getAlternative();
+        final List<FragmentRef> fragmentRefs = ongoingTrafo.getFragmentRefs();
+        assert transformations.size() == fragmentRefs.size();
+        // list of trafo results for each fragment ref
+        List<List<ITransformation.Result>> trafoResults = new ArrayList<List<ITransformation.Result>>();
+        for (int i = 0; i < fragmentRefs.size(); i++) {
+            ITransformation trafo = transformations.get(i);
+            if (trafo == null) {
+                trafoResults.add(Collections.<ITransformation.Result>singletonList(null));
+                continue;
+            }
+            final FragmentRef fragmentRef = fragmentRefs.get(i);
+            final Fragment fragment = getFragment(alternative, fragmentRef);
+            final List<ITransformation.Result> alternatives = trafo.transform(fragment);
+            trafoResults.add(alternatives);
+        }
+
+        // build ongoing trafos
+        List<List<ITransformation.Result>> trafoList = calculatePermutations(trafoResults);
+        for (List<ITransformation.Result> trafo : trafoList) {
+            Fragment newFragment = alternative.clone();
+            TrafoHistory.Entry historyEntry = new TrafoHistory.Entry();
+            for (int i = 0; i < trafo.size(); i++) {
+                ITransformation.Result trafoResult = trafo.get(i);
+                if (trafoResult == null)
+                    continue;
+                FragmentRef fragmentRef = fragmentRefs.get(i);
+                newFragment = replaceFragment(newFragment, fragmentRef, trafoResult.fragment);
+                historyEntry.add(fragmentRef, transformations.get(i), trafoResult);
+            }
+            TrafoHistory history = ongoingTrafo.getTrafoHistory();
+            if (historyEntry.size() > 0) {
+                history = history.clone();
+                history.add(historyEntry);
+            }
+
+            T classification = classifier.classify(newFragment, history);
+            List<FragmentRef> nextLevel = getNextLevel(newFragment, ongoingTrafo.getFragmentRefs());
+
+            IPermutationSelector selector = ongoingTrafo.getSelector();
+            results.add(new OngoingTrafo<T>(history, newFragment, classification, nextLevel,
+                    selector.create()));
+        }
+    }
+
+    private List<FragmentRef> getNextLevel(Fragment alternative, List<FragmentRef> currentRefs) {
+        List<FragmentRef> nextLevel = new ArrayList<FragmentRef>();
+        for (int i = 0; i < currentRefs.size(); i++) {
+            FragmentRef fragmentRef = currentRefs.get(i);
+            Fragment fragment = getFragment(alternative, fragmentRef);
+            // collect next level children
+            for (int a = 0; a < fragment.size(); a++) {
+                IArea area = fragment.getItemAt(a);
+                if (!(area instanceof Fragment))
+                    continue;
+                FragmentRef clone = fragmentRef.clone();
+                clone.enterFragment(a);
+                nextLevel.add(clone);
+            }
+        }
+        return nextLevel;
+    }
+
+    private void getPermutations(List<List<ITransformation.Result>> list, List<List<ITransformation.Result>> result,
+                                 int index, List<ITransformation.Result> ongoing) {
+        if (ongoing.size() == list.size()) {
+            result.add(ongoing);
+            return;
+        }
+
+        List<ITransformation.Result> currentSource = list.get(index);
+        for (int i = 0; i < currentSource.size(); i++) {
+            List<ITransformation.Result> clone;
+            if (currentSource.size() == 1)
+                clone = ongoing;
+            else
+                clone = new ArrayList<ITransformation.Result>(ongoing);
+            clone.add(currentSource.get(i));
+            getPermutations(list, result, index + 1, clone);
+        }
+    }
+
+    private List<List<ITransformation.Result>> calculatePermutations(List<List<ITransformation.Result>> input) {
+        List<List<ITransformation.Result>> out = new ArrayList<List<ITransformation.Result>>();
+        getPermutations(input, out, 0, new ArrayList<ITransformation.Result>());
+        return out;
     }
 }

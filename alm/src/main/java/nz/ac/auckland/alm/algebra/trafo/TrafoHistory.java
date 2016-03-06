@@ -13,14 +13,21 @@ import java.util.List;
 
 public class TrafoHistory {
     static public class Entry {
-        final public FragmentRef fragmentRef;
-        final public ITransformation trafo;
-        final public ITransformation.Result trafoResult;
+        final public List<FragmentRef> fragmentRefs = new ArrayList<FragmentRef>();
+        final public List<ITransformation> trafos = new ArrayList<ITransformation>();
+        final public List<ITransformation.Result> trafoResults = new ArrayList<ITransformation.Result>();
 
-        public Entry(FragmentRef fragmentRef, ITransformation trafo, ITransformation.Result trafoResult) {
-            this.fragmentRef = fragmentRef;
-            this.trafo = trafo;
-            this.trafoResult = trafoResult;
+        public Entry() {
+        }
+
+        public void add(FragmentRef fragmentRef, ITransformation trafo, ITransformation.Result trafoResult) {
+            fragmentRefs.add(fragmentRef);
+            trafos.add(trafo);
+            trafoResults.add(trafoResult);
+        }
+
+        public int size() {
+            return fragmentRefs.size();
         }
     }
     final private List<Entry> entries = new ArrayList<Entry>();
@@ -28,11 +35,8 @@ public class TrafoHistory {
     public TrafoHistory() {
     }
 
-    public Entry addTrafoHistory(FragmentRef fragmentRef, ITransformation trafo,
-                                 ITransformation.Result trafoResult) {
-        Entry entry = new Entry(fragmentRef, trafo, trafoResult);
+    public void add(Entry entry) {
         entries.add(entry);
-        return entry;
     }
 
     public TrafoHistory clone() {
@@ -41,39 +45,10 @@ public class TrafoHistory {
         return clone;
     }
 
-    public float getTotalQuality() {
-        float quality = 1f;
-        for (Entry entry : entries)
-            quality *= entry.trafoResult.quality;
-        return quality;
-    }
-
     public int getNTrafos() {
         return entries.size();
     }
 
-    public int getHighestNestedLevel() {
-        int highestLevel = 0;
-        for (Entry entry : entries) {
-            int nestedLevel = getNestedLevel(entry);
-            if (nestedLevel > highestLevel)
-                highestLevel = nestedLevel;
-        }
-        return highestLevel;
-    }
-
-    private int getNestedLevel(Entry entry) {
-        int level = 0;
-        for (Entry current : entries) {
-            if (current == entry)
-                continue;
-            if (!isSubTree(entry, current))
-                continue;
-
-            level++;
-        }
-        return level;
-    }
 
     /**
      * Check if subTree is a sub tree of entry.
@@ -84,6 +59,7 @@ public class TrafoHistory {
      * @param subTree
      * @return
      */
+    /*
     private boolean isSubTree(Entry entry, Entry subTree) {
         List<Integer> subTreeLevels = subTree.fragmentRef.getLevelPositions();
         List<Integer> entryLevels = entry.fragmentRef.getLevelPositions();
@@ -93,8 +69,6 @@ public class TrafoHistory {
             if (!subTreeLevels.get(i).equals(entryLevels.get(i)))
                 return false;
         }
-        if (subTree.fragmentRef.getCurrentPosition() != entryLevels.get(subTreeLevels.size()))
-            return false;
         return true;
-    }
+    }*/
 }
