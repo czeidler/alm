@@ -100,6 +100,7 @@ public class Area extends AbstractLayoutSpecArea {
 	 */
 	static final Size UNDEFINED_SIZE = new Size(Size.UNDEFINED, Size.UNDEFINED);
 	static final public double PREFERRED_SIZE_PENALTY = 0.5;
+	static final public double MAX_SIZE_PENALTY = 0.99;
 
 	// size constraint for the content
 	Constraint minWidthConstraint;
@@ -110,7 +111,7 @@ public class Area extends AbstractLayoutSpecArea {
 	Constraint preferredHeightConstraint;
 
 	final Size shrinkPenalty = new Size();
-	final Size growPenalties = new Size(1, 1);
+	final Size growPenalties = new Size(MAX_SIZE_PENALTY, MAX_SIZE_PENALTY);
 
 	Size minSize = new Size(0, 0);
 	Size preferredSize = UNDEFINED_SIZE;
@@ -701,7 +702,7 @@ public class Area extends AbstractLayoutSpecArea {
 		minHeightConstraint.setName("minHeightConstraint");
 		addConstraint(minHeightConstraint);
 
-		setGrowPenalties(new Size(0, 0));
+		setGrowPenalties(new Size(MAX_SIZE_PENALTY, MAX_SIZE_PENALTY));
  		setShrinkPenalties(PREFERRED_SIZE_PENALTY, PREFERRED_SIZE_PENALTY);
 	}
 
