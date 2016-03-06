@@ -62,8 +62,8 @@ public class AlgebraSpec {
         public AlgebraSpecData(Map<XTab, Edge> xEdgeMap, Map<YTab, Edge> yEdgeMap) {
             this.xEdgeMap = new HashMap<XTab, Edge>(xEdgeMap);
             this.yEdgeMap = new HashMap<YTab, Edge>(yEdgeMap);
-            extractFragments(xEdgeMap, new HorizontalFragmentFactory());
-            extractFragments(yEdgeMap, new VerticalFragmentFactory());
+            extractFragments(xEdgeMap, new HorizontalFragmentFactory(), new RightDirection());
+            extractFragments(yEdgeMap, new VerticalFragmentFactory(), new BottomDirection());
         }
 
         public List<Fragment> getFragments() {
@@ -75,8 +75,10 @@ public class AlgebraSpec {
             return fragments.addFragment(fragment) == fragment;
         }
 
-        private <Tab extends Variable> void extractFragments(Map<Tab, Edge> edgeMap,
-                                                                IFragmentFactory fragmentFactory) {
+        private <Tab extends Variable, OrthTab extends Variable> void extractFragments(Map<Tab, Edge> edgeMap,
+                                                             IFragmentFactory fragmentFactory,
+                                                             IDirection<Tab, OrthTab> direction) {
+            assert direction instanceof RightDirection || direction instanceof BottomDirection;
             for (Map.Entry<Tab, Edge> entry : edgeMap.entrySet()) {
                 Edge edge = entry.getValue();
                 for (IArea area1 : edge.areas1) {
@@ -90,7 +92,7 @@ public class AlgebraSpec {
                         }
                     }
                     for (IArea area2 : edge.areas2) {
-                        Fragment newFragment = fragmentFactory.create(area1, area2);
+                        Fragment newFragment = fragmentFactory.create(area1, direction.getTab(area1), area2);
                         fragments.addFragment(newFragment);
                     }
                 }
@@ -98,16 +100,22 @@ public class AlgebraSpec {
         }
 
         public void chainFragments() {
-            while (chainFragments(xEdgeMap, new HorizontalFragmentFactory())
-                    || chainFragments(yEdgeMap, new VerticalFragmentFactory())) continue;
+            HorizontalFragmentFactory hFactory = new HorizontalFragmentFactory();
+            VerticalFragmentFactory vFactory = new VerticalFragmentFactory();
+            IDirection<XTab, YTab> rightDirection = new RightDirection();
+            IDirection<YTab, XTab> bottomDirection = new BottomDirection();
+            while (chainFragments(xEdgeMap, hFactory, rightDirection)
+                    || chainFragments(yEdgeMap, vFactory, bottomDirection)) continue;
         }
 
-        private <Tab extends Variable> boolean chainFragments(Map<Tab, Edge> edgeMap,
-                                                              IFragmentFactory fragmentFactory) {
+        private <Tab extends Variable, OrthTab extends Variable> boolean chainFragments(Map<Tab, Edge> edgeMap,
+                                                              IFragmentFactory<Tab, OrthTab> fragmentFactory,
+                                                              IDirection<Tab, OrthTab> direction) {
             for (Edge edge : new ArrayList<Edge>(edgeMap.values())) {
                 for (IArea area1 : edge.areas1) {
                     for (IArea area2 : edge.areas2) {
-                        Fragment newFragment = fragmentFactory.create(area1, area2);
+                        Tab tab = edge.areas2.size() == 1 ? null : direction.getTab(area1);
+                        Fragment newFragment = fragmentFactory.create(area1, tab, area2);
                         if (fragments.addFragment(newFragment) == newFragment) {
                             Edge.addAreaChecked(newFragment, xEdgeMap, yEdgeMap);
                             return true;
@@ -125,21 +133,21 @@ public class AlgebraSpec {
         }
     }
 
-    interface IFragmentFactory {
-        Fragment create(IArea area1, IArea area2);
+    interface IFragmentFactory<Tab extends Variable, OrthTab extends Variable> {
+        Fragment<Tab, OrthTab> create(IArea area1, Tab tab, IArea area2);
     }
 
-    class HorizontalFragmentFactory implements IFragmentFactory {
+    class HorizontalFragmentFactory implements IFragmentFactory<XTab, YTab> {
         @Override
-        public Fragment create(IArea area1, IArea area2) {
-            return Fragment.horizontalFragment(area1, area2);
+        public Fragment<XTab, YTab> create(IArea area1, XTab xTab, IArea area2) {
+            return Fragment.horizontalFragment(area1, xTab, area2);
         }
     }
 
-    class VerticalFragmentFactory implements IFragmentFactory {
+    class VerticalFragmentFactory implements IFragmentFactory<YTab, XTab> {
         @Override
-        public Fragment create(IArea area1, IArea area2) {
-            return Fragment.verticalFragment(area1, area2);
+        public Fragment<YTab, XTab> create(IArea area1, YTab yTab, IArea area2) {
+            return Fragment.verticalFragment(area1, yTab, area2);
         }
     }
 
@@ -252,8 +260,8 @@ public class AlgebraSpec {
      * Merge stuff like A|B => C
      */
     private void singleMerge() {
-        IFragmentFactory vFactory = new VerticalFragmentFactory();
-        IFragmentFactory hFactory = new HorizontalFragmentFactory();
+        IFragmentFactory<YTab, XTab> vFactory = new VerticalFragmentFactory();
+        IFragmentFactory<XTab, YTab> hFactory = new HorizontalFragmentFactory();
         boolean merged = true;
         while (merged) {
             merged = false;
@@ -273,7 +281,8 @@ public class AlgebraSpec {
     }
 
     private <Tab extends Variable, OrthTab extends Variable>
-    boolean singleMergeOnEdgeAll(Edge edge, IDirection<Tab, OrthTab> direction, IFragmentFactory fragmentFactory) {
+    boolean singleMergeOnEdgeAll(Edge edge, IDirection<Tab, OrthTab> direction,
+                                 IFragmentFactory<OrthTab, Tab> fragmentFactory) {
         boolean merged = false;
         while (singleMergeOnEdge(edge, direction, fragmentFactory)) {
             merged = true;
@@ -282,8 +291,20 @@ public class AlgebraSpec {
         return merged;
     }
 
+    /**
+     * Merge two neighbouring items that share the same edge and the same outer tab.
+     *
+     * For example, D|(A/B)|E with D connected to the edge and the search direction right.
+     * @param edge
+     * @param direction
+     * @param fragmentFactory
+     * @param <Tab>
+     * @param <OrthTab>
+     * @return
+     */
     private <Tab extends Variable, OrthTab extends Variable>
-    boolean singleMergeOnEdge(Edge edge, IDirection<Tab, OrthTab> direction, IFragmentFactory fragmentFactory) {
+    boolean singleMergeOnEdge(Edge edge, IDirection<Tab, OrthTab> direction,
+                              IFragmentFactory<OrthTab, Tab> fragmentFactory) {
         List<IArea> areas = direction.getAreas(edge);
         for (int i = 0; i < areas.size(); i++) {
             IArea area1 = areas.get(i);
@@ -293,9 +314,9 @@ public class AlgebraSpec {
                     continue;
                 Fragment fragment = null;
                 if (direction.getOrthogonalTab1(area1) == direction.getOrthogonalTab2(area2))
-                    fragment = fragmentFactory.create(area2, area1);
+                    fragment = fragmentFactory.create(area2, direction.getOrthogonalTab2(area2), area1);
                 else if (direction.getOrthogonalTab2(area1) == direction.getOrthogonalTab1(area2))
-                    fragment = fragmentFactory.create(area1, area2);
+                    fragment = fragmentFactory.create(area1, direction.getOrthogonalTab2(area1), area2);
 
                 if (fragment == null)
                     continue;
@@ -368,6 +389,18 @@ public class AlgebraSpec {
         }
     }
 
+    /**
+     * Find fragments like A|(B/C/D) with top and bottom aligned.
+     *
+     * @param edge of to start from
+     * @param direction to look at for neighbours
+     * @param map
+     * @param factory
+     * @param orthFactory
+     * @param <Tab>
+     * @param <OrthTab>
+     * @return
+     */
     private <Tab extends Variable, OrthTab extends Variable>
     boolean multiMergeOnEdge(Edge edge, IDirection<Tab, OrthTab> direction, Map<Tab, Edge> map,
                              IFragmentFactory factory, IFragmentFactory orthFactory) {
@@ -379,15 +412,18 @@ public class AlgebraSpec {
             if (neighbours == null)
                 continue;
 
-            Fragment neighbourFragment = orthFactory.create(neighbours.get(0), null);
+            // create the orth fragment that holds the neighbours
+            IArea firstNeighbour = neighbours.get(0);
+            Fragment neighbourFragment = orthFactory.create(firstNeighbour, direction.getOrthogonalTab2(firstNeighbour),
+                    null);
             for (int i = 1; i < neighbours.size(); i++)
                 neighbourFragment.add(neighbours.get(i), true);
 
             Fragment mergedFragment;
             if (direction instanceof LeftDirection || direction instanceof TopDirection)
-                mergedFragment = factory.create(neighbourFragment, area1);
+                mergedFragment = factory.create(neighbourFragment, direction.getTab(area1), area1);
             else
-                mergedFragment = factory.create(area1, neighbourFragment);
+                mergedFragment = factory.create(area1, direction.getTab(area1), neighbourFragment);
 
             merged = algebraSpecData.addFragment(mergedFragment);
             break;
@@ -401,6 +437,18 @@ public class AlgebraSpec {
         return tab;
     }
 
+    /**
+     * Find neighbours that are aligned to start.
+     *
+     * For example, _/A|(B/C/D)/_ with start == A would return B/C/D.
+     *
+     * @param start
+     * @param direction
+     * @param tabMap
+     * @param <Tab>
+     * @param <OrthTab>
+     * @return
+     */
     private <Tab extends Variable, OrthTab extends Variable>
     List<IArea> findAlignedNeighbours(IArea start, IDirection<Tab, OrthTab> direction, Map<Tab, Edge> tabMap) {
         IDirection<Tab, OrthTab> oppositeDirection = direction.getOppositeDirection();

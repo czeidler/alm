@@ -113,6 +113,7 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
             direction.setTab(area1, tab);
             direction.setOppositeTab(area2, tab);
         }
+        //TODO set tabs that are explicitly specified in the fragment
     }
 
     @Override

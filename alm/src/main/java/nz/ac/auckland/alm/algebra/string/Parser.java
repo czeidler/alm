@@ -64,7 +64,6 @@ class FragmentParser implements Parser.IState {
             IDirection direction = fragment.getDirection();
             IArea lastArea = fragment.getItemAt(fragment.size() - 1);
             Variable existingTab = direction.getTab(lastArea);
-            assert (existingTab != null);
             direction.setOppositeTab(item, existingTab);
         }
 
@@ -117,7 +116,7 @@ class FragmentParser implements Parser.IState {
         IDirection direction = fragment.getDirection();
         IArea lastArea = fragment.getItemAt(fragment.size() - 1);
         Tab existingTab = (Tab)direction.getTab(lastArea);
-        Tab tab;
+        Tab tab = null;
         Lexer.Token token = parser.peek();
         if (token.type == Lexer.Token.TAB_NAME) {
             // get the token
@@ -132,8 +131,6 @@ class FragmentParser implements Parser.IState {
             }
         } else if (existingTab != null)
             tab = existingTab;
-        else
-            tab = (Tab)direction.createTab();
 
         ((List<Fragment.Item<Tab>>)fragment.getRawItems()).get(fragment.size() - 1).setTab2(tab);
         direction.setTab(lastArea, tab);
