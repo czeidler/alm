@@ -369,6 +369,18 @@ public class LayoutSpec {
         this.explicitPreferredSize = explicitPreferredSize;
     }
 
+    private double[] getVariableValues() {
+        double[] values = new double[linearSpec.getVariables().size()];
+        for (int i = 0; i < linearSpec.getVariables().size(); i++)
+            values[i] = linearSpec.getVariables().get(i).getValue();
+        return values;
+    }
+
+    private void applyVariableValues(double[] variableValues) {
+        for (int i = 0; i < linearSpec.getVariables().size(); i++)
+            linearSpec.getVariables().get(i).setValue(variableValues[i]);
+    }
+
     /**
      * Calculate the minimal size of the GUI.
      * If the specifications have not changed use getMinSize to get an
@@ -377,9 +389,10 @@ public class LayoutSpec {
      * @return Size defining the minimal size of the GUI
      */
     private Area.Size calculateMinSize() {
+        double[] oldVariableValues = getVariableValues();
+
         //Store the preferred sizes and temporarily set the preferred size to the min size.
         Area.Size[] store = new Area.Size[areas.size()];
-
         for (int i = 0; i < areas.size(); i++) {
             if (!(areas.get(i) instanceof Area))
                 continue;
@@ -387,6 +400,7 @@ public class LayoutSpec {
             store[i] = a.getPreferredSize();
             a.setPreferredSize(a.getMinSize());
         }
+
         //Calculate the preferred container size with the min sizes set as preferred sizes.
         Area.Size min = calculatePreferredSize();
 
@@ -398,8 +412,7 @@ public class LayoutSpec {
             a.setPreferredSize(store[i]);
         }
 
-        //Recalculate to avoid any potential errors.
-        solve();
+        applyVariableValues(oldVariableValues);
         return min;
     }
 
@@ -428,6 +441,8 @@ public class LayoutSpec {
      * @return Size defining the preferred size of the GUI
      */
     private Area.Size calculatePreferredSize() {
+        double[] oldVariableValues = getVariableValues();
+
         //Store the current constraint values and reset GUI edge tabs and constraints to default.
         double leftValue = leftConstraint.getRightSide();
         double topValue = topConstraint.getRightSide();
@@ -470,9 +485,8 @@ public class LayoutSpec {
         if (bottomValue == bottomValue) {
             setBottom(bottomValue);
         }
-        //solve again to restore specification to prior state.
-        solve();
 
+        applyVariableValues(oldVariableValues);
         return prefSize;
     }
 
