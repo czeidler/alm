@@ -148,7 +148,7 @@ public class AlgebraData {
   }
 
   public Iterable<IArea> getAllAreas() {
-    return new JoinedList<IArea>(areas, emptySpaces);
+    return new JoinedIterable<IArea>(areas, emptySpaces);
   }
 
   public List<IArea> getAllAreasList() {
