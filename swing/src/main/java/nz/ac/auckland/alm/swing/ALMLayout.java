@@ -81,8 +81,8 @@ public class ALMLayout implements LayoutManager2 {
         Area.Rect frame = area.getContentRect();
 
 		// set content location and size
-		component.setLocation(new Point(Math.round(frame.left), Math.round(frame.top)));
-		component.setSize(Math.round(frame.getWidth()), Math.round(frame.getHeight()));
+		component.setLocation(new Point((int)Math.round(frame.left), (int)Math.round(frame.top)));
+		component.setSize((int)Math.round(frame.getWidth()), (int)Math.round(frame.getHeight()));
 	}
 
     /**
