@@ -8,6 +8,7 @@
 package nz.ac.auckland.alm.android;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -209,15 +210,83 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
 
     public ALMLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        readAttributes(context, attrs);
     }
 
     public ALMLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        readAttributes(context, attrs);
+    }
+
+    private void readAttributes(Context context, AttributeSet attrs) {
+        int[] attrsArray = new int[] {
+                android.R.attr.padding, // 0
+                android.R.attr.paddingBottom,
+                android.R.attr.paddingEnd,
+                android.R.attr.paddingLeft,
+                android.R.attr.paddingMode,
+                android.R.attr.paddingRight,
+                android.R.attr.paddingStart,
+                android.R.attr.paddingTop
+        };
+        final TypedArray a = context.obtainStyledAttributes(attrs, attrsArray);
+        for (int i = 0; i < a.getIndexCount(); i++) {
+            int attr = a.getIndex(i);
+            int padding = a.getDimensionPixelSize(attr, 0);
+            switch (attr) {
+                case 0: //android.R.attr.padding
+                    layoutSpec.setLeftInset(padding);
+                    layoutSpec.setTopInset(padding);
+                    layoutSpec.setRightInset(padding);
+                    layoutSpec.setBottomInset(padding);
+                    break;
+                case 1: //android.R.attr.paddingBottom
+                    layoutSpec.setBottomInset(padding);
+                    break;
+                case 2: //android.R.attr.paddingEnd
+                    Configuration config = getResources().getConfiguration();
+                    if ((config.screenLayout & Configuration.SCREENLAYOUT_LAYOUTDIR_MASK)
+                            == Configuration.SCREENLAYOUT_LAYOUTDIR_LTR)
+                        layoutSpec.setRightInset(padding);
+                    else
+                        layoutSpec.setLeftInset(padding);
+                    break;
+                case 3: //android.R.attr.paddingLeft
+                    layoutSpec.setLeftInset(padding);
+                    break;
+                case 4: //android.R.attr.paddingMode
+                    break;
+                case 5: //android.R.attr.paddingRight
+                    layoutSpec.setRightInset(padding);
+                    break;
+                case 6: //android.R.attr.paddingStart
+                    config = getResources().getConfiguration();
+                    if ((config.screenLayout & Configuration.SCREENLAYOUT_LAYOUTDIR_MASK)
+                            == Configuration.SCREENLAYOUT_LAYOUTDIR_LTR)
+                        layoutSpec.setLeftInset(padding);
+                    else
+                        layoutSpec.setRightInset(padding);
+                    break;
+                case 7: //android.R.attr.paddingTop
+                    layoutSpec.setTopInset(padding);
+                    break;
+            }
+        }
+        a.recycle();
     }
 
     private void layoutChild(View child, Area area) {
         Area.Rect frame = area.getContentRect();
         child.layout((int)frame.left, (int)frame.top, (int)frame.right, (int)frame.bottom);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        layoutSpecsNeedRebuild = true;
     }
 
     @Override
