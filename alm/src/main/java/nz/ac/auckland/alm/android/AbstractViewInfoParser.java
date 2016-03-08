@@ -31,10 +31,27 @@ abstract public class AbstractViewInfoParser<T> {
 
     public Area.Size getMinSize(T component) {
         Area.Size minSize = getMinSizeRaw(component);
-        if (minSize.getWidth() < 0)
+        if (minSize.getWidth() <= 0 && minSize.getHeight() <= 0)
+            minSize = getPreferredSizeRaw(component);
+        if (minSize.getWidth() <= 0)
             minSize.setWidth(0);
-        if (minSize.getHeight() < 0)
+        if (minSize.getHeight() <= 0)
             minSize.setHeight(0);
+
+        // fix size
+        Area.Size layoutParams = getLayoutParams(component);
+        if (layoutParams.getWidth() != MATCH_PARENT && layoutParams.getWidth() != WRAP_CONTENT)
+            minSize.setWidth(layoutParams.getWidth());
+        if (layoutParams.getHeight() != MATCH_PARENT && layoutParams.getHeight() != WRAP_CONTENT)
+            minSize.setHeight(layoutParams.getHeight());
+
+        // fix sizes
+        Area.Size rootSize = getRootViewSize(component);
+        if (minSize.getWidth() > rootSize.getWidth() / 2)
+            minSize.setWidth(0);
+        if (minSize.getHeight() > rootSize.getHeight() / 2)
+            minSize.setHeight(0);
+
         return minSize;
     }
 
@@ -52,10 +69,10 @@ abstract public class AbstractViewInfoParser<T> {
         else if (layoutParams.getHeight() != WRAP_CONTENT)
             size.setHeight(layoutParams.getHeight());
 
-        // fix too large sizes
-        if (size.getWidth() > rootSize.getWidth())
+        // fix sizes
+        if (size.getWidth() > rootSize.getWidth() || size.getWidth() < 0)
             size.setWidth(rootSize.getWidth());
-        if (size.getHeight() > rootSize.getHeight())
+        if (size.getHeight() > rootSize.getHeight() || size.getHeight() < 0)
             size.setHeight(rootSize.getHeight());
 
         return size;
