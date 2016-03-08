@@ -54,27 +54,27 @@ public class Area extends AbstractLayoutSpecArea {
 	}
 
 	public static class Rect {
-		public float left;
-		public float top;
-		public float right;
-		public float bottom;
+		public double left;
+		public double top;
+		public double right;
+		public double bottom;
 
-		public Rect(float left, float top, float right, float bottom) {
+		public Rect(double left, double top, double right, double bottom) {
 			this.left = left;
 			this.top = top;
 			this.right = right;
 			this.bottom = bottom;
 		}
 
-		public float getWidth() {
+		public double getWidth() {
 			return right - left;
 		}
 
-		public float getHeight() {
+		public double getHeight() {
 			return bottom - top;
 		}
 
-		public boolean contains(float x, float y) {
+		public boolean contains(double x, double y) {
 			if (left > x || right < x)
 				return false;
 			if (top > y || bottom < y)
@@ -86,7 +86,7 @@ public class Area extends AbstractLayoutSpecArea {
 			return intersects(area.left, area.top, area.right, area.bottom);
 		}
 
-		public boolean intersects(float left, float top, float right, float bottom) {
+		public boolean intersects(double left, double top, double right, double bottom) {
 			boolean hIntersection = (left >= this.left && left <= this.right)
 					|| (right >= this.left && right <= this.right) || (left <= this.left && right >= this.right);
 			boolean vIntersection = (top >= this.top && top <= this.bottom)
