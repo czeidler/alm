@@ -44,6 +44,9 @@ public class LayoutSpec {
      */
     YTab bottom;
 
+    // frame of the layout, the outer tab stops are positioned within this frame according to the insets
+    Area.Rect layoutFrame = new Area.Rect(0, 0, 0, 0);
+
     Constraint rightConstraint;
     Constraint bottomConstraint;
     Constraint leftConstraint;
@@ -230,6 +233,7 @@ public class LayoutSpec {
      * @param right double which defines the X-tab
      */
     public void setRight(double right) {
+        layoutFrame.right = right;
         if (rightConstraint == null || !linearSpec.getConstraints().contains(rightConstraint))
             rightConstraint = linearSpec.addConstraint(1, this.right, OperatorType.EQ, 0);
 
@@ -242,6 +246,7 @@ public class LayoutSpec {
      * @param bottom double which defines the Y-tab
      */
     public void setBottom(double bottom) {
+        layoutFrame.bottom = bottom;
         if (bottomConstraint == null || !linearSpec.getConstraints().contains(bottomConstraint))
             bottomConstraint = linearSpec.addConstraint(1, this.bottom, OperatorType.EQ, 0);
 
@@ -254,6 +259,7 @@ public class LayoutSpec {
      * @param left double which defines the X-tab
      */
     public void setLeft(double left) {
+        layoutFrame.left = left;
         leftConstraint.setRightSide(left + leftInset);
     }
 
@@ -263,6 +269,7 @@ public class LayoutSpec {
      * @param top double which defines the X-tab
      */
     public void setTop(double top) {
+        layoutFrame.top = top;
         topConstraint.setRightSide(top + topInset);
     }
 
@@ -291,6 +298,11 @@ public class LayoutSpec {
         if (explicitSize.getHeight() != Area.Size.UNDEFINED)
             composedSize.setHeight(explicitSize.getHeight());
         return composedSize;
+    }
+
+    private void addInsets(Area.Size size) {
+        size.setWidth(size.getWidth() + leftInset + rightInset);
+        size.setWidth(size.getWidth() + topInset + bottomInset);
     }
 
     /**
@@ -584,6 +596,7 @@ public class LayoutSpec {
 
     public void setLeftInset(float leftInset) {
         this.leftInset = leftInset;
+        setLeft(layoutFrame.left);
     }
 
     public float getTopInset() {
@@ -592,6 +605,7 @@ public class LayoutSpec {
 
     public void setTopInset(float topInset) {
         this.topInset = topInset;
+        setTop(layoutFrame.top);
     }
 
     public float getRightInset() {
@@ -600,6 +614,7 @@ public class LayoutSpec {
 
     public void setRightInset(float rightInset) {
         this.rightInset = rightInset;
+        setRight(layoutFrame.right);
     }
 
     public float getBottomInset() {
@@ -608,6 +623,7 @@ public class LayoutSpec {
 
     public void setBottomInset(float bottomInset) {
         this.bottomInset = bottomInset;
+        setBottom(layoutFrame.bottom);
     }
 
     public float getHorizontalSpacing() {
