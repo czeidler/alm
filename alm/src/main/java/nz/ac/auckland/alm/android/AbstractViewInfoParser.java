@@ -23,13 +23,17 @@ abstract public class AbstractViewInfoParser<T> {
     static public final int MATCH_PARENT = -1;
     static public final int WRAP_CONTENT = -2;
 
+    abstract protected String getClassName(T component);
     abstract protected Area.Size getRootViewSize(T component);
     abstract protected Area.Size getLayoutParams(T component);
     abstract protected Area.Size getMinSizeRaw(T component);
     abstract protected Area.Size getPreferredSizeRaw(T component);
     abstract protected Area.Size getMaxSizeRaw(T component);
 
-    public Area.Size getMinSize(T component) {
+    public Area.Size getMinSize(T component, Area.Size explicitSize) {
+        if (explicitSize.getWidth() != Area.Size.UNDEFINED && explicitSize.getHeight() != Area.Size.UNDEFINED)
+            return explicitSize;
+
         Area.Size minSize = getMinSizeRaw(component);
         if (minSize.getWidth() <= 0 && minSize.getHeight() <= 0)
             minSize = getPreferredSizeRaw(component);
@@ -51,6 +55,11 @@ abstract public class AbstractViewInfoParser<T> {
             minSize.setWidth(0);
         if (minSize.getHeight() > rootSize.getHeight() / 2)
             minSize.setHeight(0);
+
+        if (explicitSize.getWidth() != Area.Size.UNDEFINED)
+            minSize.setWidth(explicitSize.getWidth());
+        if (explicitSize.getHeight() != Area.Size.UNDEFINED)
+            minSize.setHeight(explicitSize.getHeight());
 
         return minSize;
     }
@@ -78,7 +87,10 @@ abstract public class AbstractViewInfoParser<T> {
         return size;
     }
 
-    public Area.Size getPreferredSize(T component) {
+    public Area.Size getPreferredSize(T component, Area.Size explicitSize) {
+        if (explicitSize.getWidth() != Area.Size.UNDEFINED && explicitSize.getHeight() != Area.Size.UNDEFINED)
+            return explicitSize;
+
         Area.Size layoutParams = getLayoutParams(component);
         Area.Size prefSize;
         if (layoutParams.getWidth() == WRAP_CONTENT
@@ -87,7 +99,18 @@ abstract public class AbstractViewInfoParser<T> {
         else
             prefSize = new Area.Size(0, 0);
 
-        return validateRawSize(component, prefSize, layoutParams);
+        // fix sizes
+        Area.Size rootSize = getRootViewSize(component);
+        if (prefSize.getWidth() > rootSize.getWidth() || prefSize.getWidth() < 0)
+            prefSize.setWidth(rootSize.getWidth());
+        if (prefSize.getHeight() > rootSize.getHeight() || prefSize.getHeight() < 0)
+            prefSize.setHeight(rootSize.getHeight());
+
+        if (explicitSize.getWidth() != Area.Size.UNDEFINED)
+            prefSize.setWidth(explicitSize.getWidth());
+        if (explicitSize.getHeight() != Area.Size.UNDEFINED)
+            prefSize.setHeight(explicitSize.getHeight());
+        return prefSize;
     }
 
     public Area.Size getMaxSize(T component) {
@@ -114,6 +137,8 @@ abstract public class AbstractViewInfoParser<T> {
             alignment.horizontalAlignment = HorizontalAlignment.FILL;
         if (layoutParams.getHeight() == MATCH_PARENT)
             alignment.verticalAlignment = VerticalAlignment.FILL;
+        if (getClassName(component).equals("TextView"))
+            alignment.horizontalAlignment = HorizontalAlignment.LEFT;
         return alignment;
     }
 }

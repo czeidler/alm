@@ -41,6 +41,8 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_bottomTab
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_horizontal_alignment
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_vertical_alignment
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_prefWidth
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_prefHeight
      */
     static public class LayoutParams extends ViewGroup.LayoutParams {
         public AreaRef areaRef = new AreaRef();
@@ -120,6 +122,14 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
                             break;
                     }
 
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_minWidth) {
+                    areaRef.explicitMinSize.setWidth(a.getDimensionPixelSize(attr, Area.Size.UNDEFINED));
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_minHeight) {
+                    areaRef.explicitMinSize.setHeight(a.getDimensionPixelSize(attr, Area.Size.UNDEFINED));
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_prefWidth) {
+                    areaRef.explicitPrefSize.setWidth(a.getDimensionPixelSize(attr, Area.Size.UNDEFINED));
+                } else if (attr == R.styleable.ALMLayout_Layout_layout_prefHeight) {
+                    areaRef.explicitPrefSize.setHeight(a.getDimensionPixelSize(attr, Area.Size.UNDEFINED));
                 }
             }
             a.recycle();
@@ -168,6 +178,11 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
         protected Area.Size getLayoutParams(View view) {
             ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             return new Area.Size(layoutParams.width, layoutParams.height);
+        }
+
+        @Override
+        protected String getClassName(View component) {
+            return component.getClass().getSimpleName();
         }
 
         @Override
@@ -350,8 +365,8 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
             Area area = layoutSpec.addArea((XTab)areaRef.left.relation, (YTab)areaRef.top.relation,
                     (XTab)areaRef.right.relation, (YTab)areaRef.bottom.relation);
 
-            area.setMinSize(viewInfoParser.getMinSize(child));
-            area.setPreferredSize(viewInfoParser.getPreferredSize(child));
+            area.setMinSize(viewInfoParser.getMinSize(child, areaRef.explicitMinSize));
+            area.setPreferredSize(viewInfoParser.getPreferredSize(child, areaRef.explicitPrefSize));
             area.setMaxSize(viewInfoParser.getMaxSize(child));
             AbstractViewInfoParser.Alignment alignment = viewInfoParser.getAlignment(child);
             areaRef.horizontalAlignment = alignment.horizontalAlignment;

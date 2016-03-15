@@ -19,6 +19,8 @@ class AreaRef {
     public int id = -1;
     public HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
     public VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
+    public Area.Size explicitMinSize = new Area.Size(Area.Size.UNDEFINED, Area.Size.UNDEFINED);
+    public Area.Size explicitPrefSize = new Area.Size(Area.Size.UNDEFINED, Area.Size.UNDEFINED);
 
     public Relation left = new Relation();
     public Relation top = new Relation();
