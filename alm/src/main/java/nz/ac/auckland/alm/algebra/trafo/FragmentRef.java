@@ -15,6 +15,10 @@ public class FragmentRef {
     // list of indices at what position the next level has been entered
     final protected List<Integer> fragLevelPosition = new ArrayList<Integer>();
 
+    public int getNLevels() {
+        return fragLevelPosition.size();
+    }
+
     public List<Integer> getLevelPositions() {
         return fragLevelPosition;
     }

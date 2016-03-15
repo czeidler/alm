@@ -57,8 +57,16 @@ public class GroupDetector implements IGroupDetector {
             Fragment alternative = ongoing.remove(0);
             List<Fragment> subAlternatives = detectSinglePass(alternative, comparator);
             if (subAlternatives.size() == 0) {
-                if (!inList(finalized, alternative, comparator))
+                if (!inList(finalized, alternative, comparator)) {
+                    // remove superfluous containing fragment, e.g. ((A|B) | (A|B)) -> (A|B) | (A|B)
+                    if (alternative.size() == 1) {
+                        IArea area = alternative.getItemAt(0);
+                        if (area instanceof Fragment)
+                            alternative = (Fragment)area;
+                    }
+
                     finalized.add(alternative);
+                }
             } else
                 ongoing.addAll(subAlternatives);
         }
@@ -294,12 +302,6 @@ public class GroupDetector implements IGroupDetector {
 
         if (alternative.size() == 0)
             return null;
-        // remove superfluous containing fragment, e.g. ((A|B) | (A|B)) -> (A|B) | (A|B)
-        if (alternative.size() == 1) {
-            IArea area = alternative.getItemAt(0);
-            if (area instanceof Fragment)
-                alternative = (Fragment)area;
-        }
         // don't return an alternative if all item in a fragment are the same, i.e. the alternative is equivalent
         if (alternative.size() == fragment.size())
             return null;

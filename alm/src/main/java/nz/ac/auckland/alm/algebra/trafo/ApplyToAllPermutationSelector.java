@@ -34,13 +34,12 @@ public class ApplyToAllPermutationSelector<T> implements IPermutationSelector<T>
             for (FragmentRef ref : state.getFragmentRefs())
                 transformations.add(transformation);
         }
-
+        progress ++;
         int permutation = OngoingTrafo.getPermutationValue(transformations, trafos);
         List<List<ITransformation>> out = new ArrayList<List<ITransformation>>();
         if (state.getHandledPermutations().contains(permutation))
             return out;
         out.add(transformations);
-        progress ++;
         return out;
     }
 

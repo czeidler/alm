@@ -49,6 +49,9 @@ public class TrafoHistory {
         return entries.size();
     }
 
+    public List<Entry> getEntries() {
+        return entries;
+    }
 
     /**
      * Check if subTree is a sub tree of entry.

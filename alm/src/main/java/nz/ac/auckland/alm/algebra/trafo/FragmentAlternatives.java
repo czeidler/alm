@@ -76,16 +76,21 @@ public class FragmentAlternatives<T> {
 
     class OngoingTrafoComparator implements Comparator<OngoingTrafo<T>> {
         @Override
-        public int compare(OngoingTrafo<T> ongoingTrafo, OngoingTrafo<T> t1) {
+        public int compare(OngoingTrafo<T> ongoingTrafo, OngoingTrafo<T> ongoingTrafo1) {
+            Integer nTrafos0 = ongoingTrafo.getTrafoHistory().getNTrafos();
+            Integer nTrafos1= ongoingTrafo1.getTrafoHistory().getNTrafos();
+            if (nTrafos0 >= 2 || nTrafos1 >= 2)
+                return nTrafos0.compareTo(nTrafos1);
+
             int priorityComparison = -((Integer)ongoingTrafo.getSelector().getPriority()).compareTo(
-                    t1.getSelector().getPriority());
+                    ongoingTrafo1.getSelector().getPriority());
             if (priorityComparison != 0)
                 return priorityComparison;
 
             Double objectValue0 = classifier.objectiveValue(ongoingTrafo.getClassification());
-            Double objectValue2 = classifier.objectiveValue(t1.getClassification());
+            Double objectValue1 = classifier.objectiveValue(ongoingTrafo1.getClassification());
 
-            return -objectValue0.compareTo(objectValue2);
+            return objectValue0.compareTo(objectValue1);
         }
     }
 
@@ -141,7 +146,8 @@ public class FragmentAlternatives<T> {
             for (OngoingTrafo<T> newResult : newResults) {
                 Result<T> result = new Result<T>(newResult.getTrafoHistory(), newResult.getAlternative(),
                         newResult.getClassification());
-                addResult(results, result);
+                if (!result.fragment.isEquivalent(fragment))
+                    addResult(results, result);
 
                 if (newResult.getFragmentRefs().size() > 0) {
                     spawnOngoing(ongoingTrafos, newResult, false);
@@ -169,6 +175,14 @@ public class FragmentAlternatives<T> {
         return results;
     }
 
+    private boolean allItemsNull(List list) {
+        for (Object item : list) {
+            if (item != null)
+                return false;
+        }
+        return true;
+    }
+
     private void applyTransformations(OngoingTrafo<T> ongoingTrafo, List<ITransformation> transformations,
                                       List<OngoingTrafo<T>> results) {
         final Fragment alternative = ongoingTrafo.getAlternative();
@@ -191,13 +205,14 @@ public class FragmentAlternatives<T> {
         // build ongoing trafos
         List<List<ITransformation.Result>> trafoList = calculatePermutations(trafoResults);
         for (List<ITransformation.Result> trafo : trafoList) {
-            Fragment newFragment = alternative.clone();
+            Fragment newFragment = alternative;
             TrafoHistory.Entry historyEntry = new TrafoHistory.Entry();
             for (int i = 0; i < trafo.size(); i++) {
                 ITransformation.Result trafoResult = trafo.get(i);
                 if (trafoResult == null)
                     continue;
                 FragmentRef fragmentRef = fragmentRefs.get(i);
+                newFragment = newFragment.clone();
                 newFragment = replaceFragment(newFragment, fragmentRef, trafoResult.fragment);
                 historyEntry.add(fragmentRef, transformations.get(i), trafoResult);
             }
@@ -207,7 +222,11 @@ public class FragmentAlternatives<T> {
                 history.add(historyEntry);
             }
 
-            T classification = classifier.classify(newFragment, history);
+            T classification;
+            if (allItemsNull(trafo))
+                classification = ongoingTrafo.getClassification();
+            else
+                classification = classifier.classify(newFragment, history);
             List<FragmentRef> nextLevel = getNextLevel(newFragment, ongoingTrafo.getFragmentRefs());
 
             IPermutationSelector selector = ongoingTrafo.getSelector();
