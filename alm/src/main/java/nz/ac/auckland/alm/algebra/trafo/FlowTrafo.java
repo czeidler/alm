@@ -1,5 +1,5 @@
 /*
- * Copyright 2015.
+ * Copyright 2016.
  * Distributed under the terms of the GPLv3 License.
  *
  * Authors:
@@ -15,27 +15,24 @@ import java.util.List;
 
 
 public class FlowTrafo implements ITransformation {
-    final private IDirection direction;
+    final private IDirection inDirection;
+    final private IDirection containerDirection;
+    final private IDirection lineDirection;
 
-    public FlowTrafo(IDirection direction) {
-        this.direction = direction;
+    public FlowTrafo(IDirection inDirection, IDirection containerDirection, IDirection lineDirection) {
+        this.inDirection = inDirection;
+        this.containerDirection = containerDirection;
+        this.lineDirection = lineDirection;
     }
 
     private void split(Fragment fragment, int elementsPerLine, List<Result> results) {
         Fragment current = null;
-        Fragment container;
-        if (fragment.isHorizontalDirection())
-            container = Fragment.verticalFragment();
-        else
-            container = Fragment.horizontalFragment();
+        Fragment container = Fragment.createEmptyFragment(containerDirection);
 
         for (int i = 0; i < fragment.size(); i++) {
-            if (i == 0 || i % elementsPerLine == 0) {
-                if (fragment.isHorizontalDirection())
-                    current = Fragment.horizontalFragment();
-                else
-                    current = Fragment.verticalFragment();
-            }
+            if (i == 0 || i % elementsPerLine == 0)
+                current = Fragment.createEmptyFragment(lineDirection);
+
             current.add(fragment.getItemAt(i), false);
             if ((i + 1) % elementsPerLine == 0 || i + 1 == fragment.size()) {
                 if (current.size() == 1)
@@ -50,7 +47,7 @@ public class FlowTrafo implements ITransformation {
     @Override
     public List<Result> transform(Fragment fragment) {
         List<Result> results = new ArrayList<Result>();
-        if (fragment.getDirection() != direction)
+        if (fragment.getDirection() != inDirection)
             return results;
         // at least 3 items otherwise it's a swap
         if (fragment.size() < 3)

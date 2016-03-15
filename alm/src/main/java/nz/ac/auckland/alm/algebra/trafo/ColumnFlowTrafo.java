@@ -12,6 +12,6 @@ import nz.ac.auckland.alm.algebra.Fragment;
 
 public class ColumnFlowTrafo extends FlowTrafo {
     public ColumnFlowTrafo() {
-        super(Fragment.verticalDirection);
+        super(Fragment.verticalDirection, Fragment.horizontalDirection, Fragment.verticalDirection);
     }
 }
