@@ -75,6 +75,8 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     }
 
     static public Fragment createEmptyFragment(IDirection direction) {
+        assert direction == horizontalDirection || direction == verticalDirection;
+
         Fragment fragment = new Fragment();
         fragment.direction = direction;
         return fragment;
