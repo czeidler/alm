@@ -79,7 +79,7 @@ public class FragmentAlternatives<T> {
         public int compare(OngoingTrafo<T> ongoingTrafo, OngoingTrafo<T> ongoingTrafo1) {
             Integer nTrafos0 = ongoingTrafo.getTrafoHistory().getNTrafos();
             Integer nTrafos1= ongoingTrafo1.getTrafoHistory().getNTrafos();
-            if (nTrafos0 >= 2 || nTrafos1 >= 2)
+            if (nTrafos0 >= 1 || nTrafos1 >= 1)
                 return nTrafos0.compareTo(nTrafos1);
 
             int priorityComparison = -((Integer)ongoingTrafo.getSelector().getPriority()).compareTo(
@@ -253,14 +253,18 @@ public class FragmentAlternatives<T> {
         return nextLevel;
     }
 
-    private void getPermutations(List<List<ITransformation.Result>> list, List<List<ITransformation.Result>> result,
+    private void getPermutations(List<List<ITransformation.Result>> input, List<List<ITransformation.Result>> result,
                                  int index, List<ITransformation.Result> ongoing) {
-        if (ongoing.size() == list.size()) {
+        if (ongoing.size() == input.size()) {
             result.add(ongoing);
             return;
         }
 
-        List<ITransformation.Result> currentSource = list.get(index);
+        List<ITransformation.Result> currentSource = input.get(index);
+        if (currentSource.size() == 0) {
+            ongoing.add(null);
+            getPermutations(input, result, index + 1, ongoing);
+        }
         for (int i = 0; i < currentSource.size(); i++) {
             List<ITransformation.Result> clone;
             if (currentSource.size() == 1)
@@ -268,7 +272,7 @@ public class FragmentAlternatives<T> {
             else
                 clone = new ArrayList<ITransformation.Result>(ongoing);
             clone.add(currentSource.get(i));
-            getPermutations(list, result, index + 1, clone);
+            getPermutations(input, result, index + 1, clone);
         }
     }
 
