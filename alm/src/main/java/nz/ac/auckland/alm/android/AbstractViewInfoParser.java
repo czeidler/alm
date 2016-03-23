@@ -91,21 +91,23 @@ abstract public class AbstractViewInfoParser<T> {
         if (explicitSize.getWidth() != Area.Size.UNDEFINED && explicitSize.getHeight() != Area.Size.UNDEFINED)
             return explicitSize;
 
-        Area.Size layoutParams = getLayoutParams(component);
-        Area.Size prefSize;
-        if (layoutParams.getWidth() == WRAP_CONTENT
-                || layoutParams.getHeight() == WRAP_CONTENT)
-            prefSize = getPreferredSizeRaw(component);
-        else
-            prefSize = new Area.Size(0, 0);
+        Area.Size prefSize = getPreferredSizeRaw(component);
 
-        // fix sizes
+        // specified size
+        Area.Size layoutParams = getLayoutParams(component);
+        if (layoutParams.getWidth() != MATCH_PARENT && layoutParams.getWidth() != WRAP_CONTENT)
+            prefSize.setWidth(layoutParams.getWidth());
+        if (layoutParams.getHeight() != MATCH_PARENT && layoutParams.getHeight() != WRAP_CONTENT)
+            prefSize.setHeight(layoutParams.getHeight());
+
+        // validate sizes
         Area.Size rootSize = getRootViewSize(component);
         if (prefSize.getWidth() > rootSize.getWidth() || prefSize.getWidth() < 0)
             prefSize.setWidth(rootSize.getWidth());
         if (prefSize.getHeight() > rootSize.getHeight() || prefSize.getHeight() < 0)
             prefSize.setHeight(rootSize.getHeight());
 
+        // override with explicit sizes
         if (explicitSize.getWidth() != Area.Size.UNDEFINED)
             prefSize.setWidth(explicitSize.getWidth());
         if (explicitSize.getHeight() != Area.Size.UNDEFINED)

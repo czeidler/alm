@@ -201,21 +201,20 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
             return size;
         }
 
-        private Area.Size measureSizeAtMost(View view, int width, int Height) {
-            view.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
-                    MeasureSpec.makeMeasureSpec(Height, MeasureSpec.AT_MOST));
+        private Area.Size measureSizeAtMost(View view, int width, int Height, int mode) {
+            view.measure(MeasureSpec.makeMeasureSpec(width, mode), MeasureSpec.makeMeasureSpec(Height, mode));
             return new Area.Size(view.getMeasuredWidth(), view.getMeasuredHeight());
         }
 
         @Override
         protected Area.Size getPreferredSizeRaw(View view) {
-            return measureSizeAtMost(view, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+            return measureSizeAtMost(view, 0, 0, MeasureSpec.UNSPECIFIED);
         }
 
         @Override
         protected Area.Size getMaxSizeRaw(View view) {
             Area.Size rootSize = getRootViewSize(view);
-            return measureSizeAtMost(view, (int)rootSize.getWidth(), (int)rootSize.getHeight());
+            return measureSizeAtMost(view, (int)rootSize.getWidth(), (int)rootSize.getHeight(), MeasureSpec.AT_MOST);
         }
     };
 
