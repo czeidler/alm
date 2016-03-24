@@ -9,6 +9,7 @@ package nz.ac.auckland.alm.algebra.trafo;
 
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.algebra.Fragment;
+import nz.ac.auckland.alm.algebra.FragmentUtils;
 import nz.ac.auckland.alm.algebra.IDirection;
 
 import java.util.ArrayList;
@@ -62,24 +63,12 @@ public class SymmetryAnalyzer {
         return true;
     }
 
-    static private List<Fragment> nextLevel(List<Fragment> currentLevel) {
-        List<Fragment> level = new ArrayList<Fragment>();
-        for (Fragment fragment : currentLevel) {
-            for (IArea area : (Iterable<IArea>) fragment.getItems()) {
-                if (!(area instanceof Fragment))
-                    continue;
-                level.add((Fragment)area);
-            }
-        }
-        return level;
-    }
-
     static private boolean sameOrientationsOnAllLevels(Fragment fragment) {
         List<Fragment> level = Collections.singletonList(fragment);
         while (level.size() > 0) {
             if (!childrenHaveSameOrientation(level))
                 return false;
-            level = nextLevel(level);
+            level = FragmentUtils.nextLevel(level);
         }
         return true;
     }
@@ -112,7 +101,70 @@ public class SymmetryAnalyzer {
     }
 
 
+    static private String symmetryHash(Fragment fragment) {
+        String hash;
+        if (fragment.isHorizontalDirection())
+            hash = "h";
+        else
+            hash = "v";
+        for (IArea area : (Iterable<IArea>) fragment.getItems()) {
+            if (area instanceof Fragment)
+                hash += "a";
+            else
+                hash += "f";
+        }
+        return hash;
+    }
 
+    static private boolean symmetric(List<Fragment> level) {
+        if (level.size() <= 1)
+            return false;
+        String hash = null;
+        for (Fragment fragment : level) {
+            if (hash == null) {
+                hash = symmetryHash(fragment);
+                continue;
+            }
+            if (!hash.equals(symmetryHash(fragment)))
+                return false;
+        }
+        return true;
+    }
+
+    static private int symmetryValue(Fragment fragment) {
+        if (!FragmentUtils.childrenAreFragments(fragment))
+            return 0;
+        int nLevels = 0;
+        boolean symmetric = false;
+        List<Fragment> level = FragmentUtils.nextLevel(Collections.singletonList(fragment));
+        while (level.size() > 0) {
+            symmetric = symmetric(level);
+            level = FragmentUtils.nextLevel(level);
+            nLevels++;
+        }
+        if (!symmetric)
+            return 0;
+        return nLevels;
+    }
+
+    static public int symmetryValueRecursive(Fragment fragment) {
+        int value = symmetryValue(fragment);
+        if (value != 0)
+            return value * FragmentUtils.countAreas(fragment);
+
+        for (IArea area : (Iterable<IArea>)fragment.getItems()) {
+            if (!(area instanceof Fragment))
+                continue;
+            value += symmetryValueRecursive((Fragment)area);
+        }
+        return value;
+    }
+
+    static public float symmetryClassifier(Fragment fragment) {
+        float count = symmetryValueRecursive(fragment);
+        int maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
+        return count / maxCount;
+    }
 
     static public int symmetryCountSameChildrenSize(Fragment fragment) {
         IDirection direction = null;
@@ -150,7 +202,7 @@ public class SymmetryAnalyzer {
             for (Fragment current : level) {
                 count += current.size();
             }
-            level = nextLevel(level);
+            level = FragmentUtils.nextLevel(level);
         }
         return count;
     }
@@ -181,7 +233,7 @@ public class SymmetryAnalyzer {
         List<Fragment> level = Collections.singletonList(fragment);
         while (level.size() > 0) {
             count += levelSymmetry(level);
-            level = nextLevel(level);
+            level = FragmentUtils.nextLevel(level);
         }
         return count;
     }

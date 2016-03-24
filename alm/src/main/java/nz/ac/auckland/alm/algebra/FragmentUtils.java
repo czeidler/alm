@@ -13,6 +13,7 @@ import nz.ac.auckland.alm.ILayoutSpecArea;
 import nz.ac.auckland.alm.LayoutSpec;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -30,6 +31,47 @@ public class FragmentUtils {
             else if (area instanceof Area && !areas.contains(area))
                 areas.add((Area)area);
         }
+    }
+
+    static public int countLevels(Fragment fragment) {
+        int nLevels = 0;
+        for (IArea area : (Iterable<IArea>)fragment.getItems()) {
+            if (!(area instanceof Fragment))
+                continue;
+            nLevels = Math.max(nLevels, countLevels((Fragment)area) + 1);
+        }
+        return nLevels;
+    }
+
+    static public boolean childrenAreFragments(Fragment fragment) {
+        for (IArea area : (Iterable<IArea>) fragment.getItems()) {
+            if (!(area instanceof Fragment))
+                return false;
+        }
+        return true;
+    }
+
+    static public List<Fragment> nextLevel(List<Fragment> currentLevel) {
+        List<Fragment> level = new ArrayList<Fragment>();
+        for (Fragment fragment : currentLevel) {
+            for (IArea area : (Iterable<IArea>) fragment.getItems()) {
+                if (!(area instanceof Fragment))
+                    continue;
+                level.add((Fragment)area);
+            }
+        }
+        return level;
+    }
+
+    static public int countAreas(Fragment fragment) {
+        int areas = 0;
+        for (IArea area : (Iterable<IArea>)fragment.getItems()) {
+            if (area instanceof Fragment)
+                areas += countAreas((Fragment)area);
+            else
+                areas++;
+        }
+        return areas;
     }
 
     static public LayoutSpec toLayoutSpec(Fragment fragment) {
