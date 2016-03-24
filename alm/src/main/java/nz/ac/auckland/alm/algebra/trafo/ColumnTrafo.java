@@ -58,7 +58,7 @@ public class ColumnTrafo implements ITransformation {
         int end = start + NUMBER_BREAK_POINTS;
         if (end >= fragment.size())
             end = fragment.size() - 1;
-        for (int i = start; i < end; i++)
+        for (int i = start; i <= end; i++)
             split(fragment, i, results);
 
         return results;
