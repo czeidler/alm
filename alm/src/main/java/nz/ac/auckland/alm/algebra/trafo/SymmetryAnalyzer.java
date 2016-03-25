@@ -135,15 +135,13 @@ public class SymmetryAnalyzer {
         if (!FragmentUtils.childrenAreFragments(fragment))
             return 0;
         int nLevels = 0;
-        boolean symmetric = false;
         List<Fragment> level = FragmentUtils.nextLevel(Collections.singletonList(fragment));
         while (level.size() > 0) {
-            symmetric = symmetric(level);
+            if (!symmetric(level))
+                return 0;
             level = FragmentUtils.nextLevel(level);
             nLevels++;
         }
-        if (!symmetric)
-            return 0;
         return nLevels;
     }
 

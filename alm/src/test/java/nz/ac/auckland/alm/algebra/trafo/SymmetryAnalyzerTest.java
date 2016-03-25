@@ -151,5 +151,17 @@ public class SymmetryAnalyzerTest extends TestCase  {
         maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
         assertEquals(0, count);
         assertEquals(18, maxCount);
+
+        fragment = create("(((D|E)/F)|((G|H)/I))/(((J|K)/L)|((M|N)/O))/(((P|Q)/R)|((S|T)/U))");
+        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
+        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
+        assertEquals(54, count);
+        assertEquals(54, maxCount);
+
+        fragment = create("(((D|E)/F)/((G|H)/I)/((J|K)/L)/((M|N)/O))|(((P|Q)/R)/((S|T)/U))");
+        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
+        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
+        assertEquals(36, count);
+        assertEquals(54, maxCount);
     }
 }
