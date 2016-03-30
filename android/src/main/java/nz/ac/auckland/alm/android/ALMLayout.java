@@ -367,10 +367,6 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
             area.setMinSize(viewInfoParser.getMinSize(child, areaRef.explicitMinSize));
             area.setPreferredSize(viewInfoParser.getPreferredSize(child, areaRef.explicitPrefSize));
             area.setMaxSize(viewInfoParser.getMaxSize(child));
-            AbstractViewInfoParser.Alignment alignment = viewInfoParser.getAlignment(child);
-            areaRef.horizontalAlignment = alignment.horizontalAlignment;
-            areaRef.verticalAlignment = alignment.verticalAlignment;
-            area.setAlignment(areaRef.horizontalAlignment, areaRef.verticalAlignment);
 
             areaMap.put(child, area);
         }

@@ -126,21 +126,4 @@ abstract public class AbstractViewInfoParser<T> {
 
         return validateRawSize(component, maxSize, layoutParams);
     }
-
-    public static class Alignment {
-        public HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
-        public VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
-    }
-
-    public Alignment getAlignment(T component) {
-        Area.Size layoutParams = getLayoutParams(component);
-        Alignment alignment = new Alignment();
-        if (layoutParams.getWidth() == MATCH_PARENT)
-            alignment.horizontalAlignment = HorizontalAlignment.FILL;
-        if (layoutParams.getHeight() == MATCH_PARENT)
-            alignment.verticalAlignment = VerticalAlignment.FILL;
-        if (getClassName(component).equals("TextView"))
-            alignment.horizontalAlignment = HorizontalAlignment.LEFT;
-        return alignment;
-    }
 }
