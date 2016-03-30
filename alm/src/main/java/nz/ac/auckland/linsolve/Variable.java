@@ -88,10 +88,11 @@ public class Variable {
 	 * @return the <code>String</code> index of the variable
 	 */
 	public String toString() {
-		if (name != null)
-			return name;
+		String outName = name;
+		if (name == null)
+			outName = "Var" + getIndex();
 
-		return "Var" + getIndex() + "(" + value + " )";
+		return outName + "(" + value + ")";
 	}
 
 	public void setValue(double value) {
