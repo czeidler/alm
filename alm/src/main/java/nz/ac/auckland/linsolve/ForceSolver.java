@@ -37,9 +37,9 @@ public class ForceSolver extends AbstractLinearSolver {
     protected ResultType doSolve() {
         initVariableValues();
 
-        double cooling = 1.9d;
+        double cooling = 1.d;
         final double COOLING_FACTOR = 1.d;
-        final int MAX_ITERATION = 10000;
+        final int MAX_ITERATION = 5000;
 
         for (Variable v : this.getLinearSpec().getVariables())
             v.setValue(0.0);

@@ -39,9 +39,9 @@ public class ForceSolver2 extends AbstractLinearSolver {
     protected ResultType doSolve() {
         initVariableValues();
 
-        double cooling = 1.d;
+        double cooling = 1.9d;
         final double COOLING_FACTOR = 1.d;
-        final int MAX_ITERATION = 1000;
+        final int MAX_ITERATION = 5000;
 
         for (Variable v : this.getLinearSpec().getVariables())
             v.setValue(0.0);
@@ -117,7 +117,9 @@ public class ForceSolver2 extends AbstractLinearSolver {
             error += Math.pow(constraint.error(), 2);
             nSoftConstraints++;
         }
-        return Math.sqrt(error / Math.pow(nSoftConstraints + 1, 2));
+        if (nSoftConstraints == 0)
+            return error;
+        return Math.sqrt(error / nSoftConstraints);
     }
 
     private VariableForce getVariableForce(Variable variable) {

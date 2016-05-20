@@ -41,7 +41,7 @@ public class ForceSolverPureSoft extends AbstractLinearSolver {
 
         double cooling = 1.9d;
         final double COOLING_FACTOR = 1.d;
-        final int MAX_ITERATION = 10000;
+        final int MAX_ITERATION = 1000;
 
         for (Variable v : this.getLinearSpec().getVariables())
             v.setValue(0.0);
