@@ -245,6 +245,44 @@ public class AlgebraStringTest extends BaseAlgebraTestCase {
         assertTrue(isEquivalent(data, readAlgebraData, true));
     }
 
+    public void testSimpleGrid() {
+        LayoutSpec layoutSpec = getLayoutSpec(500, 500);
+
+        XTab left = layoutSpec.getLeft();
+        YTab top = layoutSpec.getTop();
+        XTab right = layoutSpec.getRight();
+        YTab bottom = layoutSpec.getBottom();
+
+        XTab x0 = makeXTabAt(100);
+
+        YTab y0 = makeYTabAt(100);
+
+        // row1
+        layoutSpec.addArea(new Area(left, top, x0, y0));
+        layoutSpec.addArea(new Area(x0, top, right, y0));
+        // row2
+        layoutSpec.addArea(new Area(left, y0, x0, bottom));
+        layoutSpec.addArea(new Area(x0, y0, right, bottom));
+
+        assignAreaIds(layoutSpec.getAreas());
+
+        AlgebraData data = new AlgebraData(layoutSpec, null);
+
+        AlgebraSpec algebraSpec = new AlgebraSpec(data);
+        algebraSpec.compress();
+
+        System.out.println("Simple Grid:");
+        String algebraString = StringWriter.write(algebraSpec);
+        System.out.println(algebraString);
+
+        assertEquals(1, algebraSpec.getFragments().size());
+
+        AlgebraData readAlgebraData = StringReader.read(algebraString, left, top, right, bottom,
+                Parser.getDefaultAreaFactory());
+        assertTrue(readAlgebraData != null);
+        assertTrue(isEquivalent(data, readAlgebraData, true));
+    }
+
     public void testGrid() {
         LayoutSpec layoutSpec = getLayoutSpec(500, 500);
 

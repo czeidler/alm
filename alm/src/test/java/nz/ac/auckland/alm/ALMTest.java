@@ -8,7 +8,12 @@
 package nz.ac.auckland.alm;
 
 import junit.framework.TestCase;
+import nz.ac.auckland.alm.algebra.Fragment;
+import nz.ac.auckland.alm.algebra.FragmentUtils;
+import nz.ac.auckland.alm.algebra.string.Parser;
+import nz.ac.auckland.alm.algebra.string.StringReader;
 import nz.ac.auckland.linsolve.Constraint;
+import nz.ac.auckland.linsolve.ResultType;
 import nz.ac.auckland.linsolve.Summand;
 
 
@@ -253,5 +258,30 @@ public class ALMTest extends TestCase {
         clone.solve();
         // we just assume that both layouts have the same values after solving
         assertEqualClones(layoutSpec, clone);
+    }
+
+    private IArea createArea(String id) {
+        Area area = new Area();
+        area.setId(id);
+        area.setPreferredSize(200, 70);
+        area.setMinSize(200, 70);
+        return area;
+    }
+
+    private Parser.IAreaFactory areaFactory = new Parser.IAreaFactory() {
+        @Override
+        public IArea getArea(String areaId) {
+            return createArea(areaId);
+        }
+    };
+
+    private Fragment create(String algebraString) {
+        return StringReader.readRawFragments(algebraString, areaFactory).get(0);
+    }
+
+    public void testSuboptimal() throws Exception {
+        Fragment fragment = create("(A|B|C|D)/E/F/G/(((H/I)/J)|((K|L)/M))/(((N/O)/(P|Q))|((R|S)/(T|U))|((V/W)/(X|Y)))");
+        LayoutSpec layoutSpec = FragmentUtils.toLayoutSpec(fragment);
+        assertTrue(layoutSpec.solve() != ResultType.SUBOPTIMAL);
     }
 }
