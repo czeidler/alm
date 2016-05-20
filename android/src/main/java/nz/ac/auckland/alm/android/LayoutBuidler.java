@@ -16,7 +16,7 @@ import java.util.Map;
 
 
 class AreaRef {
-    public int id = -1;
+    public String id = "";
     public HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
     public VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
     public Area.Size explicitMinSize = new Area.Size(Area.Size.UNDEFINED, Area.Size.UNDEFINED);
@@ -36,11 +36,20 @@ class AreaRef {
             UNSET
         }
 
-        public Object relation;
-        public Type type;
+        private Object relation;
+        private Type type;
 
         public Relation() {
             this.type = Type.UNSET;
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public void setTo(Variable tab) {
+            this.relation = tab;
+            this.type = Type.TAB;
         }
 
         public void setTo(XTab tab) {
@@ -53,19 +62,34 @@ class AreaRef {
             this.type = Type.TAB;
         }
 
-        public void setTo(String tabName) {
+        public void setToTabName(String tabName) {
             this.relation = tabName;
             this.type = Type.TAB_NAME;
         }
 
-        public void setTo(Integer areaId) {
+        public void setToAreaId(String areaId) {
             this.relation = areaId;
             this.type = Type.AREA_ID;
         }
 
-        public void setAlignTo(Integer areaId) {
+        public void setToAlignAreaId(String areaId) {
             this.relation = areaId;
             this.type = Type.ALIGN_AREA_ID;
+        }
+
+        public Variable getTab() {
+            assert type == Type.TAB;
+            return (Variable)relation;
+        }
+
+        public String getTabName() {
+            assert type == Type.TAB_NAME;
+            return (String)relation;
+        }
+
+        public String getAreaId() {
+            assert type == Type.AREA_ID || type == Type.ALIGN_AREA_ID;
+            return (String) relation;
         }
     }
 }
@@ -146,9 +170,9 @@ class BottomDirection implements IRectDirection {
 }
 
 class LayoutBuilder {
-    static AreaRef getById(List<AreaRef> areas, int id) {
+    static AreaRef getById(List<AreaRef> areas, String id) {
         for (AreaRef area : areas) {
-            if (area.id == id)
+            if (area.id.equals(id))
                 return area;
         }
         return null;
@@ -157,42 +181,36 @@ class LayoutBuilder {
     static <Tab extends Variable> void resolveToTabs(AreaRef area, LayoutSpec layoutSpec, List<AreaRef> areas,
                                                      Map<String, Tab> map, IRectDirection direction) {
         AreaRef.Relation relation = direction.getRelation(area);
-        switch (relation.type) {
+        switch (relation.getType()) {
             case TAB:
                 break;
             case TAB_NAME:
-                String name = (String) relation.relation;
-                Variable existingTab = map.get(name);
+                String name = relation.getTabName();
+                Tab existingTab = map.get(name);
                 if (existingTab == null) {
-                    existingTab = direction.addTab(layoutSpec);
-                    map.put(name, (Tab) existingTab);
+                    existingTab = (Tab)direction.addTab(layoutSpec);
+                    map.put(name, existingTab);
                     existingTab.setName(name);
                 }
-                relation.relation = existingTab;
-                relation.type = AreaRef.Relation.Type.TAB;
+                relation.setTo(existingTab);
                 break;
             case ALIGN_AREA_ID:
             case AREA_ID:
-                AreaRef areaRef = getById(areas, (Integer)relation.relation);
+                AreaRef areaRef = getById(areas, relation.getAreaId());
                 if (areaRef == null)
-                    throw new RuntimeException("bad layout specification: can't find area " + relation.relation);
+                    throw new RuntimeException("bad layout specification: can't find area " + relation.getAreaId());
                 AreaRef.Relation opRelation;
-                if (relation.type == AreaRef.Relation.Type.AREA_ID)
+                if (relation.getType() == AreaRef.Relation.Type.AREA_ID)
                     opRelation = direction.getOppositeRelation(areaRef);
                 else
                     opRelation = direction.getRelation(areaRef);
-                if (opRelation.type == AreaRef.Relation.Type.AREA_ID
-                        && (Integer)opRelation.relation != area.id)
-                    throw new RuntimeException("bad layout specification: conflicting relations");
-                else if (opRelation.type == AreaRef.Relation.Type.TAB)
-                    existingTab = (Variable) opRelation.relation;
+                if (opRelation.getType() == AreaRef.Relation.Type.TAB)
+                    existingTab = (Tab) opRelation.getTab();
                 else {
-                    existingTab = direction.addTab(layoutSpec);
-                    opRelation.relation = existingTab;
-                    opRelation.type = AreaRef.Relation.Type.TAB;
+                    existingTab = (Tab)direction.addTab(layoutSpec);
+                    opRelation.setTo(existingTab);
                 }
-                relation.relation = existingTab;
-                relation.type = AreaRef.Relation.Type.TAB;
+                relation.setTo(existingTab);
                 break;
         }
     }
@@ -210,13 +228,13 @@ class LayoutBuilder {
 
         // set outer tabs
         for (AreaRef area : areas) {
-            if (area.left.type == AreaRef.Relation.Type.UNSET)
+            if (area.left.getType() == AreaRef.Relation.Type.UNSET)
                 area.left.setTo(layoutSpec.getLeft());
-            if (area.top.type == AreaRef.Relation.Type.UNSET)
+            if (area.top.getType() == AreaRef.Relation.Type.UNSET)
                 area.top.setTo(layoutSpec.getTop());
-            if (area.right.type == AreaRef.Relation.Type.UNSET)
+            if (area.right.getType() == AreaRef.Relation.Type.UNSET)
                 area.right.setTo(layoutSpec.getRight());
-            if (area.bottom.type == AreaRef.Relation.Type.UNSET)
+            if (area.bottom.getType() == AreaRef.Relation.Type.UNSET)
                 area.bottom.setTo(layoutSpec.getBottom());
         }
     }

@@ -41,54 +41,113 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_bottomTab
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_horizontal_alignment
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_vertical_alignment
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_minWidth
+     * @attr ref android.R.styleable#ALMLayout_Layout_layout_minHeight
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_prefWidth
      * @attr ref android.R.styleable#ALMLayout_Layout_layout_prefHeight
      */
     static public class LayoutParams extends ViewGroup.LayoutParams {
         public AreaRef areaRef = new AreaRef();
 
+        private String getIdFromAttributeValue(AttributeSet attrs, int i) {
+            String value = attrs.getAttributeValue(i);
+            if (value.startsWith("@+id/"))
+                value = value.substring("@+id/".length(), value.length());
+            if (value.startsWith("@id/"))
+                value = value.substring("@id/".length(), value.length());
+
+            return value;
+        }
+
         public LayoutParams(Context context, AttributeSet attrs) {
             super(context, attrs);
+
+            for (int i = 0; i < attrs.getAttributeCount(); i++) {
+                String attr = attrs.getAttributeName(i);
+                if (attr.equals("id")) {
+                    areaRef.id = getIdFromAttributeValue(attrs, i);
+                } else if (attr.equals("layout_toLeftOf")) {
+                    areaRef.right.setToAreaId(getIdFromAttributeValue(attrs, i));
+
+                } else if (attr.equals("layout_below")) {
+                    areaRef.top.setToAreaId(getIdFromAttributeValue(attrs, i));
+
+                } else if (attr.equals("layout_toRightOf")) {
+                    areaRef.left.setToAreaId(getIdFromAttributeValue(attrs, i));
+
+                } else if (attr.equals("layout_above")) {
+                    areaRef.bottom.setToAreaId(getIdFromAttributeValue(attrs, i));
+
+                } else if (attr.equals("layout_alignLeft")) {
+                    areaRef.left.setToAlignAreaId(getIdFromAttributeValue(attrs, i));
+
+                } else if (attr.equals("layout_alignTop")) {
+                    areaRef.top.setToAlignAreaId(getIdFromAttributeValue(attrs, i));
+
+                } else if (attr.equals("layout_alignRight")) {
+                    areaRef.right.setToAlignAreaId(getIdFromAttributeValue(attrs, i));
+
+                } else if (attr.equals("layout_alignBottom")) {
+                    areaRef.bottom.setToAlignAreaId(getIdFromAttributeValue(attrs, i));
+
+                }
+            }
+
+            /*
+            // get the view id
+            int[] attrsArray = new int[] {
+                    android.R.attr.id, // 0
+            };
+            a = context.obtainStyledAttributes(attrs, attrsArray);
+            for (int i = 0; i < a.getIndexCount(); i++) {
+                int attr = a.getIndex(i);
+                switch (attr) {
+                    case 0:
+                        areaRef.id = a.getResourceId(attr, -1);
+                        break;
+                }
+            }
+            a.recycle();*/
 
             TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ALMLayout_Layout);
             final int n = a.getIndexCount();
             for (int i = 0; i < n; i++) {
                 int attr = a.getIndex(i);
-                if (attr == R.styleable.ALMLayout_Layout_layout_toLeftOf) {
-                    areaRef.right.setTo(a.getResourceId(attr, 0));
+                /*if (attr == R.styleable.ALMLayout_Layout_layout_toLeftOf) {
+                    areaRef.right.setToAreaId(a.getResourceId(attr, 0));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_below) {
-                    areaRef.top.setTo(a.getResourceId(attr, 0));
+                    areaRef.top.setToAreaId(a.getResourceId(attr, 0));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_toRightOf) {
-                    areaRef.left.setTo(a.getResourceId(attr, 0));
+                    areaRef.left.setToAreaId(a.getResourceId(attr, 0));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_above) {
-                    areaRef.bottom.setTo(a.getResourceId(attr, 0));
+                    areaRef.bottom.setToAreaId(a.getResourceId(attr, 0));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_alignLeft) {
-                    areaRef.left.setAlignTo(a.getResourceId(attr, 0));
+                    areaRef.left.setToAlignAreaId(a.getResourceId(attr, 0));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_alignTop) {
-                    areaRef.top.setAlignTo(a.getResourceId(attr, 0));
+                    areaRef.top.setToAlignAreaId(a.getResourceId(attr, 0));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_alignRight) {
-                    areaRef.right.setAlignTo(a.getResourceId(attr, 0));
+                    areaRef.right.setToAlignAreaId(a.getResourceId(attr, 0));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_alignBottom) {
-                    areaRef.bottom.setAlignTo(a.getResourceId(attr, 0));
+                    areaRef.bottom.setToAlignAreaId(a.getResourceId(attr, 0));
 
-                } else if (attr == R.styleable.ALMLayout_Layout_layout_leftTab) {
-                    areaRef.left.setTo(a.getString(attr));
+                } else */if (attr == R.styleable.ALMLayout_Layout_layout_leftTab) {
+                    areaRef.left.setToTabName(a.getString(attr));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_topTab) {
-                    areaRef.top.setTo(a.getString(attr));
+                    areaRef.top.setToTabName(a.getString(attr));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_rightTab) {
-                    areaRef.right.setTo(a.getString(attr));
+                    areaRef.right.setToTabName(a.getString(attr));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_bottomTab) {
-                    areaRef.bottom.setTo(a.getString(attr));
+                    areaRef.bottom.setToTabName(a.getString(attr));
 
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_horizontal_alignment) {
                     switch (a.getInteger(attr, 0)) {
@@ -130,20 +189,6 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
                     areaRef.explicitPrefSize.setWidth(a.getDimensionPixelSize(attr, Area.Size.UNDEFINED));
                 } else if (attr == R.styleable.ALMLayout_Layout_layout_prefHeight) {
                     areaRef.explicitPrefSize.setHeight(a.getDimensionPixelSize(attr, Area.Size.UNDEFINED));
-                }
-            }
-            a.recycle();
-
-            int[] attrsArray = new int[] {
-                    android.R.attr.id, // 0
-            };
-            a = context.obtainStyledAttributes(attrs, attrsArray);
-            for (int i = 0; i < a.getIndexCount(); i++) {
-                int attr = a.getIndex(i);
-                switch (attr) {
-                    case 0:
-                        areaRef.id = a.getResourceId(attr, -1);
-                        break;
                 }
             }
             a.recycle();
@@ -361,8 +406,8 @@ public class ALMLayout extends ViewGroup implements IALMLayoutSpecs {
             LayoutParams params = (LayoutParams)child.getLayoutParams();
             AreaRef areaRef = params.areaRef;
 
-            Area area = layoutSpec.addArea((XTab)areaRef.left.relation, (YTab)areaRef.top.relation,
-                    (XTab)areaRef.right.relation, (YTab)areaRef.bottom.relation);
+            Area area = layoutSpec.addArea((XTab)areaRef.left.getTab(), (YTab)areaRef.top.getTab(),
+                    (XTab)areaRef.right.getTab(), (YTab)areaRef.bottom.getTab());
 
             area.setMinSize(viewInfoParser.getMinSize(child, areaRef.explicitMinSize));
             area.setPreferredSize(viewInfoParser.getPreferredSize(child, areaRef.explicitPrefSize));
