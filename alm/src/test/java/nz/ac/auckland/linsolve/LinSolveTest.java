@@ -245,6 +245,9 @@ public class LinSolveTest extends TestCase {
         }
         benchmark(new KaczmarzLeastSquares(), linearSpec, n);
         benchmark(new ForceSolver(), linearSpec, n);
+        benchmark(new ForceSolverPureSoft(), linearSpec, n);
+        benchmark(new ForceSolver2(), linearSpec, n);
+        benchmark(new ForceSolver3(), linearSpec, n);
         benchmark(new OJAlgoSolver(), linearSpec, n);
 
         for (int i = 0; i < variableList.size(); i++) {
