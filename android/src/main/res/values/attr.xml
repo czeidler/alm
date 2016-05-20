@@ -25,5 +25,9 @@
             <enum name="center" value="3"/>
             <enum name="fill" value="4"/>
         </attr>
+        <attr name="layout_minWidth" format="dimension" />
+        <attr name="layout_minHeight" format="dimension" />
+        <attr name="layout_prefWidth" format="dimension" />
+        <attr name="layout_prefHeight" format="dimension" />
     </declare-styleable>
 </resources>
