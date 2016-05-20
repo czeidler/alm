@@ -1,7 +1,7 @@
 package nz.ac.auckland.alm.swing;
 
 import nz.ac.auckland.alm.*;
-import nz.ac.auckland.linsolve.AbstractLinearSolver;
+import nz.ac.auckland.linsolve.LinearSolver;
 
 import java.awt.*;
 import java.awt.Dimension;
@@ -60,7 +60,7 @@ public class ALMLayout implements LayoutManager2 {
     }
 
     /** Creates a new layout engine with a specific solver. */
-    public ALMLayout(AbstractLinearSolver solver) {
+    public ALMLayout(LinearSolver solver) {
         layoutSpec = new LayoutSpec(solver);
     }
 
