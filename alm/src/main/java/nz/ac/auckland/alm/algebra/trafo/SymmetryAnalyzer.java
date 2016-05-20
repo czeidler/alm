@@ -148,7 +148,7 @@ public class SymmetryAnalyzer {
     static public int symmetryValueRecursive(Fragment fragment) {
         int value = symmetryValue(fragment);
         if (value != 0)
-            return value * FragmentUtils.countAreas(fragment);
+            return value * (int)Math.pow(FragmentUtils.countAreas(fragment), 2);
 
         for (IArea area : (Iterable<IArea>)fragment.getItems()) {
             if (!(area instanceof Fragment))
@@ -160,8 +160,8 @@ public class SymmetryAnalyzer {
 
     static public float symmetryClassifier(Fragment fragment) {
         float count = symmetryValueRecursive(fragment);
-        int maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        return count / maxCount;
+        int maxCount = (int)Math.pow(FragmentUtils.countAreas(fragment), 2) * FragmentUtils.countLevels(fragment);
+        return (float)Math.sqrt(count / maxCount);
     }
 
     static public int symmetryCountSameChildrenSize(Fragment fragment) {

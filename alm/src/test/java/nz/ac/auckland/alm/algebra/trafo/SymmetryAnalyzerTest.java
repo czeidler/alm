@@ -97,71 +97,92 @@ public class SymmetryAnalyzerTest extends TestCase  {
         assertEquals(4, summedFragmentWeightSameOrientation);
     }
 
+    private int symmetryMaxCount(Fragment fragment) {
+        return (int)Math.pow(FragmentUtils.countAreas(fragment), 2) * FragmentUtils.countLevels(fragment);
+    }
+
     public void testSymmetryClassifier() throws Exception {
         Fragment fragment = create("(A|B)/(C/D)");
         int count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        int maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
+        int maxCount = symmetryMaxCount(fragment);
         assertEquals(0, count);
-        assertEquals(4, maxCount);
+        //assertEquals(16, maxCount);
 
         fragment = create("(A|B)/(C|D)");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(4, count);
-        assertEquals(4, maxCount);
-
-        fragment = create("((A/B)|(A/B))/((A/B)|(A/B))");
-        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
+        maxCount = symmetryMaxCount(fragment);
         assertEquals(16, count);
         assertEquals(16, maxCount);
 
+        fragment = create("((A/B)|(A/B))/((A/B)|(A/B))");
+        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(128, count);
+        assertEquals(128, maxCount);
+
         fragment = create("((A/B)|(A/B))/((A/B)|(A|B))");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(4, count);
-        assertEquals(16, maxCount);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(16, count);
+        assertEquals(128, maxCount);
 
         fragment = create("(T/E)/(T/E)/(T/E)/(T/E)/(T/E)/(T/E)");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(12, count);
-        assertEquals(12, maxCount);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(144, count);
+        assertEquals(144, maxCount);
 
         fragment = create("(T/E)/(T/E)");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(4, count);
-        assertEquals(4, maxCount);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(16, count);
+        assertEquals(16, maxCount);
 
         fragment = create("((T/T)/E)/((T/T)/E)");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(12, count);
-        assertEquals(12, maxCount);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(72, count);
+        assertEquals(72, maxCount);
 
         fragment = create("S/T/S/((T/E)/(T/E))/(((T/T)/E)/((T/T)/E))/((T/E)/(T/E)/(T/E)/(T/E)/(T/E)/(T/E))");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(28, count);
-        assertEquals(75, maxCount);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(232, count);
+        assertEquals(1875, maxCount);
 
         fragment = create("(A/(B|(C/D/E)))/F");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
+        maxCount = symmetryMaxCount(fragment);
         assertEquals(0, count);
-        assertEquals(18, maxCount);
+        assertEquals(108, maxCount);
 
         fragment = create("(((D|E)/F)|((G|H)/I))/(((J|K)/L)|((M|N)/O))/(((P|Q)/R)|((S|T)/U))");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(54, count);
-        assertEquals(54, maxCount);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(972, count);
+        assertEquals(972, maxCount);
 
         fragment = create("(((D|E)/F)/((G|H)/I)/((J|K)/L)/((M|N)/O))|(((P|Q)/R)/((S|T)/U))");
         count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
-        maxCount = FragmentUtils.countAreas(fragment) * FragmentUtils.countLevels(fragment);
-        assertEquals(36, count);
-        assertEquals(54, maxCount);
+        maxCount = symmetryMaxCount(fragment);
+        assertEquals(360, count);
+        assertEquals(972, maxCount);
+
+        fragment = create("((A|B|C|D)/(E|F|G|H))|((I|J|K|L)/(M|N|O|P)/(Q|R|S|T)/(U|V|W|X)/(Y|Z|A1|B1))");
+        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
+        maxCount = symmetryMaxCount(fragment);
+
+        fragment = create("(A|B|C|D)|((E|F|G|H)/(I|J|K|L)/(M|N|O|P)/(Q|R|S|T)/(U|V|W|X)/(Y|Z|A1|B1))");
+        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
+        maxCount = symmetryMaxCount(fragment);
+
+        fragment = create("((A|B|C|D)|(E|F|G|H))/((I|J|K|L)|(M|N|O|P))/((Q|R|S|T)|(U|V|W|X))/(Y|Z|A1|B1)");
+        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
+        maxCount = symmetryMaxCount(fragment);
+
+        fragment = create("((A|B|C|D)|(E|F|G|H))/((I|J|K|L)|(M|N|O|P))/((Q|R|S|T)|(U|V|W|X))/(Y|Z|A1|B1)");
+        count = SymmetryAnalyzer.symmetryValueRecursive(fragment);
+        maxCount = symmetryMaxCount(fragment);
+
     }
 }

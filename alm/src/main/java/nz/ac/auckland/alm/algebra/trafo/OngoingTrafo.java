@@ -32,15 +32,15 @@ public class OngoingTrafo<T> {
         /**
          * For example, if there are 10 trafo values, the array [2,3,5,1] will be encoded to the number 2351
          *
-         * @param trafoValues
+         * @param entries
          * @param nTrafoValues the number of possible trafo values
          * @return
          */
-        static int toPermutation(int[] trafoValues, int nTrafoValues) {
+        static int toPermutation(int[] entries, int nTrafoValues) {
             int out = 0;
-            for (int i = 0; i < trafoValues.length; i++) {
-                int index = trafoValues[i];
-                out += index * Math.pow(nTrafoValues, (trafoValues.length - 1 - i));
+            for (int i = 0; i < entries.length; i++) {
+                int index = entries[i];
+                out += index * Math.pow(nTrafoValues, (entries.length - 1 - i));
             }
             return out;
         }
@@ -55,12 +55,11 @@ public class OngoingTrafo<T> {
          */
         static int[] fromPermutation(int permutation, int nEntries, int nTrafoValues) {
             int[] trafoValues = new int[nEntries];
-            for (int i = 0; i < nEntries - 1; i++) {
+            for (int i = 0; i < nEntries; i++) {
                 int positionValue = (int)Math.pow(nTrafoValues, (nEntries - 1 - i));
                 trafoValues[i] = permutation / positionValue;
                 permutation -= positionValue * trafoValues[i];
             }
-            trafoValues[nEntries - 1] = permutation;
             return trafoValues;
         }
     }

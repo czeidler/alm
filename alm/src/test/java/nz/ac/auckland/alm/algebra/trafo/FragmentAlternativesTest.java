@@ -104,6 +104,18 @@ public class FragmentAlternativesTest extends TestCase {
         assertEquals(22, results.size());
     }*/
 
+    IAlternativeClassifier<Object> classifierSimple = new IAlternativeClassifier<Object>() {
+        @Override
+        public Object classify(Fragment fragment, TrafoHistory trafoHistory) {
+            return null;
+        }
+
+        @Override
+        public double objectiveValue(Object classification) {
+            return 0;
+        }
+    };
+
     class Classification {
         public TrafoHistory trafoHistory;
         public double prefWidth;
@@ -117,9 +129,6 @@ public class FragmentAlternativesTest extends TestCase {
     }
 
     IAlternativeClassifier<Classification> classifier = new IAlternativeClassifier<Classification>() {
-        VerticalToHorizontalTrafo verticalToHorizontalTrafo = new VerticalToHorizontalTrafo();
-        HorizontalToVerticalTrafo horizontalToVerticalTrafo = new HorizontalToVerticalTrafo();
-
         @Override
         public Classification classify(Fragment fragment, TrafoHistory history) {
             Classification classification = new Classification();
@@ -146,17 +155,6 @@ public class FragmentAlternativesTest extends TestCase {
         }
 
         @Override
-        public List<ITransformation> selectTransformations(Fragment fragment, Classification classification) {
-            List<ITransformation> trafos = new ArrayList<ITransformation>();
-
-            //if (classification.diffWidth > classification.diffHeight)
-            trafos.add(verticalToHorizontalTrafo);
-            //else
-            trafos.add(horizontalToVerticalTrafo);
-            return trafos;
-        }
-
-        @Override
         public double objectiveValue(Classification classification) {
             double prefSizeDiffTerm = classification.getDiffSize() / (SCREEN_HEIGHT_LAND * SCREEN_WIDTH_LAND);
             double ratioTerm = (classification.prefWidth / classification.prefHeight)
@@ -168,8 +166,11 @@ public class FragmentAlternativesTest extends TestCase {
     public void testFragmentAlternatives3() {
         FragmentAlternatives fragmentAlternatives = new FragmentAlternatives(classifier, new GroupDetector(comparator));
         SwapTrafo swapTrafo = new SwapTrafo();
+        ColumnFlowTrafo columnFlowTrafo = new ColumnFlowTrafo();
+        InverseRowFlowTrafo inverseRowFlowTrafo = new InverseRowFlowTrafo();
         fragmentAlternatives.addTrafo(swapTrafo);
-        //fragmentAlternatives.addTrafo(new ColumnFlowTrafo());
+        fragmentAlternatives.addTrafo(columnFlowTrafo);
+        fragmentAlternatives.addTrafo(inverseRowFlowTrafo);
         List<ITransformation> trafos = fragmentAlternatives.getTrafos();
 
         //Fragment fragment = create("(B|C)/A/A");
@@ -180,13 +181,16 @@ public class FragmentAlternativesTest extends TestCase {
         //Fragment fragment = create("((A|B)/(C|D))/((E|F)/(G|H))");
         //Fragment fragment = create("A/B/A/B/A");
         //Fragment fragment = create("(A|A|A)/(A|A|A)/G/(A|A|A)");
-        Fragment fragment = create("S/T/S/T/E/T/E/T/T/E/T/T/E/T/E/T/E/T/E/T/E/T/E/T/E");
+        //Fragment fragment = create("S/T/S/T/E/T/E/T/T/E/T/T/E/T/E/T/E/T/E/T/E/T/E/T/E");
+        Fragment fragment = create("(T|T|T)/((T|E)/(T|E)/(T|E)/(T|E)/(T|E)/(T|E))/S/(T|T|T|T)/S/E");
         //Fragment fragment = create("T/T/E/T/T/E/T/E/T/E");
         //Fragment fragment = create("(((T/T)/E)/((T/T)/E))/((T/E)/(T/E))");
 
         IPermutationSelector<Classification> selector
                 = new ChainPermutationSelector<Classification>(
                 new ApplyToAllPermutationSelector<Classification>(trafos, swapTrafo),
+                new ApplyToAllPermutationSelector<Classification>(trafos, columnFlowTrafo),
+                new ApplyToAllPermutationSelector<Classification>(trafos, inverseRowFlowTrafo),
                 new RandomPermutationSelector<Classification>(trafos));
 
         List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector, 30,
@@ -194,6 +198,72 @@ public class FragmentAlternativesTest extends TestCase {
         for (FragmentAlternatives.Result result : results)
             System.out.println(result.fragment);
         System.out.println(results.size());
+    }
+
+    public void testFragmentAlternativesSimpleClassification() {
+        FragmentAlternatives fragmentAlternatives = new FragmentAlternatives(classifierSimple,
+                new GroupDetector(comparator));
+        SwapTrafo swapTrafo = new SwapTrafo();
+        ColumnFlowTrafo columnFlowTrafo = new ColumnFlowTrafo();
+        InverseRowFlowTrafo inverseRowFlowTrafo = new InverseRowFlowTrafo();
+        fragmentAlternatives.addTrafo(swapTrafo);
+        fragmentAlternatives.addTrafo(columnFlowTrafo);
+        fragmentAlternatives.addTrafo(inverseRowFlowTrafo);
+        List<ITransformation> trafos = fragmentAlternatives.getTrafos();
+
+        //Fragment fragment = create("(B|C)/A/A");
+        //Fragment fragment = create("A|B");
+        //Fragment fragment = create("(A|B)/(C|D)");
+        //Fragment fragment = create("(A|B)/C");
+        //Fragment fragment = create("(A/B/C)|D");
+        //Fragment fragment = create("((A|B)/(C|D))/((E|F)/(G|H))");
+        //Fragment fragment = create("A/B/A/B/A");
+        //Fragment fragment = create("(A|A|A)/(A|A|A)/G/(A|A|A)");
+        //Fragment fragment = create("S/T/S/T/E/T/E/T/T/E/T/T/E/T/E/T/E/T/E/T/E/T/E/T/E");
+        Fragment fragment = create("(T|T|T)/((T|E)/(T|E)/(T|E)/(T|E)/(T|E)/(T|E))/S/(T|T|T|T)/S/E");
+        //Fragment fragment = create("T/T/E/T/T/E/T/E/T/E");
+        //Fragment fragment = create("(((T/T)/E)/((T/T)/E))/((T/E)/(T/E))");
+
+        IPermutationSelector<Object> selector
+                = new ChainPermutationSelector<Object>(
+                new ApplyToAllPermutationSelector<Object>(trafos, swapTrafo),
+                new ApplyToAllPermutationSelector<Object>(trafos, columnFlowTrafo),
+                new ApplyToAllPermutationSelector<Object>(trafos, inverseRowFlowTrafo),
+                new RandomPermutationSelector<Object>(trafos));
+
+        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector, 30000,
+                1000 * 60);
+        for (FragmentAlternatives.Result result : results)
+            System.out.println(result.fragment);
+        System.out.println(results.size());
+    }
+
+    public void testFragmentAlternativesPermutations() {
+        FragmentAlternatives fragmentAlternatives = new FragmentAlternatives(classifierSimple,
+                new GroupDetector(comparator));
+        SwapTrafo swapTrafo = new SwapTrafo();
+        ColumnFlowTrafo columnFlowTrafo = new ColumnFlowTrafo();
+        InverseRowFlowTrafo inverseRowFlowTrafo = new InverseRowFlowTrafo();
+        fragmentAlternatives.addTrafo(swapTrafo);
+        fragmentAlternatives.addTrafo(columnFlowTrafo);
+        fragmentAlternatives.addTrafo(inverseRowFlowTrafo);
+        List<ITransformation> trafos = fragmentAlternatives.getTrafos();
+
+        IPermutationSelector<Object> selector
+                = new ChainPermutationSelector<Object>(
+                new ApplyToAllPermutationSelector<Object>(trafos, swapTrafo),
+                new ApplyToAllPermutationSelector<Object>(trafos, columnFlowTrafo),
+                new ApplyToAllPermutationSelector<Object>(trafos, inverseRowFlowTrafo),
+                new RandomPermutationSelector<Object>(trafos));
+
+        Fragment fragment = create("A|B");
+        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector,
+                30000, 1000 * 60);
+        assertEquals(1, results.size());
+
+        fragment = create("A/B/C/D");
+        results = fragmentAlternatives.calculateAlternatives(fragment, selector, 30000, 1000 * 60);
+        assertEquals(8, results.size());
     }
 
 

@@ -64,12 +64,19 @@ public class FragmentAlternatives<T> {
     }
 
     private void addResult(List<Result<T>> results, Result<T> result) {
-        if (classifier.objectiveValue(result.classification) >= IAlternativeClassifier.INVALID_OBJECTIVE)
+        double classificationValue = classifier.objectiveValue(result.classification);
+        if (classificationValue >= IAlternativeClassifier.INVALID_OBJECTIVE)
             return;
-        for (Result<T> existingResult : results) {
-            // todo add better result?
-            if (existingResult.fragment.isEquivalent(result.fragment))
+        for (int i = 0; i < results.size(); i++) {
+            Result<T> existingResult = results.get(i);
+            if (existingResult.fragment.isEquivalent(result.fragment)) {
+                // use the better result
+                if (classificationValue < classifier.objectiveValue(existingResult.classification)) {
+                    results.remove(i);
+                    results.add(result);
+                }
                 return;
+            }
         }
         results.add(result);
     }
@@ -79,7 +86,8 @@ public class FragmentAlternatives<T> {
         public int compare(OngoingTrafo<T> ongoingTrafo, OngoingTrafo<T> ongoingTrafo1) {
             Integer nTrafos0 = ongoingTrafo.getTrafoHistory().getNTrafos();
             Integer nTrafos1= ongoingTrafo1.getTrafoHistory().getNTrafos();
-            if (nTrafos0 >= 1 || nTrafos1 >= 1)
+            int minTrafos = 1;
+            if ((nTrafos0 < minTrafos && nTrafos1 >= minTrafos) || (nTrafos0 >= minTrafos && nTrafos1 < minTrafos))
                 return nTrafos0.compareTo(nTrafos1);
 
             int priorityComparison = -((Integer)ongoingTrafo.getSelector().getPriority()).compareTo(
@@ -154,11 +162,14 @@ public class FragmentAlternatives<T> {
                     needsSorting = true;
                 }
             }
-            if (System.currentTimeMillis() - startTime > maxTimes)
+            if (System.currentTimeMillis() - startTime > maxTimes) {
+                System.out.println("time expired");
                 break;
+            }
             if (needsSorting)
                 Collections.sort(ongoingTrafos, ongoingTrafoComparator);
         }
+        System.out.println("time: " + (System.currentTimeMillis() - startTime) + "ms");
         return results;
     }
 

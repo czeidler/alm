@@ -1,5 +1,5 @@
 /*
- * Copyright 2015.
+ * Copyright 2016.
  * Distributed under the terms of the GPLv3 License.
  *
  * Authors:
