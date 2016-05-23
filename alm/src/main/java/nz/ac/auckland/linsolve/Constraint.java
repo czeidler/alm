@@ -231,7 +231,7 @@ public class Constraint implements Cloneable {
             if (i == -1)
                 throw new RuntimeException("Constraint not part of linearSpec.constraints.");
         }
-        return i + 1;
+        return i;
     }
 
     /**
