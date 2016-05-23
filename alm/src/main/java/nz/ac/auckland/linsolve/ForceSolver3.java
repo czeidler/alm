@@ -143,7 +143,7 @@ public class ForceSolver3 extends AbstractLinearSolver {
         }
         // add contribution from inequalities
         for (Constraint constraint : getLinearSpec().getConstraints()) {
-            if (constraint.getOp() == OperatorType.EQ)
+            if (constraint.getOp() == OperatorType.EQ || isSatisfied(constraint))
                 continue;
 
             double p = getKaczmarzProjection(constraint);
@@ -152,8 +152,8 @@ public class ForceSolver3 extends AbstractLinearSolver {
                 VariableForce variableForce = getVariableForce(variable);
 
                 double displacement = p * summand.getCoeff();
-                if (variableForce.nForces > 0 && !sameSign(variableForce.forceSum, displacement)
-                        && !isSatisfied(constraint))
+                if (!sameSign(variableForce.forceSum, displacement)
+                        || Math.abs(variableForce.getZeroForceDisplacement()) < Math.abs(displacement))
                     variableForce.addForce(getK(constraint.getPenalty()), displacement);
             }
         }
