@@ -14,6 +14,11 @@ import java.util.List;
 
 public class BottomDirection extends AbstractVerticalDirection {
   @Override
+  public String toString() {
+    return "BottomDirection";
+  }
+
+  @Override
   public YTab getTab(IArea area) {
     return area.getBottom();
   }

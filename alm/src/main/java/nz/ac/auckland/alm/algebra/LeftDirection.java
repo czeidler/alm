@@ -14,6 +14,11 @@ import java.util.List;
 
 public class LeftDirection extends AbstractHorizontalDirection {
   @Override
+  public String toString() {
+    return "LeftDirection";
+  }
+
+  @Override
   public XTab getTab(IArea area) {
     return area.getLeft();
   }

@@ -14,6 +14,11 @@ import java.util.List;
 
 public class TopDirection extends AbstractVerticalDirection {
   @Override
+  public String toString() {
+    return "TopDirection";
+  }
+
+  @Override
   public YTab getTab(IArea area) {
     return area.getTop();
   }
