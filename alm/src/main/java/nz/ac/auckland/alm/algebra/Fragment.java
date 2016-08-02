@@ -126,10 +126,25 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     public String hash() {
         String hash = "";
         if (direction != null)
-            hash += direction.getClass().getSimpleName();
+            hash += direction.toString();
         for (IArea item : getItems()) {
             if (item instanceof Fragment)
                 hash += "(" + ((Fragment) item).hash() + ")";
+            else
+                hash += item.hashCode();
+        }
+        return hash;
+    }
+
+    public String hashResolved() {
+        BaseIterator iterator = new BaseIterator(this);
+        String hash = "";
+        if (direction != null)
+            hash += direction.toString();
+        while (iterator.hasNext()) {
+            IArea item = iterator.next();
+            if (item instanceof Fragment)
+                hash += "(" + ((Fragment) item).hashResolved() + ")";
             else
                 hash += item.hashCode();
         }
@@ -207,7 +222,7 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
      * @param resolve merges sub fragments if true
      * @return a copy of the fragment
      */
-    private Fragment cloneResolve(boolean resolve) {
+    public Fragment cloneResolve(boolean resolve) {
         Fragment clone = Fragment.createEmptyFragment(getDirection());
         for (IArea child : getItems()) {
             if (child instanceof Fragment) {

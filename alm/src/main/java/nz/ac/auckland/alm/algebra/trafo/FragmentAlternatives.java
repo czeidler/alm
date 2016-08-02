@@ -63,22 +63,19 @@ public class FragmentAlternatives<T> {
         return child;
     }
 
-    private void addResult(List<Result<T>> results, Result<T> result) {
+    private void addResult(Map<String, Result<T>> results, String resultHashResolved, Result<T> result) {
         double classificationValue = classifier.objectiveValue(result.classification);
         if (classificationValue >= IAlternativeClassifier.INVALID_OBJECTIVE)
             return;
-        for (int i = 0; i < results.size(); i++) {
-            Result<T> existingResult = results.get(i);
-            if (existingResult.fragment.isEquivalent(result.fragment)) {
-                // use the better result
-                if (classificationValue < classifier.objectiveValue(existingResult.classification)) {
-                    results.remove(i);
-                    results.add(result);
-                }
-                return;
+        Result<T> existingResult = results.get(resultHashResolved);
+        if (existingResult != null) {
+            if (classificationValue < classifier.objectiveValue(existingResult.classification)) {
+                results.remove(resultHashResolved);
+                results.put(resultHashResolved, result);
             }
+            return;
         }
-        results.add(result);
+        results.put(resultHashResolved, result);
     }
 
     class OngoingTrafoComparator implements Comparator<OngoingTrafo<T>> {
@@ -142,7 +139,9 @@ public class FragmentAlternatives<T> {
         List<OngoingTrafo<T>> ongoingTrafos = new ArrayList<OngoingTrafo<T>>();
         OngoingTrafoComparator ongoingTrafoComparator = new OngoingTrafoComparator();
         spawnOngoing(ongoingTrafos, root, true);
-        List<Result<T>> results = new ArrayList<Result<T>>();
+        Map<String, Result<T>> results = new HashMap<String, Result<T>>();
+        long testedAlternatives = 0;
+        String fragmentHashResolved = fragment.hashResolved();
         long startTime = System.currentTimeMillis();
         while (ongoingTrafos.size() > 0 && results.size() < maxResults) {
             OngoingTrafo<T> current = ongoingTrafos.get(0);
@@ -154,8 +153,10 @@ public class FragmentAlternatives<T> {
             for (OngoingTrafo<T> newResult : newResults) {
                 Result<T> result = new Result<T>(newResult.getTrafoHistory(), newResult.getAlternative(),
                         newResult.getClassification());
-                if (!result.fragment.isEquivalent(fragment))
-                    addResult(results, result);
+                testedAlternatives++;
+                String resultFragmentHash = result.fragment.hashResolved();
+                if (!fragmentHashResolved.equals(resultFragmentHash))
+                    addResult(results, resultFragmentHash, result);
 
                 if (newResult.getFragmentRefs().size() > 0) {
                     spawnOngoing(ongoingTrafos, newResult, false);
@@ -169,8 +170,9 @@ public class FragmentAlternatives<T> {
             if (needsSorting)
                 Collections.sort(ongoingTrafos, ongoingTrafoComparator);
         }
-        System.out.println("time: " + (System.currentTimeMillis() - startTime) + "ms");
-        return results;
+        System.out.println("Time to calculate alternatives: " + (System.currentTimeMillis() - startTime) + "ms, "
+            + testedAlternatives + " alternatives tested");
+        return new ArrayList<Result<T>>(results.values());
     }
 
     public List<OngoingTrafo<T>> performTransformations(OngoingTrafo<T> ongoingTrafo) {
