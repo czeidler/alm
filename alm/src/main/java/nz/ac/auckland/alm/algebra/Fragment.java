@@ -1,5 +1,5 @@
 /*
- * Copyright 2015.
+ * Copyright 2015-2016.
  * Distributed under the terms of the GPLv3 License.
  *
  * Authors:
@@ -207,7 +207,7 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
      * @param resolve merges sub fragments if true
      * @return a copy of the fragment
      */
-    public Fragment cloneResolve(boolean resolve) {
+    private Fragment cloneResolve(boolean resolve) {
         Fragment clone = Fragment.createEmptyFragment(getDirection());
         for (IArea child : getItems()) {
             if (child instanceof Fragment) {
@@ -247,8 +247,9 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
     }
 
     public boolean isEquivalent(Fragment fragment) {
-        Fragment resolvedCopy = cloneResolve(true);
-        return resolvedCopy.isEquivalentResolved(fragment.cloneResolve(true));
+        return isEquivalentQuick(fragment);
+        //Fragment resolvedCopy = cloneResolve(true);
+        //return resolvedCopy.isEquivalentResolved(fragment.cloneResolve(true));
     }
 
     /**
@@ -271,6 +272,91 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
                     return false;
             } else if (ours != theirs)
                 return false;
+        }
+        return true;
+    }
+
+    private static class BaseIterator implements Iterator<IArea> {
+        final Fragment fragment;
+        int position = -1;
+        BaseIterator nestedIterator;
+
+        public BaseIterator(Fragment fragment) {
+            this.fragment = fragment;
+            goToNext();
+        }
+
+        private void goToNext() {
+            position++;
+            if (position >= fragment.size()) {
+                position = -1;
+                return;
+            }
+
+            IArea next = fragment.getItemAt(position);
+            if (!(next instanceof Fragment))
+                return;
+            if (fragment.size() == 1) {
+                nestedIterator = new BaseIterator((Fragment) fragment.getItemAt(0));
+                return;
+            }
+            Fragment child = (Fragment) next;
+            if (child.getDirection() == fragment.getDirection())
+                nestedIterator = new BaseIterator(child);
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (nestedIterator != null) {
+                if (nestedIterator.hasNext())
+                    return true;
+                else {
+                    nestedIterator = null;
+                    goToNext();
+                }
+            }
+            if (position < 0)
+                return false;
+            return true;
+        }
+
+        @Override
+        public IArea next() {
+            if (nestedIterator != null)
+                return nestedIterator.next();
+            IArea current = fragment.getItemAt(position);
+            goToNext();
+            return current;
+        }
+
+        @Override
+        public void remove() {
+
+        }
+    }
+
+    private boolean isEquivalentQuick(Fragment fragment) {
+        BaseIterator iterThis = new BaseIterator(this);
+        BaseIterator iterOther = new BaseIterator(fragment);
+
+        while (iterThis.hasNext()) {
+            if (!iterOther.hasNext())
+                return false;
+            IArea childThis = iterThis.next();
+            IArea childOther = iterOther.next();
+            if (childThis instanceof Fragment) {
+                if (!(childOther instanceof Fragment))
+                    return false;
+                if (((Fragment) childThis).getDirection() != ((Fragment) childOther).getDirection())
+                    return false;
+                if (!((Fragment) childThis).isEquivalentQuick((Fragment)childOther))
+                    return false;
+            } else {
+                if (childOther instanceof Fragment)
+                    return false;
+                if (childThis != childOther)
+                    return false;
+            }
         }
         return true;
     }
