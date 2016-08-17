@@ -111,8 +111,8 @@ public class FragmentAlternativesTest extends TestCase {
         }
 
         @Override
-        public void fineClassify(Fragment fragment, Object classification) {
-
+        public boolean fineClassify(Fragment fragment, Object classification) {
+            return true;
         }
 
         @Override
@@ -160,8 +160,8 @@ public class FragmentAlternativesTest extends TestCase {
         }
 
         @Override
-        public void fineClassify(Fragment fragment, Classification classification) {
-
+        public boolean fineClassify(Fragment fragment, Classification classification) {
+            return true;
         }
 
         @Override

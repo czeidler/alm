@@ -92,14 +92,14 @@ public class Classifier implements IAlternativeClassifier<Classification> {
   }
 
   @Override
-  public void fineClassify(Fragment fragment, Classification classification) {
+  public boolean fineClassify(Fragment fragment, Classification classification) {
     LayoutSpec layoutSpec = FragmentUtils.toLayoutSpec(fragment);
 
     long start = System.currentTimeMillis();
     classification.minSize = layoutSpec.getMinSize();
     if (isInvalid(classification)) {
       layoutSpec.release();
-      return;
+      return false;
     }
     System.out.println("min size solve time: " + (System.currentTimeMillis() - start));
     classification.prefSize = layoutSpec.getPreferredSize();
@@ -130,10 +130,11 @@ public class Classifier implements IAlternativeClassifier<Classification> {
     classification.childrenPrefDiff2Height /= areas.size();
 
     classification.symmetryTerm = 1.f - SymmetryAnalyzer.symmetryClassifier(fragment);
+    return true;
   }
 
   private boolean hasFineClassification(Classification classification) {
-    return classification.minSize != null;
+    return classification.minSize != null && classification.prefSize != null;
   }
 
   private boolean isInvalid(Classification classification) {
@@ -160,17 +161,23 @@ public class Classifier implements IAlternativeClassifier<Classification> {
   }
 
   public double getPrefSizeDiffTerm(nz.ac.auckland.alm.algebra.trafo.Classification classification) {
+    if (!hasFineClassification(classification))
+      return INVALID_OBJECTIVE;
     return (classification.childrenPrefDiff2Width + classification.childrenPrefDiff2Height)
             / (Math.pow(targetWidth, 2) + Math.pow(targetHeight, 2));
   }
 
   public double getMinSizeTerm(nz.ac.auckland.alm.algebra.trafo.Classification classification) {
+    if (!hasFineClassification(classification))
+      return INVALID_OBJECTIVE;
     return (Math.pow(classification.minSize.getWidth(), 2)
             + Math.pow(classification.minSize.getHeight(), 2))
             / (Math.pow(targetWidth, 2) + Math.pow(targetHeight, 2));
   }
 
   public double getRatioTerm(nz.ac.auckland.alm.algebra.trafo.Classification classification) {
+    if (!hasFineClassification(classification))
+      return INVALID_OBJECTIVE;
     double ratio = classification.prefSize.getWidth() / classification.prefSize.getHeight();
     double targetRatio = targetWidth / targetHeight;
     // assume a height of 1 and compare the resulting width, i.e. the ratios

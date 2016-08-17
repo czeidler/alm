@@ -182,11 +182,13 @@ public class FragmentAlternatives<T> {
         System.out.println("Time to calculate alternatives (coarse): " + (System.currentTimeMillis() - startTime)
                 + "ms");
         List<Result<T>> coarseResults = new ArrayList<Result<T>>(results.values());
+        List<Result<T>> fineResults = new ArrayList<Result<T>>();
         for (int i = 0; i < Math.min(maxFineResults, coarseResults.size()); i++) {
             Result<T> result = coarseResults.get(i);
-            classifier.fineClassify(result.fragment, result.classification);
+            if (classifier.fineClassify(result.fragment, result.classification))
+                fineResults.add(result);
         }
-        Collections.sort(coarseResults, new Comparator<Result<T>>() {
+        Collections.sort(fineResults, new Comparator<Result<T>>() {
             @Override
             public int compare(Result<T> t0, Result<T> t1) {
                 Double obj0 = classifier.objectiveValue(t0.classification);
@@ -196,7 +198,7 @@ public class FragmentAlternatives<T> {
         });
         System.out.println("Time to calculate alternatives (fine): " + (System.currentTimeMillis() - startTime) + "ms, "
                 + testedAlternatives + " alternatives tested");
-        return coarseResults;
+        return fineResults;
     }
 
     private List<OngoingTrafo<T>> performTransformations(OngoingTrafo<T> ongoingTrafo) {

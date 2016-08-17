@@ -16,6 +16,6 @@ import java.util.List;
 public interface IAlternativeClassifier<T> {
     double INVALID_OBJECTIVE = 10000000000d;
     T coarseClassify(Fragment fragment, TrafoHistory trafoHistory);
-    void fineClassify(Fragment fragment, T classification);
+    boolean fineClassify(Fragment fragment, T classification);
     double objectiveValue(T classification);
 }
