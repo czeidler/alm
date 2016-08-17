@@ -330,10 +330,13 @@ public class LinearSpec {
     public String toString() {
         StringBuffer s = new StringBuffer();
         int i = 1;
+        double error2 = 0;
         for (Constraint c : constraints) {
             s.append(i + ".  " + c + "\n");
             i++;
+            error2 += Math.pow(c.error(), 2) * c.getPenalty();
         }
+        s.append("Error2 = " + error2);
         return s.toString();
 
     }

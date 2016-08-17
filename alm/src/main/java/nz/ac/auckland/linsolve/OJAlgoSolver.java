@@ -49,8 +49,6 @@ public class OJAlgoSolver extends AbstractLinearSolver {
                 softConstraints.add(constraint);
         }
 
-        long startTime = System.currentTimeMillis();
-
         PrimitiveDenseStore hardEqA = PrimitiveDenseStore.FACTORY.makeZero(hardEqualityConstraints.size(),
                 variables.size());
         PrimitiveDenseStore hardEqB = PrimitiveDenseStore.FACTORY.makeZero(hardEqualityConstraints.size(), 1);
@@ -76,6 +74,7 @@ public class OJAlgoSolver extends AbstractLinearSolver {
 
         ConvexSolver solver = builder.build();
 
+        long startTime = System.currentTimeMillis();
         final Optimisation.Result result = solver.solve();
         internalSolvingTime = System.currentTimeMillis() - startTime;
 

@@ -16,6 +16,27 @@ import java.util.List;
 
 
 public class LinSolveTest extends TestCase {
+    public void testTemp() {
+        LinearSpec linearSpec = new LinearSpec(new ForceSolver3());
+        Variable x1 = new Variable();
+        Variable x2 = new Variable();
+        linearSpec.addConstraint(1, x1, OperatorType.EQ, 0, 0.5);
+        linearSpec.addConstraint(-1, x1, 4, x2, OperatorType.EQ, 10, 0.5);
+        linearSpec.addConstraint(1, x2, OperatorType.EQ, 20, 0.5);
+        /*Variable x3 = new Variable();
+        Variable x4 = new Variable();
+        linearSpec.addConstraint(1, x1, OperatorType.EQ, 0, 0.5);
+        linearSpec.addConstraint(-1, x1, 4, x2, OperatorType.EQ, 10, 0.2);
+        linearSpec.addConstraint(-1, x2, 1, x3, OperatorType.EQ, 10, 0.1);
+        linearSpec.addConstraint(-1, x3, 1, x4, OperatorType.EQ, 10, 0.6);
+        linearSpec.addConstraint(1, x4, OperatorType.EQ, 60, 0.5);
+        */
+        linearSpec.solve();
+
+        System.out.println(linearSpec.getInternalSolvingTime());
+        System.out.println(linearSpec);
+    }
+
     public void testInternal() {
         LinearSpec linearSpec = new LinearSpec();
 
@@ -90,7 +111,7 @@ public class LinSolveTest extends TestCase {
     }
 
     public void testConstraintRandomButtons() {
-        final int nButtons = 100;
+        final int nButtons = 50;
         System.out.println("testConstraintRandomButtons " + nButtons);
 
         LinearSpec linearSpec = new LinearSpec();
@@ -248,7 +269,8 @@ public class LinSolveTest extends TestCase {
         benchmark(new ForceSolverPureSoft(), linearSpec, n);
         benchmark(new ForceSolver2(), linearSpec, n);
         benchmark(new ForceSolver3(), linearSpec, n);
-        benchmark(new OJAlgoSolver(), linearSpec, n);
+        //benchmark(new JOptimizerSolver(), linearSpec, n);
+        //benchmark(new OJAlgoSolver(), linearSpec, n);
 
         for (int i = 0; i < variableList.size(); i++) {
             //System.out.println(results1[i] + " " + variableList.get(i).getValue());
