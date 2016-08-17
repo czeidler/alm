@@ -9,6 +9,7 @@ package nz.ac.auckland.alm.algebra.trafo;
 
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.algebra.Fragment;
+import nz.ac.auckland.alm.algebra.trafo.*;
 
 import java.util.*;
 
@@ -26,13 +27,13 @@ public class FragmentAlternatives<T> {
         }
     }
 
-
     final private IAlternativeClassifier<T> classifier;
     final private IGroupDetector groupDetector;
     final List<ITransformation> trafos = new ArrayList<ITransformation>();
 
-    public FragmentAlternatives(IAlternativeClassifier<T> classifier, IGroupDetector groupDetector) {
-        this.classifier = classifier;
+    public FragmentAlternatives(IAlternativeClassifier<T> coarseClassifier,
+                                IGroupDetector groupDetector) {
+        this.classifier = coarseClassifier;
         this.groupDetector = groupDetector;
     }
 
@@ -131,9 +132,14 @@ public class FragmentAlternatives<T> {
         ongoingTrafos.addAll(groupPermutation);
     }
 
-    public List<Result<T>> calculateAlternatives(Fragment fragment, IPermutationSelector selector, int maxResults,
-                                                 long maxTimes) {
-        T classification = classifier.classify(fragment, new TrafoHistory());
+    public List<Result<T>> calculateAlternatives(Fragment fragment, IPermutationSelector selector, int maxCoarseResults,
+                                                 long maxCoarseTime) {
+        return calculateAlternatives(fragment, selector, maxCoarseResults, maxCoarseTime, maxCoarseResults);
+    }
+
+    public List<Result<T>> calculateAlternatives(Fragment fragment, IPermutationSelector selector, int maxCoarseResults,
+                                                 long maxCoarseTime, int maxFineResults) {
+        T classification = classifier.coarseClassify(fragment, new TrafoHistory());
         OngoingTrafo<T> root = new OngoingTrafo<T>(new TrafoHistory(), fragment.clone(), classification,
                 Collections.singletonList(new FragmentRef()), selector);
         List<OngoingTrafo<T>> ongoingTrafos = new ArrayList<OngoingTrafo<T>>();
@@ -143,7 +149,7 @@ public class FragmentAlternatives<T> {
         long testedAlternatives = 0;
         String fragmentHashResolved = fragment.hashResolved();
         long startTime = System.currentTimeMillis();
-        while (ongoingTrafos.size() > 0 && results.size() < maxResults) {
+        while (ongoingTrafos.size() > 0 && results.size() < maxCoarseResults) {
             OngoingTrafo<T> current = ongoingTrafos.get(0);
             List<OngoingTrafo<T>> newResults = performTransformations(current);
             if (current.done())
@@ -162,20 +168,38 @@ public class FragmentAlternatives<T> {
                     spawnOngoing(ongoingTrafos, newResult, false);
                     needsSorting = true;
                 }
+
+                if (System.currentTimeMillis() - startTime > maxCoarseTime || results.size() >= maxCoarseResults)
+                    break;
             }
-            if (System.currentTimeMillis() - startTime > maxTimes) {
+            if (System.currentTimeMillis() - startTime > maxCoarseTime) {
                 System.out.println("time expired");
                 break;
             }
             if (needsSorting)
                 Collections.sort(ongoingTrafos, ongoingTrafoComparator);
         }
-        System.out.println("Time to calculate alternatives: " + (System.currentTimeMillis() - startTime) + "ms, "
-            + testedAlternatives + " alternatives tested");
-        return new ArrayList<Result<T>>(results.values());
+        System.out.println("Time to calculate alternatives (coarse): " + (System.currentTimeMillis() - startTime)
+                + "ms");
+        List<Result<T>> coarseResults = new ArrayList<Result<T>>(results.values());
+        for (int i = 0; i < Math.min(maxFineResults, coarseResults.size()); i++) {
+            Result<T> result = coarseResults.get(i);
+            classifier.fineClassify(result.fragment, result.classification);
+        }
+        Collections.sort(coarseResults, new Comparator<Result<T>>() {
+            @Override
+            public int compare(Result<T> t0, Result<T> t1) {
+                Double obj0 = classifier.objectiveValue(t0.classification);
+                Double obj1 = classifier.objectiveValue(t1.classification);
+                return obj0.compareTo(obj1);
+            }
+        });
+        System.out.println("Time to calculate alternatives (fine): " + (System.currentTimeMillis() - startTime) + "ms, "
+                + testedAlternatives + " alternatives tested");
+        return coarseResults;
     }
 
-    public List<OngoingTrafo<T>> performTransformations(OngoingTrafo<T> ongoingTrafo) {
+    private List<OngoingTrafo<T>> performTransformations(OngoingTrafo<T> ongoingTrafo) {
         List<List<ITransformation>> permutations = ongoingTrafo.getSelector().next(ongoingTrafo);
         if (permutations == null)
             return Collections.emptyList();
@@ -239,7 +263,7 @@ public class FragmentAlternatives<T> {
             if (allItemsNull(trafo))
                 classification = ongoingTrafo.getClassification();
             else
-                classification = classifier.classify(newFragment, history);
+                classification = classifier.coarseClassify(newFragment, history);
             List<FragmentRef> nextLevel = getNextLevel(newFragment, ongoingTrafo.getFragmentRefs());
 
             IPermutationSelector selector = ongoingTrafo.getSelector();

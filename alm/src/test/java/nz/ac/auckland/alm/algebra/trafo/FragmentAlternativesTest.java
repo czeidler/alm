@@ -106,8 +106,13 @@ public class FragmentAlternativesTest extends TestCase {
 
     IAlternativeClassifier<Object> classifierSimple = new IAlternativeClassifier<Object>() {
         @Override
-        public Object classify(Fragment fragment, TrafoHistory trafoHistory) {
+        public Object coarseClassify(Fragment fragment, TrafoHistory trafoHistory) {
             return null;
+        }
+
+        @Override
+        public void fineClassify(Fragment fragment, Object classification) {
+
         }
 
         @Override
@@ -130,7 +135,7 @@ public class FragmentAlternativesTest extends TestCase {
 
     IAlternativeClassifier<Classification> classifier = new IAlternativeClassifier<Classification>() {
         @Override
-        public Classification classify(Fragment fragment, TrafoHistory history) {
+        public Classification coarseClassify(Fragment fragment, TrafoHistory history) {
             Classification classification = new Classification();
             classification.trafoHistory = history;
 
@@ -155,6 +160,11 @@ public class FragmentAlternativesTest extends TestCase {
         }
 
         @Override
+        public void fineClassify(Fragment fragment, Classification classification) {
+
+        }
+
+        @Override
         public double objectiveValue(Classification classification) {
             double prefSizeDiffTerm = classification.getDiffSize() / (SCREEN_HEIGHT_LAND * SCREEN_WIDTH_LAND);
             double ratioTerm = (classification.prefWidth / classification.prefHeight)
@@ -164,7 +174,8 @@ public class FragmentAlternativesTest extends TestCase {
     };
 
     public void testFragmentAlternatives3() {
-        FragmentAlternatives fragmentAlternatives = new FragmentAlternatives(classifier, new GroupDetector(comparator));
+        FragmentAlternatives fragmentAlternatives = new FragmentAlternatives(new Classifier(5000, 5000),
+                new GroupDetector(comparator));
         SwapTrafo swapTrafo = new SwapTrafo();
         ColumnFlowTrafo columnFlowTrafo = new ColumnFlowTrafo();
         InverseRowFlowTrafo inverseRowFlowTrafo = new InverseRowFlowTrafo();
@@ -190,11 +201,12 @@ public class FragmentAlternativesTest extends TestCase {
                 = new ChainPermutationSelector<Classification>(
                 new ApplyToAllPermutationSelector<Classification>(trafos, swapTrafo),
                 new ApplyToAllPermutationSelector<Classification>(trafos, columnFlowTrafo),
-                new ApplyToAllPermutationSelector<Classification>(trafos, inverseRowFlowTrafo),
-                new RandomPermutationSelector<Classification>(trafos));
+                new ApplyToAllPermutationSelector<Classification>(trafos, inverseRowFlowTrafo)
+                //new RandomPermutationSelector<Classification>(trafos)
+        );
 
-        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector, 30,
-                1000 * 60);
+        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector, 60,
+                1000 * 5, 20);
         for (FragmentAlternatives.Result result : results)
             System.out.println(result.fragment);
         System.out.println(results.size());
@@ -228,11 +240,12 @@ public class FragmentAlternativesTest extends TestCase {
                 = new ChainPermutationSelector<Object>(
                 new ApplyToAllPermutationSelector<Object>(trafos, swapTrafo),
                 new ApplyToAllPermutationSelector<Object>(trafos, columnFlowTrafo),
+                //new ApplyToAllPermutationSelector<Object>(trafos, inverseRowFlowTrafo));
                 new ApplyToAllPermutationSelector<Object>(trafos, inverseRowFlowTrafo),
                 new RandomPermutationSelector<Object>(trafos));
 
-        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector, 30000,
-                1000 * 60);
+        List<FragmentAlternatives.Result> results = fragmentAlternatives.calculateAlternatives(fragment, selector, 100,
+                1000 * 6);
         for (FragmentAlternatives.Result result : results)
             System.out.println(result.fragment);
         System.out.println(results.size());
