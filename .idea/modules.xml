@@ -2,11 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ALM.iml" filepath="$PROJECT_DIR$/ALM.iml" />
-      <module fileurl="file://$PROJECT_DIR$/alm/alm.iml" filepath="$PROJECT_DIR$/alm/alm.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/android.iml" filepath="$PROJECT_DIR$/android/android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/androidtest/androidtest.iml" filepath="$PROJECT_DIR$/androidtest/androidtest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/swing/swing.iml" filepath="$PROJECT_DIR$/swing/swing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ALM.iml" filepath="$PROJECT_DIR$/.idea/modules/ALM.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/alm/alm.iml" filepath="$PROJECT_DIR$/.idea/modules/alm/alm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android/android.iml" filepath="$PROJECT_DIR$/.idea/modules/android/android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/androidtest/androidtest.iml" filepath="$PROJECT_DIR$/.idea/modules/androidtest/androidtest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/swing/swing.iml" filepath="$PROJECT_DIR$/.idea/modules/swing/swing.iml" />
     </modules>
   </component>
 </project>
