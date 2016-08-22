@@ -7,11 +7,11 @@
  */
 package nz.ac.auckland.alm.algebra.trafo;
 
-
 import nz.ac.auckland.alm.algebra.Fragment;
 
-public class RowFlowTrafo extends FlowToColumnTrafo {
-    public RowFlowTrafo() {
-        super(Fragment.verticalDirection, Fragment.verticalDirection, Fragment.horizontalDirection);
+
+public class InverseColumnTrafo extends FlowToColumnTrafo {
+    public InverseColumnTrafo() {
+        super(Fragment.horizontalDirection, Fragment.verticalDirection, Fragment.verticalDirection);
     }
 }
