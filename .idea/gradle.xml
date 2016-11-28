@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/alm" />
             <option value="$PROJECT_DIR$/android" />
             <option value="$PROJECT_DIR$/androidtest" />
+            <option value="$PROJECT_DIR$/androidxmlparser" />
             <option value="$PROJECT_DIR$/swing" />
           </set>
         </option>

@@ -29,3 +29,4 @@ proguard-project.txt
 
 # dolphin (KDE file manager)
 .directory
+/.nb-gradle/
