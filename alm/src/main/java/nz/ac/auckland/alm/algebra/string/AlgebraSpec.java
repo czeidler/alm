@@ -265,16 +265,16 @@ public class AlgebraSpec {
         boolean merged = true;
         while (merged) {
             merged = false;
-            for (Edge edge : algebraSpecData.xEdgeMap.values()) {
-                if (singleMergeOnEdgeAll(edge, new LeftDirection(), vFactory))
-                    merged = true;
-                if (singleMergeOnEdgeAll(edge, new RightDirection(), vFactory))
-                    merged = true;
-            }
             for (Edge edge : algebraSpecData.yEdgeMap.values()) {
                 if (singleMergeOnEdgeAll(edge, new TopDirection(), hFactory))
                     merged = true;
                 if (singleMergeOnEdgeAll(edge, new BottomDirection(), hFactory))
+                    merged = true;
+            }
+            for (Edge edge : algebraSpecData.xEdgeMap.values()) {
+                if (singleMergeOnEdgeAll(edge, new LeftDirection(), vFactory))
+                    merged = true;
+                if (singleMergeOnEdgeAll(edge, new RightDirection(), vFactory))
                     merged = true;
             }
         }
