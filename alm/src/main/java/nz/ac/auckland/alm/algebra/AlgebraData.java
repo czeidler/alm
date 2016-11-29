@@ -22,7 +22,7 @@ public class AlgebraData {
   final Map<YTab, Edge> yTabEdgeMap;
   List<XTab> sortedXTabs;
   List<YTab> sortedYTabs;
-  final List<Area> areas;
+  final List<IArea> areas;
   final List<EmptySpace> emptySpaces;
 
   Comparator<Variable> tabComparator = new Comparator<Variable>() {
@@ -41,7 +41,7 @@ public class AlgebraData {
     this.xTabEdgeMap = new HashMap<XTab, Edge>();
     this.yTabEdgeMap = new HashMap<YTab, Edge>();
 
-    this.areas = new ArrayList<Area>();
+    this.areas = new ArrayList<IArea>();
     this.emptySpaces = new ArrayList<EmptySpace>();
 
   }
@@ -55,16 +55,16 @@ public class AlgebraData {
     this.xTabEdgeMap = new HashMap<XTab, Edge>();
     this.yTabEdgeMap = new HashMap<YTab, Edge>();
 
-    this.areas = new ArrayList<Area>();
+    this.areas = new ArrayList<IArea>();
     this.emptySpaces = new ArrayList<EmptySpace>();
 
     for (IArea area : layoutSpec.getAreas()) {
       if (area == removedArea)
         continue;
-      if (area instanceof Area)
-        this.areas.add((Area)area);
       if (area instanceof EmptySpace)
         this.emptySpaces.add((EmptySpace)area);
+      else
+        this.areas.add(area);
     }
     Edge.fillEdges(layoutSpec, xTabEdgeMap, yTabEdgeMap, removedArea);
     if (removedArea != null) {
@@ -82,8 +82,8 @@ public class AlgebraData {
     while (layoutSpec.getAreas().size() > 0)
       layoutSpec.removeArea((ILayoutSpecArea)layoutSpec.getAreas().get(0));
 
-    for (Area area : areas)
-      layoutSpec.addArea(area);
+    for (IArea area : areas)
+      layoutSpec.addArea((Area)area);
     for (EmptySpace space : emptySpaces)
       layoutSpec.addArea(space);
   }
@@ -102,10 +102,10 @@ public class AlgebraData {
 
     Edge.addArea(area, xTabEdgeMap, yTabEdgeMap);
 
-    if (area instanceof Area)
-      areas.add((Area)area);
     if (area instanceof EmptySpace)
       emptySpaces.add((EmptySpace)area);
+    else
+      areas.add(area);
 
     invalidateTabs();
   }
@@ -139,10 +139,10 @@ public class AlgebraData {
   public void removeArea(IArea area) {
     Edge.removeArea(area, xTabEdgeMap, yTabEdgeMap);
 
-    if (area instanceof Area)
-      areas.remove(area);
     if (area instanceof EmptySpace)
       emptySpaces.remove(area);
+    else
+      areas.remove(area);
 
     invalidateTabs();
   }
@@ -157,7 +157,7 @@ public class AlgebraData {
     return list;
   }
 
-  public List<Area> getAreas() {
+  public List<IArea> getAreas() {
     return areas;
   }
 
