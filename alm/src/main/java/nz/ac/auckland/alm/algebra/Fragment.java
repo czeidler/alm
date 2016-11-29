@@ -111,7 +111,9 @@ public class Fragment<Tab extends Variable, OrthTab extends Variable> extends Ta
                 ((Fragment)area1).applySpecsToChild();
             if (area2 instanceof Fragment)
                 ((Fragment)area2).applySpecsToChild();
-            Variable tab = direction.createTab();
+            Variable tab = getRawItemAt(i).getTab2();
+            if (tab == null)
+                tab = direction.createTab();
             direction.setTab(area1, tab);
             direction.setOppositeTab(area2, tab);
         }

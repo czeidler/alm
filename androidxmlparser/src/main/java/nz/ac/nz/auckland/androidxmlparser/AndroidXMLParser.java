@@ -7,57 +7,75 @@
  */
 package nz.ac.nz.auckland.androidxmlparser;
 
+import nz.ac.auckland.alm.EmptySpace;
 import nz.ac.auckland.alm.IArea;
 import nz.ac.auckland.alm.TabArea;
+import nz.ac.auckland.alm.XTab;
+import nz.ac.auckland.alm.algebra.AlgebraLayoutSpec;
 import nz.ac.auckland.alm.algebra.Fragment;
-import nz.ac.auckland.alm.algebra.string.*;
 import nz.ac.auckland.alm.algebra.string.StringWriter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
-class AreaInfo {
-    String viewType;
+class ItemInfo {
+    String type = "";
+    int layoutColumn = -1;
+
+    public void parse(XmlPullParser parser) {
+        this.type = parser.getName();
+        String layoutColumnString = parser.getAttributeValue(null, "android:layout_column");
+        if (layoutColumnString != null)
+            layoutColumn = Integer.parseInt(layoutColumnString);
+    }
 }
 
-abstract class BaseParser {
-    final protected Object elementSpecsParent;
-    final protected LayoutElementParser parentParser;
+abstract class ItemParser {
+    // info about this item (the one we are parsing
+    protected ItemInfo itemInfo;
+    final private ItemParser parentParser;
 
-    public BaseParser(LayoutElementParser parentParser, Object elementSpecsParent) {
+    public ItemParser(ItemParser parentParser) {
+
         this.parentParser = parentParser;
-        this.elementSpecsParent = elementSpecsParent;
     }
 
-    abstract IArea getElement();
+    public void parse(XmlPullParser parser) {
+        this.itemInfo = createItemInfo();
+        itemInfo.parse(parser);
+    }
 
-    public LayoutElementParser finish() {
-        parentParser.addChild(elementSpecsParent, getElement());
+    public ItemInfo getItemInfo() {
+        return itemInfo;
+    }
+
+    public ItemParser getParentParser() {
         return parentParser;
     }
-}
 
-class ElementParser extends BaseParser {
-    private IArea area;
-    private AreaInfo areaInfo = new AreaInfo();
-
-    public ElementParser(LayoutElementParser parentParser, Object elementSpecsParent, XmlPullParser parser,
-                         Map<IArea, AreaInfo> areaMap) {
-        super(parentParser, elementSpecsParent);
-
-        String viewType = parser.getName();
-        if (!isKnownView(viewType))
-            viewType = "Custom";
-        areaInfo.viewType = viewType;
-        area = new TabArea();
-        areaMap.put(area, areaInfo);
+    static public TabArea simplify(AlgebraLayoutSpec child) {
+        if (child.getElements().size() > 1)
+            return child;
+        return child.getElements().get(0);
     }
 
+    protected ItemInfo createItemInfo() {
+        return new ItemInfo();
+    }
+
+    abstract public void add(AlgebraLayoutSpec child, ItemInfo childInfo);
+    abstract public AlgebraLayoutSpec getLayoutSpec();
+}
+
+
+class ViewParser extends ItemParser {
     final private String[] viewTypes = {
             "AnalogClock",
             "AutoCompleteTextView",
@@ -89,7 +107,6 @@ class ElementParser extends BaseParser {
             "SurfaceView",
             "Switch",
             "TabHost",
-            "TableRow",
             "TabWidget",
             "TextSwitcher",
             "TextView",
@@ -111,6 +128,10 @@ class ElementParser extends BaseParser {
             "view_spacer"
     };
 
+    public ViewParser(ItemParser parentParser) {
+        super(parentParser);
+    }
+
     private boolean isKnownView(String name) {
         for (String type : viewTypes) {
             if (type.equals(name))
@@ -119,33 +140,43 @@ class ElementParser extends BaseParser {
         return false;
     }
 
-    IArea getElement() {
-        return area;
+    @Override
+    protected ItemInfo createItemInfo() {
+        return new ItemInfo() {
+            @Override
+            public void parse(XmlPullParser parser) {
+                super.parse(parser);
+
+                if (!isKnownView(parser.getName()))
+                    this.type = "unknown";
+            }
+        };
+    }
+
+    @Override
+    public void add(AlgebraLayoutSpec child, ItemInfo childInfo) {
+        throw new RuntimeException("Unexpected");
+    }
+
+    @Override
+    public AlgebraLayoutSpec getLayoutSpec() {
+        AlgebraLayoutSpec layoutSpec = new AlgebraLayoutSpec();
+        layoutSpec.add(new TabArea());
+        return layoutSpec;
     }
 }
 
-abstract class LayoutElementParser extends BaseParser {
 
-    public LayoutElementParser(LayoutElementParser parentParser, Object elementSpecsParent) {
-        super(parentParser, elementSpecsParent);
+class LinearLayoutParser extends ItemParser {
+    final protected Fragment fragment = new Fragment();
+
+    public LinearLayoutParser(ItemParser parentParser) {
+        super(parentParser);
     }
 
-    abstract Object parseChildSpecs(String tag, XmlPullParser parser);
-    abstract void addChild(Object childSpecs, IArea child);
-
-    public LayoutElementParser finish() {
-        if (parentParser == null)
-            return parentParser;
-        parentParser.addChild(elementSpecsParent, getElement());
-        return parentParser;
-    }
-}
-
-class LinearLayoutParser extends LayoutElementParser {
-    final Fragment fragment = new Fragment();
-
-    public LinearLayoutParser(LayoutElementParser parentParser, Object elementSpecsParent, XmlPullParser parser) {
-        super(parentParser, elementSpecsParent);
+    @Override
+    public void parse(XmlPullParser parser) {
+        super.parse(parser);
 
         fragment.setHorizontalDirection();
         String orientation = parser.getAttributeValue(null, "android:orientation");
@@ -153,22 +184,116 @@ class LinearLayoutParser extends LayoutElementParser {
             fragment.setVerticalDirection();
     }
 
-    Object parseChildSpecs(String tag, XmlPullParser parser) {
-        return null;
+    @Override
+    public void add(AlgebraLayoutSpec child, ItemInfo childInfo) {
+        fragment.add(simplify(child), false);
     }
 
-    void addChild(Object childSpecs, IArea child) {
-        fragment.add(child, false);
-    }
-
-    IArea getElement() {
-        return fragment;
+    @Override
+    public AlgebraLayoutSpec getLayoutSpec() {
+        AlgebraLayoutSpec layoutSpec = new AlgebraLayoutSpec();
+        layoutSpec.add(fragment);
+        return layoutSpec;
     }
 }
 
-public class AndroidXMLParser {
-    private LayoutElementParser currentParser;
+class TableRowLayout extends LinearLayoutParser {
+    public TableRowLayout(ItemParser parentParser) {
+        super(parentParser);
+    }
 
+    @Override
+    public void parse(XmlPullParser parser) {
+        super.parse(parser);
+        fragment.setHorizontalDirection();
+    }
+}
+
+class TableLayoutParser extends ItemParser {
+    class Row {
+        AlgebraLayoutSpec child;
+        ItemInfo childInfo;
+
+        public Row(AlgebraLayoutSpec child, ItemInfo childInfo) {
+            this.child = child;
+            this.childInfo = childInfo;
+        }
+    }
+
+    final Map<IArea, ItemInfo> areaMap;
+    private int nColumns = 0;
+    final List<Row> rowList = new ArrayList<Row>();
+
+    public TableLayoutParser(ItemParser parentParser, Map<IArea, ItemInfo> areaMap) {
+        super(parentParser);
+
+        this.areaMap = areaMap;
+    }
+
+    private boolean isTableRow(Row row) {
+        return row.childInfo.type.equals("TableRow");
+    }
+
+    @Override
+    public void add(AlgebraLayoutSpec child, ItemInfo childInfo) {
+        Row row = new Row(child, childInfo);
+        rowList.add(row);
+
+        if (isTableRow(row)) {
+            int nChildItems = ((Fragment)child.getElements().get(0)).size();
+            nColumns = Math.max(nColumns, nChildItems);
+        }
+    }
+
+    @Override
+    public AlgebraLayoutSpec getLayoutSpec() {
+        Fragment fragment = new Fragment();
+        fragment.setVerticalDirection();
+
+        XTab[] tabs = new XTab[nColumns];
+        for (int i = 0; i < tabs.length - 1; i++)
+            tabs[i] = new XTab();
+
+        for (Row row : rowList) {
+            if (!isTableRow(row)) {
+                fragment.add(simplify(row.child), false);
+                continue;
+            }
+
+            IArea[] areaRow = new IArea[nColumns];
+            Fragment rowFragment = (Fragment) row.child.getElements().get(0);
+            assert rowFragment.isHorizontalDirection();
+            int pointer = 0;
+            for (IArea rowItem : (Iterable<IArea>)rowFragment.getItems()) {
+                ItemInfo rowItemInfo = areaMap.get(rowItem);
+                if (rowItemInfo.layoutColumn >= 0)
+                    pointer = rowItemInfo.layoutColumn;
+                assert pointer >= 0;
+                assert pointer < nColumns;
+                areaRow[pointer] = rowItem;
+                pointer++;
+            }
+            for (int i = 0; i < areaRow.length; i++) {
+                if (areaRow[i] == null)
+                    areaRow[i] = new EmptySpace();
+            }
+            rowFragment = Fragment.horizontalFragment();
+            for (int i = 0; i < areaRow.length; i++) {
+                IArea rowItem = areaRow[i];
+                rowFragment.add(rowItem, tabs[i], false);
+            }
+            fragment.add(rowFragment, false);
+        }
+
+        fragment.applySpecsToChild();
+        AlgebraLayoutSpec layoutSpec = new AlgebraLayoutSpec();
+        layoutSpec.add(fragment);
+        return layoutSpec;
+    }
+}
+
+
+public class AndroidXMLParser {
     public void parse(File file) throws XmlPullParserException, IOException {
         parse(new FileInputStream(file));
     }
@@ -178,15 +303,34 @@ public class AndroidXMLParser {
             "FrameLayout",
             "LinearLayout",
             "TableLayout",
+            "TableRow",
             "GridLayout",
-            "RelativeLayout"
+            "RelativeLayout",
     };
 
-    private LayoutElementParser getLayoutParser(String layout, LayoutElementParser parentParser,
-                                                Object elementSpecsParent, XmlPullParser parser) {
+    private boolean isKnownLayout(String name) {
+        for (String type : layoutTypes) {
+            if (type.equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    private ItemParser getLayoutParser(String layout, ItemParser parentParser, Map<IArea, ItemInfo> areaMap) {
         if (layout.equalsIgnoreCase("LinearLayout"))
-            return new LinearLayoutParser(parentParser, elementSpecsParent, parser);
+            return new LinearLayoutParser(parentParser);
+        if (layout.equalsIgnoreCase("TableLayout"))
+            return new TableLayoutParser(parentParser, areaMap);
+        if (layout.equalsIgnoreCase("TableRow"))
+            return new TableRowLayout(parentParser);
         return null;
+    }
+
+    private ItemParser getParser(String tag, ItemParser parentParser, Map<IArea, ItemInfo> areaMap) {
+        ItemParser layoutParser = getLayoutParser(tag, parentParser, areaMap);
+        if (layoutParser != null)
+            return layoutParser;
+        return new ViewParser(parentParser);
     }
 
     public void parse(InputStream inputStream) throws XmlPullParserException, IOException {
@@ -197,11 +341,9 @@ public class AndroidXMLParser {
         parser = pullParserFactory.newPullParser();
         parser.setInput(inputStream, null);
 
-        Map<IArea, AreaInfo> areaMap = new HashMap<IArea, AreaInfo>();
+        Map<IArea, ItemInfo> areaMap = new HashMap<IArea, ItemInfo>();
 
-        LayoutElementParser rootLayoutParser = null;
-        LayoutElementParser currentLayoutParser = null;
-        BaseParser currentElementParser = null;
+        ItemParser currentParser = null;
 
         int tag = parser.getEventType();
         while (tag != XmlPullParser.END_DOCUMENT) {
@@ -212,32 +354,27 @@ public class AndroidXMLParser {
                     break;
 
                 case XmlPullParser.START_TAG:
-                    if (currentLayoutParser == null) {
-                        rootLayoutParser = getLayoutParser(key, null, null, parser);
-                        currentLayoutParser = rootLayoutParser;
-                        break;
-                    }
-                    Object elementSpec = currentLayoutParser.parseChildSpecs(key, parser);
-                    LayoutElementParser childLayoutParser = getLayoutParser(key, currentLayoutParser, elementSpec,
-                            parser);
-                    if (childLayoutParser == null)
-                        currentElementParser = new ElementParser(currentLayoutParser, elementSpec, parser, areaMap);
-                    else
-                        currentLayoutParser = childLayoutParser;
+                    currentParser = getParser(key, currentParser, areaMap);
+                    currentParser.parse(parser);
                     break;
 
                 case XmlPullParser.END_TAG:
-                    if (currentElementParser != null) {
-                        currentLayoutParser = currentElementParser.finish();
-                        currentElementParser = null;
-                    } else {
-                        currentLayoutParser = currentLayoutParser.finish();
+                    ItemInfo itemInfo = currentParser.getItemInfo();
+                    AlgebraLayoutSpec layoutSpec = currentParser.getLayoutSpec();
+
+                    areaMap.put(ItemParser.simplify(layoutSpec), itemInfo);
+
+                    ItemParser parentParser = currentParser.getParentParser();
+                    if (parentParser != null) {
+                        parentParser.add(layoutSpec, itemInfo);
+                        currentParser = parentParser;
                     }
+
                     break;
             }
             tag = parser.next();
         }
 
-        System.out.println(StringWriter.write((Fragment)rootLayoutParser.getElement()));
+        System.out.println(StringWriter.write((Fragment)currentParser.getLayoutSpec().getElements().get(0)));
     }
 }

@@ -16,8 +16,15 @@ import java.io.IOException;
 
 
 public class ParserTest extends TestCase {
-    public void testSimple() throws IOException, XmlPullParserException {
+    public void testLinearLayout() throws IOException, XmlPullParserException {
         File file = new File(ClassLoader.getSystemClassLoader().getResource("simple.xml").getFile());
+
+        AndroidXMLParser parser = new AndroidXMLParser();
+        parser.parse(file);
+    }
+
+    public void testTableLayout() throws IOException, XmlPullParserException {
+        File file = new File(ClassLoader.getSystemClassLoader().getResource("tablelayout.xml").getFile());
 
         AndroidXMLParser parser = new AndroidXMLParser();
         parser.parse(file);
