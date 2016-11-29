@@ -29,7 +29,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="alm" exported="" />
     <orderEntry type="library" exported="" name="xpp3-1.1.4c" level="project" />
-    <orderEntry type="library" exported="" name="ojalgo-39.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" name="ojalgo-40.0.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
   </component>
