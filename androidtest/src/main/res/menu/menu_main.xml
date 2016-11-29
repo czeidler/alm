@@ -22,4 +22,8 @@
           android:title="@string/action_align_grid_xml"
           android:orderInCategory="100"
           app:showAsAction="never"/>
+    <item android:id="@+id/list_view_xml"
+          android:title="ListView"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
 </menu>

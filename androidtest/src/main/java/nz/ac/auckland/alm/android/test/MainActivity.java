@@ -79,6 +79,11 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
 
+        if (id == R.id.list_view_xml) {
+            setFragment(createFragment(R.layout.list_view));
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
