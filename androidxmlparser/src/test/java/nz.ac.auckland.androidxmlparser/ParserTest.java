@@ -16,6 +16,13 @@ import java.io.IOException;
 
 
 public class ParserTest extends TestCase {
+    public void testFrameLayout() throws IOException, XmlPullParserException {
+        File file = new File(ClassLoader.getSystemClassLoader().getResource("framelayout.xml").getFile());
+
+        AndroidXMLParser parser = new AndroidXMLParser();
+        parser.parse(file);
+    }
+
     public void testLinearLayout() throws IOException, XmlPullParserException {
         File file = new File(ClassLoader.getSystemClassLoader().getResource("simple.xml").getFile());
 
@@ -25,6 +32,27 @@ public class ParserTest extends TestCase {
 
     public void testTableLayout() throws IOException, XmlPullParserException {
         File file = new File(ClassLoader.getSystemClassLoader().getResource("tablelayout.xml").getFile());
+
+        AndroidXMLParser parser = new AndroidXMLParser();
+        parser.parse(file);
+    }
+
+    public void testGridLayout() throws IOException, XmlPullParserException {
+        File file = new File(ClassLoader.getSystemClassLoader().getResource("gridlayout.xml").getFile());
+
+        AndroidXMLParser parser = new AndroidXMLParser();
+        parser.parse(file);
+    }
+
+    public void testGridLayout0() throws IOException, XmlPullParserException {
+        File file = new File(ClassLoader.getSystemClassLoader().getResource("gridlayout0.xml").getFile());
+
+        AndroidXMLParser parser = new AndroidXMLParser();
+        parser.parse(file);
+    }
+
+    public void testGridLayout1() throws IOException, XmlPullParserException {
+        File file = new File(ClassLoader.getSystemClassLoader().getResource("gridlayout1.xml").getFile());
 
         AndroidXMLParser parser = new AndroidXMLParser();
         parser.parse(file);
