@@ -57,4 +57,11 @@ public class ParserTest extends TestCase {
         AndroidXMLParser parser = new AndroidXMLParser();
         parser.parse(file);
     }
+
+    public void testRelativeLayout() throws IOException, XmlPullParserException {
+        File file = new File(ClassLoader.getSystemClassLoader().getResource("relativelayout.xml").getFile());
+
+        AndroidXMLParser parser = new AndroidXMLParser();
+        parser.parse(file);
+    }
 }

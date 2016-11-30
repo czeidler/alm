@@ -84,6 +84,10 @@ public class LayoutSpec {
      * @param solver the Linear Solver that defines the LayoutSpec
      */
     public LayoutSpec(LinearSolver solver) {
+        this(solver, null, null, null, null);
+    }
+
+    public LayoutSpec(LinearSolver solver, XTab left, YTab top, XTab right, YTab bottom) {
         if (solver == null)
             linearSpec = new LinearSpec();
         else
@@ -91,15 +95,27 @@ public class LayoutSpec {
         linearSpec.setTolerance(GUI_TOLERANCE);
 
         //Create the Tabs defining the edge of the layout.
-        left = new XTab("left");
-        top = new YTab("top");
-        right = new XTab("right");
-        bottom = new YTab("bottom");
+        if (left != null)
+            this.left = left;
+        else
+            this.left = new XTab("left");
+        if (top != null)
+            this.top = top;
+        else
+            this.top = new YTab("top");
+        if (right != null)
+            this.right = right;
+        else
+            this.right = new XTab("right");
+        if (bottom != null)
+            this.bottom = bottom;
+        else
+            this.bottom = new YTab("bottom");
 
         //Set Default Constraints
-        leftConstraint = linearSpec.addConstraint(1, left, OperatorType.EQ, 0);
+        leftConstraint = linearSpec.addConstraint(1, this.left, OperatorType.EQ, 0);
         setLeft(0);
-        topConstraint = linearSpec.addConstraint(1, top, OperatorType.EQ, 0);
+        topConstraint = linearSpec.addConstraint(1, this.top, OperatorType.EQ, 0);
         setTop(0);
     }
 

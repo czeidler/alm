@@ -24,23 +24,102 @@ import java.util.List;
 import java.util.Map;
 
 
+class RelativeParamsInfo {
+    String toStartOf;
+    String toEndOf;
+    String above;
+    String below;
+
+    String alignBottom;
+    String alignTop;
+    String alignStart;
+    String alignEnd;
+
+    boolean centerH = false;
+    boolean centerV = false;
+    boolean alignWithParentIfMissing = false;
+
+    boolean alignParentTop = false;
+    boolean alignParentBottom = false;
+    boolean alignParentStart = false;
+    boolean alignParentEnd = false;
+
+    private boolean parseBoolean(XmlPullParser parser, String attributeName) {
+        String attribute = parser.getAttributeValue(null, attributeName);
+        if (attribute == null)
+            return false;
+        if (attribute.equals("true"))
+            return true;
+        return false;
+    }
+
+    public void parse(XmlPullParser parser) {
+        toStartOf = parser.getAttributeValue(null, "android:layout_toStartOf");
+        toEndOf = parser.getAttributeValue(null, "android:layout_toEndOf");
+        if (toStartOf == null)
+            toStartOf = parser.getAttributeValue(null, "android:layout_toLeftOf");
+        if (toEndOf == null)
+            toEndOf = parser.getAttributeValue(null, "android:layout_toRightOf");
+
+        above = parser.getAttributeValue(null, "android:layout_above");
+        below = parser.getAttributeValue(null, "android:layout_below");
+
+        alignBottom = parser.getAttributeValue(null, "android:layout_alignBottom");
+        if (alignBottom != null)
+            alignBottom = parser.getAttributeValue(null, "android:layout_alignBaseline");
+        alignTop = parser.getAttributeValue(null, "android:layout_alignTop");
+        alignStart = parser.getAttributeValue(null, "android:layout_alignStart");
+        alignEnd = parser.getAttributeValue(null, "android:layout_alignEnd");
+        if (alignStart == null)
+            alignStart = parser.getAttributeValue(null, "android:layout_alignLeft");
+        if (alignEnd == null)
+            alignEnd = parser.getAttributeValue(null, "android:layout_alignRight");
+
+        centerH = parseBoolean(parser, "android:layout_centerHorizontal");
+        centerV = parseBoolean(parser, "android:layout_centerVertical");
+        if (parseBoolean(parser, "android:layout_centerInParent")) {
+            centerH = true;
+            centerV = true;
+        }
+        alignWithParentIfMissing = parseBoolean(parser, "android:layout_alignWithParentIfMissing");
+        alignParentTop = parseBoolean(parser, "android:layout_alignParentTop");
+        alignParentBottom = parseBoolean(parser, "android:layout_alignParentBottom");
+
+        alignParentStart = parseBoolean(parser, "android:layout_alignParentStart");
+        alignParentEnd = parseBoolean(parser, "android:layout_alignParentEnd");
+        if (!alignParentStart)
+            alignParentStart = parseBoolean(parser, "android:layout_alignParentLeft");
+        if (!alignParentEnd)
+            alignParentEnd = parseBoolean(parser, "android:layout_alignParentRight");
+    }
+}
+
 class ItemInfo {
     String type = "";
+    String rawId = null;
     String id = null;
+
+    // grid and table layout
     int layoutColumn = -1;
     int layoutRow = -1;
     int layoutColumnSpan = -1;
     int layoutRowSpan = -1;
 
+    RelativeParamsInfo relativeParamsInfo = new RelativeParamsInfo();
+
+    static public String removeIdPrefix(String viewIdRef) {
+        if (viewIdRef.startsWith("@+id/"))
+            return viewIdRef.substring("@+id/".length());
+        else if (viewIdRef.startsWith("@id/"))
+            return viewIdRef.substring("@id/".length());
+        return viewIdRef;
+    }
+
     public void parse(XmlPullParser parser) {
         this.type = parser.getName();
-        String id = parser.getAttributeValue(null, "android:id");
-        if (id != null) {
-            if (id.startsWith("@+id/"))
-                id = id.substring("@+id/".length());
-            else if (id.startsWith("@id/"))
-                id = id.substring("@id/".length());
-            this.id = id;
+        this.rawId = parser.getAttributeValue(null, "android:id");
+        if (rawId != null) {
+            this.id = removeIdPrefix(rawId);
         }
         String layoutColumnString = parser.getAttributeValue(null, "android:layout_column");
         if (layoutColumnString != null)
@@ -54,6 +133,8 @@ class ItemInfo {
         String layoutRowSpanString = parser.getAttributeValue(null, "android:layout_rowSpan");
         if (layoutRowSpanString != null)
             layoutRowSpan = Integer.parseInt(layoutRowSpanString);
+
+        relativeParamsInfo.parse(parser);
     }
 }
 
@@ -181,7 +262,10 @@ class ViewParser extends ItemParser {
     @Override
     public AlgebraLayoutSpec getLayoutSpec() {
         AlgebraLayoutSpec layoutSpec = new AlgebraLayoutSpec();
-        TabArea area = new TabArea();
+        TabArea area = new Area();
+        ((Area)area).setMinSize(1.d, 1.d);
+        ((Area)area).setPreferredSize(1.d, 1.d);
+        ((Area)area).setMaxSize(1.d, 1.d);
         if (itemInfo.type.equals("Space"))
             area = new EmptySpace();
         area.setId(itemInfo.id);
@@ -249,7 +333,7 @@ class TableRowLayoutParser extends LinearLayoutParser {
 }
 
 class GridLayoutParser extends  ItemParser {
-    class Item {
+    static class Item {
         AlgebraLayoutSpec child;
         ItemInfo childInfo;
 
@@ -348,7 +432,7 @@ class GridLayoutParser extends  ItemParser {
 }
 
 class TableLayoutParser extends ItemParser {
-    class Row {
+    static class Row {
         AlgebraLayoutSpec child;
         ItemInfo childInfo;
 
@@ -465,6 +549,8 @@ public class AndroidXMLParser {
             return new TableRowLayoutParser(parentParser);
         if (layout.equalsIgnoreCase("GridLayout"))
             return new GridLayoutParser(parentParser);
+        if (layout.equalsIgnoreCase("RelativeLayout"))
+            return new RelativeLayoutParser(parentParser);
         return null;
     }
 
